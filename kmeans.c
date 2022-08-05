@@ -290,6 +290,6 @@ void printcentroids(int k, int d, double **c){
         for (j=0; j<d; j++){
             printf("%.4f,", c[i][j]);
         }
-        printf(" numOfVecs=%.4f\n", c[i][d]);
+        printf(" numOfVecs=%.4f\n", c[i][d])
     }
 }

@@ -5,8 +5,8 @@
 double gaussian_RBF(PyObject *x1, PyObject *x2);
 double euclidean_distance(PyObject *x1, PyObject *x2);
 
-/*int argc, char **argv*/
 
+/*int argc, char **argv*/
 int main(){
 
 }
