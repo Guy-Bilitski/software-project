@@ -26,6 +26,7 @@ typedef struct Point {
 Matrix *create_matrix(int rows, int cols, int is_diag);
 double matrix_get(Matrix *matrix, int row, int col);
 void matrix_set(Matrix *matrix, int row, int col, double value);
+void matrix_set_row(Matrix *matrix, int row, double *new_row);
 
 /* Matrix inner functions */
 int _get_matrix_index(Matrix *matrix, int row, int col);
@@ -71,6 +72,7 @@ double matrix_get(Matrix *matrix, int row, int col){
 }
 
 void matrix_set(Matrix *matrix, int row, int col, double value) {
+    /* sets an entry in the matrix */
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
 
     if (matrix->is_diag) {
@@ -87,7 +89,16 @@ void matrix_set(Matrix *matrix, int row, int col, double value) {
     else { /* matrix is NOT diagonal */
         (matrix->data)[_get_matrix_index(matrix, row, col)] = value;
     }
+}
 
+void matrix_set_row(Matrix *matrix, int row, double *new_row) {
+    /* sets a whole row in the matrix */
+    int i;
+    if (matrix->is_diag == false) {
+        for (i=0; i<matrix->rows; i++) {
+            matrix_set(matrix, row, i, new_row[i]);
+        }
+    }
 }
 
 
@@ -153,12 +164,19 @@ void *print_point(Point *point) {
 int main() {
     /* non diagonal matrix */
     Matrix *m = create_matrix(4,4,false);
+    double *new_row = malloc(sizeof(double)*4);
+    int i;
+    for (i=0; i<4; i++) {
+        new_row[i] = i + 100;
+    }
     matrix_set(m, 1, 2, 10);
     matrix_set(m, 0, 0, 20);
     matrix_set(m, 3, 3, 30);
     matrix_set(m, 3, 3, 5);
+    matrix_set_row(m, 3, new_row);
     print_matrix(m);
     free(m);
+    free(new_row);
 
 
     printf("\n");
