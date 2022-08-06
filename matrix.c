@@ -25,17 +25,22 @@ typedef struct Point {
 /* Matrix API */
 Matrix *create_matrix(int rows, int cols, int is_diag);
 double matrix_get(Matrix *matrix, int row, int col);
+Point *matrix_get_point(Matrix *matrix, int row_num);
+int matrix_get_rows_num(Matrix *matrix);
+int matrix_get_cols_num(Matrix *matrix);
 void matrix_set(Matrix *matrix, int row, int col, double value);
-void matrix_set_row(Matrix *matrix, int row, double *new_row);
+void matrix_set_point(Matrix *matrix, int row, Point *point);
 
 /* Matrix inner functions */
 int _get_matrix_index(Matrix *matrix, int row, int col);
 void _diag_to_square_matrix(Matrix *matrix);
 
 /* Point API */
-Point *create_point(int dim);
-void point_set(Point *point, int index, double value);
-double point_get(Point *point, int index);
+Point *create_empty_point(int dim);
+Point *create_point(int dim, double *data);
+double point_get_index(Point *point, int index);
+int point_get_dim(Point *point);
+void point_set_index(Point *point, int index, double value);
 
 /* debugging functions */
 void *print_point(Point *point);
@@ -71,6 +76,27 @@ double matrix_get(Matrix *matrix, int row, int col){
     }
 }
 
+Point *matrix_get_point(Matrix *matrix, int row_index) {
+    int i, row_num = matrix_get_rows_num(matrix);
+    double val;
+    Point *point = create_empty_point(matrix_get_rows_num(matrix));
+
+    for (i=0; i<row_num; i++) {
+        val = matrix_get(matrix, row_index, i);
+        point_set_index(point, i, val);
+    }
+
+    return point;
+}
+
+int matrix_get_rows_num(Matrix *matrix) {
+    return matrix->rows;
+}
+
+int matrix_get_cols_num(Matrix *matrix) {
+    return matrix->cols;
+}
+
 void matrix_set(Matrix *matrix, int row, int col, double value) {
     /* sets an entry in the matrix */
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
@@ -91,12 +117,12 @@ void matrix_set(Matrix *matrix, int row, int col, double value) {
     }
 }
 
-void matrix_set_row(Matrix *matrix, int row, double *new_row) {
-    /* sets a whole row in the matrix */
+void matrix_set_point(Matrix *matrix, int row_index, Point *point) {
+    /* sets a whole point in the matrix */
     int i;
     if (matrix->is_diag == false) {
         for (i=0; i<matrix->rows; i++) {
-            matrix_set(matrix, row, i, new_row[i]);
+            matrix_set(matrix, row_index, i, point_get_index(point, i));
         }
     }
 }
@@ -122,21 +148,32 @@ void _diag_to_square_matrix(Matrix *matrix) {
 
 
 /* Point API */
-double point_get(Point *point, int index) {
-    assert(index >= 0 && index < point->dim);
-    return point->data[index];
-}
-
-void point_set(Point *point, int index, double value) {
-    assert(index >= 0 && index < point->dim);
-    point->data[index] = value;
-}
-
-Point *create_point(int dim) {
+Point *create_empty_point(int dim) {
     Point *point = (Point *)malloc(sizeof(Point));
     point->data = (double *)calloc(sizeof(double), dim); 
     point->dim = dim;
     return point;
+}
+
+Point *create_point(int dim, double *data) {
+    Point *new_point = create_empty_point(dim);
+    new_point->data = data;
+    return new_point;
+}
+
+double point_get_index(Point *point, int index) {
+    assert(index >= 0 && index < point->dim);
+    return point->data[index];
+}
+
+int point_get_dim(Point *point) {
+    return point->dim;
+}
+
+void point_set_index(Point *point, int index, double value) {
+    /* sets value in a specific index */
+    assert(index >= 0 && index < point->dim);
+    point->data[index] = value;
 }
 
 
@@ -161,7 +198,7 @@ void *print_point(Point *point) {
 }
 
 
-int main() {
+int main2() {
     /* non diagonal matrix */
     Matrix *m = create_matrix(4,4,false);
     double *new_row = malloc(sizeof(double)*4);
@@ -169,11 +206,12 @@ int main() {
     for (i=0; i<4; i++) {
         new_row[i] = i + 100;
     }
+    Point *p = create_point(4, new_row);
     matrix_set(m, 1, 2, 10);
     matrix_set(m, 0, 0, 20);
     matrix_set(m, 3, 3, 30);
     matrix_set(m, 3, 3, 5);
-    matrix_set_row(m, 3, new_row);
+    matrix_set_point(m, 2, p);
     print_matrix(m);
     free(m);
     free(new_row);
@@ -195,10 +233,10 @@ int main() {
     free(d);
 
     /* point */
-    Point *point = create_point(3);
-    point_set(point, 0, 100);
-    point_set(point, 1, 1);
-    point_set(point, 2, 8);
+    Point *point = create_empty_point(3);
+    point_set_index(point, 0, 100);
+    point_set_index(point, 1, 1);
+    point_set_index(point, 2, 8);
     print_point(point);
     free(point);
 
