@@ -14,6 +14,13 @@ typedef struct Matrix {
     double *data;
 } Matrix;
 
+typedef struct Centroids { /*IMPORTANT: column oriented, unlike matrix*/
+    int k;
+    int dim;
+    int *vectors_in_cluster;
+    double *data;
+} Centroids;
+
 
 typedef struct Point {
     int dim;
@@ -42,8 +49,11 @@ double point_get_index(Point *point, int index);
 int point_get_dim(Point *point);
 void point_set_index(Point *point, int index, double value);
 
+/* Centroids API */
+Centroids *init_centroids(int dim, int k);
+
 /* debugging functions */
-void *print_point(Point *point);
+void print_point(Point *point);
 void print_matrix(Matrix *matrix);
 
 
@@ -68,7 +78,7 @@ double matrix_get(Matrix *matrix, int row, int col){
         if (row != col){
             return 0;
         } else {
-            return matrix->data[col];
+            return (matrix->data)[col];
         }
         
     } else { /* matrix is NOT diagonal */
@@ -177,6 +187,32 @@ void point_set_index(Point *point, int index, double value) {
 }
 
 
+
+/* Centroids API */
+double get_centroid_entry(Centroids *centroids, int centroid_idx, int entry){
+    assert(0 <= centroid_idx && centroid_idx < (centroids->k)); /*TODO: Delete*/
+    assert(0 <= entry && entry < (centroids->dim)); /*TODO: Delete*/
+    assert(0 < (centroids->vectors_in_cluster)[centroid_idx]); /* to keep assertion */
+    int num_of_vectors_in_cluster = (centroids->vectors_in_cluster)[centroid_idx];
+    return (centroids->data)[centroid_idx*(centroids->dim)+entry] / num_of_vectors_in_cluster;
+}
+
+Centroids *init_centroids(int dim, int k) {
+    assert(dim>0 && k>0);
+    int i;
+    Centroids *centroids = (Centroids *)malloc(sizeof(Centroids));
+    centroids->dim = dim;
+    centroids->k = k;
+    centroids->vectors_in_cluster = (int *)calloc(sizeof(int), k);
+    centroids->data = (double *)calloc(sizeof(double), dim*k);
+    for (i=0; i<k; i++)
+        (centroids->vectors_in_cluster)[i] = 0;
+    for (i=0; i<dim*k; i++)
+        (centroids->data)[i] = 0.;
+    return centroids;
+}
+
+
 /* debugging function */
 void print_matrix(Matrix *matrix) {
     int i, j;
@@ -190,7 +226,7 @@ void print_matrix(Matrix *matrix) {
     }
 }
 
-void *print_point(Point *point) {
+void print_point(Point *point) {
     int i;
     for (i=0; i<(point->dim); i++) {
         printf("%f ", (point->data)[i]);
@@ -198,7 +234,7 @@ void *print_point(Point *point) {
 }
 
 
-int main2() {
+int main() {
     /* non diagonal matrix */
     Matrix *m = create_matrix(4,4,false);
     double *new_row = malloc(sizeof(double)*4);
