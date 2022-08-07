@@ -9,16 +9,17 @@
 PyObject * kmeans(PyObject *data_points, Centroids *centroids, int maxiter, double epsilon);
 double max_distance_between_centroids(PyObject *old_centroids, PyObject *new_centroids);
 void kmeans_iteration(PyObject *data_points , PyObject *centroids, PyObject *new_centroids);
-void initarray(PyObject *matrix);
 int checkForZeros(int k, int dim, double **centroids);
-void print_pymatrix(PyObject *matrix);
-void print_centroids(PyObject *matrix);
 void fix_final_centroids_matrix(PyObject *matrix);
 
 
 /* Already changed:*/
 int find_closest_centroid(Point *vector, Centroids *centroids);
 
+/* TODO: move to matrix.c and delete from here */
+void print_pymatrix(PyObject *matrix);
+void print_centroids(PyObject *matrix);
+void initarray(PyObject *matrix);
 
 PyObject * kmeans(PyObject *data_points, Centroids *centroids, int maxiter, double epsilon)
 {
@@ -165,7 +166,7 @@ void initarray(PyObject *junk_centroids){
 
 
 
-void print_pymatrix(PyObject *matrix){
+void print_pymatrix(Centroids *matrix){
     Py_ssize_t i, j;
     Py_ssize_t dim;
     Py_ssize_t k;
