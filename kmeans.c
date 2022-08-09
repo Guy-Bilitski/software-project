@@ -1,87 +1,67 @@
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
 #include <float.h>
 #include <math.h>
 #include <ctype.h>
 #include "matrix.c"
+#include <limits.h>
 
 
-PyObject * kmeans(PyObject *data_points, Centroids *centroids, int maxiter, double epsilon);
-double max_distance_between_centroids(PyObject *old_centroids, PyObject *new_centroids);
-void kmeans_iteration(PyObject *data_points , PyObject *centroids, PyObject *new_centroids);
-int checkForZeros(int k, int dim, double **centroids);
-void fix_final_centroids_matrix(PyObject *matrix);
+Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsilon);
+double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids);
+void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids);
+int find_closest_centroid(Point *vector, Matrix *centroids);
 
 
-/* Already changed:*/
-int find_closest_centroid(Point *vector, Centroids *centroids);
 
-/* TODO: move to matrix.c and delete from here */
-void print_pymatrix(PyObject *matrix);
-void print_centroids(PyObject *matrix);
-void initarray(PyObject *matrix);
-
-PyObject * kmeans(PyObject *data_points, Centroids *centroids, int maxiter, double epsilon)
+Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsilon)
 {
-    Centroids *new_centroids, *temp;
+    Matrix *new_centroids, *temp;
     int dim, k;
     int iter;
-    double maxd;
+    double max_distance;
 
     //Setting variables
-    dim = centroids->dim;
-    k = centroids->k;
+    dim = centroids->cols;
+    k = centroids->rows;
     maxiter = maxiter == -1 ? INT_MAX: maxiter;
-    new_centroids = init_centroids(dim, k)
+    new_centroids = create_matrix(dim, k, 0);
+    reset_matrix_entries(new_centroids);
 
 
     for (iter=0; iter < maxiter; iter++) {
         kmeans_iteration(data_points, centroids, new_centroids);
-        maxd = max_distance_between_centroids(centroids, new_centroids);
+        max_distance = max_distance_between_centroids(centroids, new_centroids);
 
         temp = centroids;
         centroids = new_centroids;
         new_centroids = temp;
         
-        if (maxd < epsilon) {
+        if (max_distance < epsilon) {
             break;
         }
-        initarray(new_centroids);
+        reset_matrix_entries(new_centroids);
     }
-    fix_final_centroids_matrix(centroids);
-
     return centroids;
 }
 
 
 
 
-double max_distance_between_centroids(PyObject *old_centroids, PyObject *new_centroids) {
-    Py_ssize_t dim, k;
-    Py_ssize_t i,j;
-    PyObject *old_c, *new_c;
+double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids) {
+    int dim, k;
+    int r, c;
 
     double max_value = DBL_MIN;
     double current_value;
     double old_denomin, new_denomin;
 
-    dim = PyList_Size(PyList_GetItem(new_centroids, 0))-1;
-    k = PyList_Size(new_centroids);
+    dim = new_centroids->cols;
+    k = new_centroids->rows;
 
-    for (i=0; i < k; i++) {
+    for (r=0; r < k; r++) {
         current_value = 0.;
-        old_c = PyList_GetItem(old_centroids, i);
-        new_c = PyList_GetItem(new_centroids, i);
-        for (j=0; j < dim; j++) {
-            old_denomin = PyFloat_AsDouble(PyList_GetItem(old_c, dim));
-            new_denomin = PyFloat_AsDouble(PyList_GetItem(new_c, dim));
-            if (old_denomin == 0 || new_denomin == 0){
-                printf("An Error Has Occurred\n");
-                exit(1);
-            }
+        for (c=0; c < dim; c++) {
             current_value += pow(
-                (PyFloat_AsDouble(PyList_GetItem(old_c, j)) / old_denomin) - 
-                (PyFloat_AsDouble(PyList_GetItem(new_c, j)) / new_denomin), 2
+                matrix_get(old_centroids, r, c) - matrix_get(new_centroids, r, c), 2
                 );
         }
         if (current_value > max_value) {
@@ -93,15 +73,14 @@ double max_distance_between_centroids(PyObject *old_centroids, PyObject *new_cen
 }
 
 
-void kmeans_iteration(PyObject *data_points , PyObject *centroids, PyObject *new_centroids) {
-    Py_ssize_t dim, n;
-    Py_ssize_t i,j;
-    Py_ssize_t closet_centroid_index;
-    PyObject *closest_centroid, *current_vector;
+void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids) {
+    int dim, n;
+    int r, c;
+    int closet_centroid_index;
     double entry_value;
     
-    dim = PyList_Size(PyList_GetItem(data_points, 0));
-    n = PyList_Size(data_points);
+    dim = data_points->cols;
+    n = data_points->rows;
 
 
     for (i=0; i<n; i++) {
@@ -122,7 +101,7 @@ void kmeans_iteration(PyObject *data_points , PyObject *centroids, PyObject *new
 }
 
 
-int find_closest_centroid(Point *vector, Centroids *centroids) {
+int find_closest_centroid(Point *vector, Matrix *centroids) {
     int dim, k;
     int centroid_idx, entry;
     dim = centroids->dim;
@@ -149,83 +128,6 @@ int find_closest_centroid(Point *vector, Centroids *centroids) {
 }
 
 
-void initarray(PyObject *junk_centroids){
-    Py_ssize_t i,j;
-    Py_ssize_t dim, k;
-    PyObject * centroid_i;
-    dim = PyList_Size(PyList_GetItem(junk_centroids, 0))-1;
-    k = PyList_Size(junk_centroids);
-
-    for (i=0; i<k; i++){
-        centroid_i = PyList_GetItem(junk_centroids, i);
-        for (j=0; j<dim+1; j++){
-            PyList_SetItem(centroid_i, j, PyFloat_FromDouble(0.));
-        }
-    }
-}
-
-
-
-void print_pymatrix(Centroids *matrix){
-    Py_ssize_t i, j;
-    Py_ssize_t dim;
-    Py_ssize_t k;
-    PyObject *pyfloat;
-
-    k = PyList_Size(matrix);
-    dim = PyList_Size(PyList_GetItem(matrix, 0));
-    for (i=0; i < k; i++) {
-        for (j=0; j < dim; j++){
-            pyfloat = PyList_GetItem(PyList_GetItem(matrix, i), j);
-            printf("%f,",PyFloat_AsDouble(pyfloat));
-        }
-        printf("\n");
-    }
-}
-
-void print_centroids(PyObject *matrix){
-    Py_ssize_t i, j;
-    Py_ssize_t dim;
-    Py_ssize_t k;
-    PyObject *pyfloat;
-    double num;
-
-    k = PyList_Size(matrix);
-    dim = PyList_Size(PyList_GetItem(matrix, 0));
-    for (i=0; i < k; i++) {
-        num = PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(matrix, i), dim-1));
-        for (j=0; j < dim-1; j++){
-            pyfloat = PyList_GetItem(PyList_GetItem(matrix, i), j);
-            printf("%f,",PyFloat_AsDouble(pyfloat)/num);
-        }
-        printf("\n");
-    }
-}
-
-void fix_final_centroids_matrix(PyObject *matrix){
-    Py_ssize_t i, j;
-    Py_ssize_t dim;
-    Py_ssize_t k;
-    PyObject *pyfloat, *sublist;
-    double num, entry;
-
-    k = PyList_Size(matrix);
-    dim = PyList_Size(PyList_GetItem(matrix, 0));
-
-    for (i=0; i < k; i++) { //dividing each entry by sum
-        num = PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(matrix, i), dim-1));
-        for (j=0; j < dim-1; j++){
-            pyfloat = PyList_GetItem(PyList_GetItem(matrix, i), j);
-            entry = PyFloat_AsDouble(pyfloat)/num;
-            PyList_SetItem(PyList_GetItem(matrix, i), j, PyFloat_FromDouble(entry));
-        }
-    }
-
-    for (i=0; i < k; i++) { //popping the sum entry
-        sublist = PyList_GetSlice(PyList_GetItem(matrix, i), 0, dim-1);
-        PyList_SetItem(matrix, i, sublist);
-    }
-}
 
 
 static PyObject* kmeans_capi(PyObject *self, PyObject *args){
