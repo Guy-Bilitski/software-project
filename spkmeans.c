@@ -2,6 +2,7 @@
 #include <math.h>
 #include <ctype.h>
 #include "matrix.c"
+#include "point.c"
 
 double gaussian_RBF(Point *x1, Point *x2);
 double euclidean_distance(Point *x1, Point *x2);
@@ -49,7 +50,7 @@ Matrix *create_weighted_matrix(Matrix *X) {
 
 
 /*int argc, char **argv*/
-int main() {
+int main2() {
     /*
     Point *point1 = create_empty_point(3);
     Point *point2 = create_empty_point(3);

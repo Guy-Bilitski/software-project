@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "point.c"
 
 #define true 1
 #define false 0
@@ -22,38 +23,28 @@ typedef struct Centroids { /*IMPORTANT: column oriented, unlike matrix*/
 } Centroids;
 
 
-typedef struct Point {
-    int dim;
-    double *data;
-} Point;
-
 /* TODO: Check callocs/mallocs on failure */
 
 /* Matrix API */
-Matrix *create_matrix(int rows, int cols, int is_diag);
-double matrix_get(Matrix *matrix, int row, int col);
-Point *matrix_get_point(Matrix *matrix, int row_num);
-int matrix_get_rows_num(Matrix *matrix);
-int matrix_get_cols_num(Matrix *matrix);
-void matrix_set(Matrix *matrix, int row, int col, double value);
-void matrix_set_point(Matrix *matrix, int row, Point *point);
+Matrix *create_matrix(int rows, int cols, int is_diag);  /* creates a matrix with dimensions rows X columns all zeros */
+double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry */
+Point *matrix_get_point(Matrix *matrix, int row_index);  /* returns the <row_index> point (row) of the matrix */
+Point *matrix_get_column(Matrix *matrix, int column_index); /* returns the <column_index> column of the matrix */
+int matrix_get_rows_num(Matrix *matrix);  /* returns the number of rows in the matrix */
+int matrix_get_cols_num(Matrix *matrix);  /* returns the number of columns in the matrix */
+void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
+void matrix_set_point(Matrix *matrix, int row_index, Point *point);  /* sets a point (row) in the matrix in <row_index> */
+Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
 
 /* Matrix inner functions */
 int _get_matrix_index(Matrix *matrix, int row, int col);
 void _diag_to_square_matrix(Matrix *matrix);
 
-/* Point API */
-Point *create_empty_point(int dim);
-Point *create_point(int dim, double *data);
-double point_get_index(Point *point, int index);
-int point_get_dim(Point *point);
-void point_set_index(Point *point, int index, double value);
 
 /* Centroids API */
 Centroids *init_centroids(int dim, int k);
 
 /* debugging functions */
-void print_point(Point *point);
 void print_matrix(Matrix *matrix);
 
 
@@ -71,7 +62,7 @@ Matrix *create_matrix(int rows, int cols, int is_diag) {
     return matrix;
 }
 
-double matrix_get(Matrix *matrix, int row, int col){
+double matrix_get_entry(Matrix *matrix, int row, int col){
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
 
     if (matrix->is_diag){ /* if matrix is diagonal */
@@ -87,16 +78,27 @@ double matrix_get(Matrix *matrix, int row, int col){
 }
 
 Point *matrix_get_point(Matrix *matrix, int row_index) {
-    int i, row_num = matrix_get_rows_num(matrix);
-    double val;
+    int i, rows_num = matrix_get_rows_num(matrix);
+    double value;
     Point *point = create_empty_point(matrix_get_rows_num(matrix));
 
-    for (i=0; i<row_num; i++) {
-        val = matrix_get(matrix, row_index, i);
-        point_set_index(point, i, val);
+    for (i=0; i<rows_num; i++) {
+        value = matrix_get_entry(matrix, row_index, i);
+        point_set_index(point, i, value);
     }
 
     return point;
+}
+
+Point *matrix_get_column(Matrix *matrix, int column_index) {
+    int i, column_dim = matrix_get_rows_num(matrix);
+    double value;
+    Point *new_point = create_empty_point(column_dim);
+    for (i=0; i<column_dim; i++) {
+        value = matrix_get_entry(matrix, i, column_index);
+        point_set_index(new_point, i, value);
+    }
+    return new_point;
 }
 
 int matrix_get_rows_num(Matrix *matrix) {
@@ -107,7 +109,7 @@ int matrix_get_cols_num(Matrix *matrix) {
     return matrix->cols;
 }
 
-void matrix_set(Matrix *matrix, int row, int col, double value) {
+void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     /* sets an entry in the matrix */
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
 
@@ -132,9 +134,25 @@ void matrix_set_point(Matrix *matrix, int row_index, Point *point) {
     int i;
     if (matrix->is_diag == false) {
         for (i=0; i<matrix->rows; i++) {
-            matrix_set(matrix, row_index, i, point_get_index(point, i));
+            matrix_set_entry(matrix, row_index, i, point_get_index(point, i));
         }
     }
+}
+
+Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
+    int i, j, rows_num = matrix_get_rows_num(m1), columns_num = matrix_get_cols_num(m2);
+    Point *row, *column;
+    double value;
+    Matrix *new_matrix = create_matrix(rows_num, columns_num, false);
+    for (i=0; i<rows_num; i++) {
+        row = matrix_get_point(m1, i);
+        for (j=0; j<columns_num; j++) {
+            column = matrix_get_column(m2, j);
+            value = multiply_points(row, column);
+            matrix_set_entry(new_matrix, i, j, value);
+        }
+    }
+    return new_matrix;
 }
 
 
@@ -155,37 +173,6 @@ void _diag_to_square_matrix(Matrix *matrix) {
     matrix->is_diag = 0;
     free(old_data);
 }
-
-
-/* Point API */
-Point *create_empty_point(int dim) {
-    Point *point = (Point *)malloc(sizeof(Point));
-    point->data = (double *)calloc(sizeof(double), dim); 
-    point->dim = dim;
-    return point;
-}
-
-Point *create_point(int dim, double *data) {
-    Point *new_point = create_empty_point(dim);
-    new_point->data = data;
-    return new_point;
-}
-
-double point_get_index(Point *point, int index) {
-    assert(index >= 0 && index < point->dim);
-    return point->data[index];
-}
-
-int point_get_dim(Point *point) {
-    return point->dim;
-}
-
-void point_set_index(Point *point, int index, double value) {
-    /* sets value in a specific index */
-    assert(index >= 0 && index < point->dim);
-    point->data[index] = value;
-}
-
 
 
 /* Centroids API */
@@ -219,17 +206,10 @@ void print_matrix(Matrix *matrix) {
     double val;
     for (i=0; i<matrix->rows; i++) {
         for (j=0; j<matrix->cols; j++) {
-            val = matrix_get(matrix, i, j);
+            val = matrix_get_entry(matrix, i, j);
             printf("%f  ", val);
         }
         printf("\n");
-    }
-}
-
-void print_point(Point *point) {
-    int i;
-    for (i=0; i<(point->dim); i++) {
-        printf("%f ", (point->data)[i]);
     }
 }
 
@@ -237,44 +217,80 @@ void print_point(Point *point) {
 int main() {
     /* non diagonal matrix */
     Matrix *m = create_matrix(4,4,false);
+    printf("\n");
+    printf("%d", matrix_get_rows_num(m));
+    printf("\n");
     double *new_row = malloc(sizeof(double)*4);
     int i;
     for (i=0; i<4; i++) {
         new_row[i] = i + 100;
     }
     Point *p = create_point(4, new_row);
-    matrix_set(m, 1, 2, 10);
-    matrix_set(m, 0, 0, 20);
-    matrix_set(m, 3, 3, 30);
-    matrix_set(m, 3, 3, 5);
+    matrix_set_entry(m, 1, 2, 10);
+    matrix_set_entry(m, 0, 0, 20);
+    matrix_set_entry(m, 3, 3, 30);
+    matrix_set_entry(m, 3, 3, 5);
     matrix_set_point(m, 2, p);
     print_matrix(m);
-    free(m);
-    free(new_row);
+
+    printf("\n");
+    print_point(matrix_get_point(m, 0));
+    printf("\n");
+    
 
 
     printf("\n");
 
+
+    Matrix *m2 = create_matrix(4,4,false);
+    matrix_set_entry(m2, 1, 2, 4);
+    matrix_set_entry(m2, 0, 0, 3);
+    matrix_set_entry(m2, 0, 2, 5.5);
+    matrix_set_entry(m2, 3, 3, 4);
+    matrix_set_entry(m2, 2, 2, 3);
+    matrix_set_entry(m2, 3, 1, 2);
+    matrix_set_entry(m2, 2, 1, 1);
+    matrix_set_entry(m2, 1, 1, 1);
+    matrix_set_entry(m2, 3, 2, 1.7);
+
+    print_matrix(m2);
+    
+    printf("\n");
+
+    Matrix *product = multiply_matrices(m, m2);
+    print_matrix(product);
+    free(product);
+    free(m2);
+    free(m);
+    free(new_row);
+
+    
+
     /* diagonal matrix */
+    /*
     Matrix *d = create_matrix(4,4,true);
-    matrix_set(d, 0, 0, 1);
-    matrix_set(d, 1, 1, 2);
-    matrix_set(d, 2, 2, 3);
-    matrix_set(d, 3, 3, 4);
-    matrix_set(d, 3, 3, 5);
+    matrix_set_entry(d, 0, 0, 1);
+    matrix_set_entry(d, 1, 1, 2);
+    matrix_set_entry(d, 2, 2, 3);
+    matrix_set_entry(d, 3, 3, 4);
+    matrix_set_entry(d, 3, 3, 5);
     printf("%d%d%d\n",d->cols,d->rows,d->is_diag);
-    matrix_set(d, 0, 1, 5);
+    matrix_set_entry(d, 0, 1, 5);
     print_matrix(m);
     printf("%d%d%d\n",d->cols,d->rows,d->is_diag);
     free(d);
+    */
 
     /* point */
+    /*
     Point *point = create_empty_point(3);
     point_set_index(point, 0, 100);
     point_set_index(point, 1, 1);
     point_set_index(point, 2, 8);
     print_point(point);
     free(point);
+    */
+    
 
 
     return 1;
