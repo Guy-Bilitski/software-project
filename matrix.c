@@ -78,11 +78,11 @@ double matrix_get_entry(Matrix *matrix, int row, int col){
 }
 
 Point *matrix_get_point(Matrix *matrix, int row_index) {
-    int i, rows_num = matrix_get_rows_num(matrix);
+    int i, cols_num = matrix_get_cols_num(matrix);
     double value;
-    Point *point = create_empty_point(matrix_get_rows_num(matrix));
+    Point *point = create_empty_point(cols_num);
 
-    for (i=0; i<rows_num; i++) {
+    for (i=0; i<cols_num; i++) {
         value = matrix_get_entry(matrix, row_index, i);
         point_set_index(point, i, value);
     }
@@ -114,6 +114,7 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
 
     if (matrix->is_diag) {
+        printf("diag");
         if (row != col && value != 0) {
             _diag_to_square_matrix(matrix);
             (matrix->data)[_get_matrix_index(matrix, row, col)] = value;
@@ -140,25 +141,26 @@ void matrix_set_point(Matrix *matrix, int row_index, Point *point) {
 }
 
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
+    assert(matrix_get_cols_num(m1) == matrix_get_rows_num(m2));
     int i, j, rows_num = matrix_get_rows_num(m1), columns_num = matrix_get_cols_num(m2);
     Point *row, *column;
-    double value;
     Matrix *new_matrix = create_matrix(rows_num, columns_num, false);
     for (i=0; i<rows_num; i++) {
         row = matrix_get_point(m1, i);
         for (j=0; j<columns_num; j++) {
             column = matrix_get_column(m2, j);
-            value = multiply_points(row, column);
-            matrix_set_entry(new_matrix, i, j, value);
+            matrix_set_entry(new_matrix, i, j, multiply_points(row, column));
         }
     }
+    free(row);
+    free(column);
     return new_matrix;
 }
 
 
 /* Matrix inner functions */
 int _get_matrix_index(Matrix *matrix, int row, int col) {
-    return row*(matrix->rows) + col;
+    return row*(matrix->cols) + col;
 }
 
 void _diag_to_square_matrix(Matrix *matrix) { 
@@ -216,6 +218,7 @@ void print_matrix(Matrix *matrix) {
 
 int main() {
     /* non diagonal matrix */
+    /*
     Matrix *m = create_matrix(4,4,false);
     printf("\n");
     printf("%d", matrix_get_rows_num(m));
@@ -264,7 +267,47 @@ int main() {
     free(m);
     free(new_row);
 
+*/
     
+    printf("\n");
+    printf("\n");
+    Matrix *m11 = create_matrix(3,4,false);
+    Matrix *m22 = create_matrix(4,5,false);
+
+    matrix_set_entry(m11, 1, 2, 4);
+    matrix_set_entry(m11, 0, 0, 3);
+    matrix_set_entry(m11, 0, 2, 5.5);
+    matrix_set_entry(m11, 2, 3, 4);
+    matrix_set_entry(m11, 2, 2, 3);
+    matrix_set_entry(m11, 2, 1, 2);
+    matrix_set_entry(m11, 0, 1, 1);
+    matrix_set_entry(m11, 1, 1, 1);
+    matrix_set_entry(m11, 0, 3, 1.7);
+
+    print_matrix(m11);
+
+
+    matrix_set_entry(m22, 1, 2, 4);
+    matrix_set_entry(m22, 0, 0, 3);
+    matrix_set_entry(m22, 0, 2, 5.5);
+    matrix_set_entry(m22, 3, 3, 4);
+    matrix_set_entry(m22, 2, 4, 3);
+    matrix_set_entry(m22, 3, 1, 2);
+    matrix_set_entry(m22, 2, 1, 1);
+    matrix_set_entry(m22, 1, 1, 1);
+    matrix_set_entry(m22, 3, 4, 1.7);
+
+    printf("\n");
+    print_matrix(m22);
+    printf("\n");
+
+    Matrix *product1 = multiply_matrices(m11, m22);
+    print_matrix(product1);
+
+    free(m22);
+    free(m11);    
+    free(product1);
+
 
     /* diagonal matrix */
     /*
