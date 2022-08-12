@@ -44,6 +44,18 @@ Matrix *create_diagonal_degree_matrix(Matrix *matrix) {
     return diagonal_degree_matrix;
 }
 
+void neg_root_to_diag_matrix(Matrix *matrix) {
+    assert(_is_matrix_diag(matrix));
+    int i, rows_num = matrix_get_rows_num(matrix);
+    double value;
+    for (i=0; i<rows_num; i++) {
+        value = matrix_get_entry(matrix, i, i);
+        assert(value != 0);
+        value = 1 / sqrt(value);
+        matrix_set_entry(matrix, i, i, value);
+    }
+}
+
 
 /*int argc, char **argv*/
 int main() {
@@ -55,8 +67,21 @@ int main() {
     print_matrix(W);
     space();
 
+    printf("%lx", sizeof(W->data));
+    space();
+
     Matrix *D = create_diagonal_degree_matrix(W);
     print_matrix(D);
+    space();
+    printf("%lx", sizeof(D->data));
+    space();
+    neg_root_to_diag_matrix(D);
+    print_matrix(D);
+    space();
+    Point *p = matrix_get_row(D, 3);
+    print_point(p);
+
+
 
     _clean_matrix(X);
     _clean_matrix(W);

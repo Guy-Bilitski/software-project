@@ -59,15 +59,19 @@ void space();
 
 /* Matrix API */
 Matrix *create_matrix(int rows, int cols, int is_diag) {
+    int size_of_data;
     if (is_diag) {
         assert(rows==cols);
+        size_of_data = rows;
+    } else {
+        size_of_data = rows*cols;
     }
     assert(rows>0 && cols>0);
     Matrix *matrix = (Matrix *)malloc(sizeof(Matrix));
     matrix->rows = rows;
     matrix->cols = cols;
     matrix->is_diag = is_diag;
-    matrix->data = (double *)calloc(sizeof(double), rows*cols);
+    matrix->data = (double *)calloc(sizeof(double), size_of_data);
     return matrix;
 }
 
@@ -104,7 +108,7 @@ double matrix_get_entry(Matrix *matrix, int row, int col){
     }
 }
 
-Point *matrix_get_row(Matrix *matrix, int row_index) {
+Point *matrix_get_row(Matrix *matrix, int row_index) { /* TODO: what about diag matrix? */
     assert(matrix_get_rows_num(matrix) > row_index);
     int cols_num = matrix_get_cols_num(matrix);
     double *data = matrix_get_data(matrix) + row_index*cols_num;
@@ -125,11 +129,12 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     /* sets an entry in the matrix */
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
     double *matrix_data = matrix_get_data(matrix);
+    int matrix_index = _get_matrix_index(matrix, row, col);
 
     if (_is_matrix_diag(matrix)) {
         if (row != col && value != 0) {
             _diag_to_square_matrix(matrix);
-             matrix_data[_get_matrix_index(matrix, row, col)] = value;
+             matrix_data[matrix_index] = value;
         } else if (row != col && value == 0){ /* nothing to change */
             return;
         } else {
@@ -137,7 +142,7 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
         }
     } 
     else { /* matrix is NOT diagonal */
-         matrix_data[_get_matrix_index(matrix, row, col)] = value;
+         matrix_data[matrix_index] = value;
     }
 }
 
