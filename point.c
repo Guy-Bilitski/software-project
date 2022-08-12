@@ -27,6 +27,7 @@ void point_set_entry(Point *point, int index, double value);  /* sets value in i
 
 double multiply_points(Point *row_point, Point *column_point);  /* returns row X column scalar */
 double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
+double sum_point_values(Point *point); /* returns the sum of the points values */
 
 /* debugging functions */
 void print_point(Point *point);
@@ -93,6 +94,15 @@ double euclidean_distance(Point *p1, Point *p2) {
         sum += pow(point_get_entry(p1, i) - point_get_entry(p2, i), 2);
     }
     return sqrt(sum);
+}
+
+double sum_point_values(Point *point) {
+    int i;
+    double sum = 0;
+    for (i=0; i<point_get_dim(point); i++) {
+        sum += point_get_entry(point, i);
+    }
+    return sum;
 }
 
 

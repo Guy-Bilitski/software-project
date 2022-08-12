@@ -32,16 +32,18 @@ Matrix *create_matrix(int rows, int cols, int is_diag);  /* creates a matrix wit
 int matrix_get_rows_num(Matrix *matrix);  /* returns the number of rows in the matrix */
 int matrix_get_cols_num(Matrix *matrix);  /* returns the number of columns in the matrix */
 double *matrix_get_data(Matrix *matrix);  /* returns the matrix data */
+double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
 
 double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry */
 Point *matrix_get_row(Matrix *matrix, int row_index);  /* returns the <row_index> point (row) of the matrix */
 Point *matrix_get_column(Matrix *matrix, int column_index); /* returns the <column_index> column of the matrix */
 
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
-void matrix_set_point(Matrix *matrix, int row_index, Point *point);  /* sets a point (row) in the matrix in <row_index> */
-/*Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
+void matrix_set_row(Matrix *matrix, int row_index, Point *point);  /* sets a point (row) in the matrix in <row_index> */
+Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
 
 /* Matrix inner functions */
+int _is_matrix_diag(Matrix *matrix);
 int _get_matrix_index(Matrix *matrix, int row, int col);
 void _diag_to_square_matrix(Matrix *matrix);
 void _clean_matrix(Matrix *matrix);
@@ -81,21 +83,26 @@ double *matrix_get_data(Matrix *matrix) {
     return matrix->data;
 }
 
+double matrix_get_row_sum(Matrix *matrix, int row_index) {
+    Point *point = matrix_get_row(matrix, row_index);
+    return sum_point_values(point);
+}
+
 double matrix_get_entry(Matrix *matrix, int row, int col){
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
+    double *matrix_data = matrix_get_data(matrix);
 
-    if (matrix->is_diag){ /* if matrix is diagonal */
+    if (_is_matrix_diag(matrix)){ /* if matrix is diagonal */
         if (row != col){
             return 0;
         } else {
-            return (matrix->data)[col];
+            return matrix_data[col];
         }
         
     } else { /* matrix is NOT diagonal */
-        return matrix->data[_get_matrix_index(matrix, row, col)];
+        return matrix_data[_get_matrix_index(matrix, row, col)];
     }
 }
-
 
 Point *matrix_get_row(Matrix *matrix, int row_index) {
     assert(matrix_get_rows_num(matrix) > row_index);
@@ -117,28 +124,29 @@ Point *matrix_get_column(Matrix *matrix, int column_index) {
 void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     /* sets an entry in the matrix */
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
+    double *matrix_data = matrix_get_data(matrix);
 
-    if (matrix->is_diag) {
+    if (_is_matrix_diag(matrix)) {
         if (row != col && value != 0) {
             _diag_to_square_matrix(matrix);
-            (matrix->data)[_get_matrix_index(matrix, row, col)] = value;
+             matrix_data[_get_matrix_index(matrix, row, col)] = value;
         } else if (row != col && value == 0){ /* nothing to change */
             return;
-        }
-        else {
-            (matrix->data)[row] = value;
+        } else {
+            matrix_data[row] = value;
         }
     } 
     else { /* matrix is NOT diagonal */
-        (matrix->data)[_get_matrix_index(matrix, row, col)] = value;
+         matrix_data[_get_matrix_index(matrix, row, col)] = value;
     }
 }
 
-void matrix_set_point(Matrix *matrix, int row_index, Point *point) {
+void matrix_set_row(Matrix *matrix, int row_index, Point *point) {
+    /* TODO: what if is diag? */
     /* sets a whole point in the matrix */
-    int i;
-    if (matrix->is_diag == false) {
-        for (i=0; i<matrix->rows; i++) {
+    int i, rows_num = matrix_get_rows_num(matrix);
+    if (!_is_matrix_diag(matrix)) {
+        for (i=0; i<rows_num; i++) {
             matrix_set_entry(matrix, row_index, i, point_get_entry(point, i));
         }
     }
@@ -156,23 +164,24 @@ Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
             matrix_set_entry(new_matrix, i, j, multiply_points(row, column));
         }
     }
-    free(row);
-    free(column);
     return new_matrix;
 }
 
 
 /* Matrix inner functions */
+int _is_matrix_diag(Matrix *matrix) {
+    return matrix->is_diag;
+}
+
 int _get_matrix_index(Matrix *matrix, int row, int col) {
     return row*(matrix->cols) + col;
 }
 
 void _diag_to_square_matrix(Matrix *matrix) { 
     /* Changing matrix->data from n sized array (diagonal matrix) to n*n sized array (square matrix) */
-    int i,n;
-    double *old_data = matrix->data;
-    n = matrix->rows;
-    matrix->data = (double *)calloc(sizeof(double), n*n);
+    int i,n = matrix_get_rows_num(matrix);
+    double *old_data = matrix_get_data(matrix);
+    matrix->data = (double *)calloc(sizeof(double), n*n);  /* isn't it safer to create a new matrix? */
     for (i=0; i<n; i++){
         (matrix->data)[i*n + i] = old_data[i];
     }
@@ -270,8 +279,7 @@ void space() {
 }
 
 
-
-int main() {
+int main2() {
     srand((int) time(NULL)); /* important for random */
     Matrix *m1 = generate_matrix(3, 5, false);
     Matrix *m2 = generate_matrix(5, 2, false);

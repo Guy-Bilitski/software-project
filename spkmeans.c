@@ -3,27 +3,28 @@
 #include <ctype.h>
 #include "matrix.c"
 
-double gaussian_RBF(Point *x1, Point *x2);
+double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
+Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
 
-/*computes w_i in the weighted adjacency matrix*/
+
 double gaussian_RBF(Point *p1, Point *p2) {
     double distance = euclidean_distance(p1, p2);
     return exp(-(distance / 2));
 }
 
 Matrix *create_weighted_matrix(Matrix *X) {
-    int i, j, rows_num = matrix_get_rows_num(X), cols_num = matrix_get_cols_num(X);
+    int i, j, rows_num = matrix_get_rows_num(X);
     double value;
     Point *p1, *p2;
-    Matrix *matrix = create_matrix(rows_num, cols_num, false);
+    Matrix *matrix = create_matrix(rows_num, rows_num, false);
     for (i=0; i<rows_num; i++) {
-        for (j=0; j<cols_num; j++) {
+        for (j=0; j<rows_num; j++) {
             if (i == j) {
                 matrix_set_entry(matrix, i, j, 0);
             }
             else {
-                p1 = matrix_get_point(X, i);
-                p2 = matrix_get_point(X, j);
+                p1 = matrix_get_row(X, i);
+                p2 = matrix_get_row(X, j);
                 value = gaussian_RBF(p1, p2);
                 matrix_set_entry(matrix, i, j, value);
             }
@@ -32,50 +33,35 @@ Matrix *create_weighted_matrix(Matrix *X) {
     return matrix;
 }
 
+Matrix *create_diagonal_degree_matrix(Matrix *matrix) {
+    int i, rows_num = matrix_get_rows_num(matrix);
+    double value;
+    Matrix *diagonal_degree_matrix = create_matrix(rows_num, rows_num, true);
+    for (i=0; i<rows_num; i++) {
+        value = matrix_get_row_sum(matrix, i);
+        matrix_set_entry(diagonal_degree_matrix, i, i, value);
+    }
+    return diagonal_degree_matrix;
+}
+
 
 /*int argc, char **argv*/
-int main2() {
-    /*
-    Point *point1 = create_empty_point(3);
-    Point *point2 = create_empty_point(3);
-    point_set_index(point1, 0, 33);
-    point_set_index(point1, 1, 34);
-    point_set_index(point1, 2, 36);
-    point_set_index(point2, 0, 33);
-    point_set_index(point2, 1, 34);
-    point_set_index(point2, 2, 35);
-    print_point(point1);
-    printf("\n");
-    print_point(point2);
-    printf("\n");
-    printf("%f", gaussian_RBF(point1, point2));
-    free(point1);
-    free(point2);*/
+int main() {
+    Matrix *X = generate_matrix(6,3, false);
+    Matrix *W = create_weighted_matrix(X);
 
+    print_matrix(X);
+    space();
+    print_matrix(W);
+    space();
 
+    Matrix *D = create_diagonal_degree_matrix(W);
+    print_matrix(D);
 
-    printf("\n");
-    Matrix *m = create_matrix(4,4,false);
-    Matrix *m2;
-    double *new_row = malloc(sizeof(double)*4);
-    int i;
-    for (i=0; i<4; i++) {
-        new_row[i] = i + 100;
-    }
-    Point *p = create_point(4, new_row);
-    matrix_set_entry(m, 1, 2, 10);
-    matrix_set_entry(m, 0, 0, 20);
-    matrix_set_entry(m, 3, 3, 30);
-    matrix_set_entry(m, 3, 3, 5);
-    matrix_set_point(m, 2, p);
-    print_matrix(m);
-
-    printf("\n");
-    m2 = create_weighted_matrix(m);
-    printf("\n");
-    print_matrix(m2);
-    free(m);
-    free(m2);
+    _clean_matrix(X);
+    _clean_matrix(W);
+    _clean_matrix(D);
+    
 
 
     return 1;
