@@ -7,17 +7,24 @@
 #define false 0
 
 typedef struct Point {
-    int dim;
     double *data;
+    int dim;
+    int offset; /* for column representation */
 } Point;
 
 
 /* Point API */
-Point *create_empty_point(int dim);  /* creates a point with all zero values */
-Point *create_point(int dim, double *data);  /* creates a point from list */
-double point_get_index(Point *point, int index);  /* returns the value in index <index> of point */
+Point *create_point(double *data, int dim, int offset);  /* creates a point from list */
+
+int _convert_point_entry(Point *point, int entry);  /* converts given entry to the real one considering the offset */
+
+double point_get_entry(Point *point, int entry);  /* returns the value in index <index> of point */
 int point_get_dim(Point *point);  /* returs the point dimension */
-void point_set_index(Point *point, int index, double value);  /* sets value in index <index> */
+int point_get_offset(Point *point);  /* returs the point offset */
+double *point_get_data(Point *point);  /* returs the point data */
+
+void point_set_entry(Point *point, int index, double value);  /* sets value in index <index> */
+
 double multiply_points(Point *row_point, Point *column_point);  /* returns row X column scalar */
 double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
 
@@ -26,38 +33,55 @@ void print_point(Point *point);
 
 
 /* Point API */
-Point *create_empty_point(int dim) {
-    Point *point = (Point *)malloc(sizeof(Point));
-    point->data = (double *)calloc(sizeof(double), dim); 
-    point->dim = dim;
-    return point;
-}
-
-Point *create_point(int dim, double *data) {
-    Point *new_point = create_empty_point(dim);
+Point *create_point(double *data, int dim, int offset) {
+    Point *new_point = (Point *)malloc(sizeof(Point));
     new_point->data = data;
+    new_point->dim = dim;
+    new_point->offset = offset;
     return new_point;
 }
 
-double point_get_index(Point *point, int index) {
-    assert(index >= 0 && index < point->dim);
-    return point->data[index];
+int _convert_point_entry(Point *point, int entry) {
+    int point_offset = point_get_offset(point);
+    if (point_offset == 0) {
+        return entry;
+    } else {
+        return point_offset*entry;
+    }
+}
+
+double point_get_entry(Point *point, int entry) {
+    assert(entry >= 0 && entry < point->dim);
+    int real_entry = _convert_point_entry(point, entry);
+    double *data = point_get_data(point);
+    return data[real_entry];
+    
 }
 
 int point_get_dim(Point *point) {
     return point->dim;
 }
 
-void point_set_index(Point *point, int index, double value) {
-    assert(index >= 0 && index < point->dim);
-    point->data[index] = value;
+int point_get_offset(Point *point) {
+    return point->offset;
+}
+
+double *point_get_data(Point *point) {
+    return point->data;
+}
+
+void point_set_entry(Point *point, int entry, double value) {
+    assert(entry >= 0 && entry < point->dim);
+    int real_entry = _convert_point_entry(point, entry);
+    double *data = point_get_data(point);
+    data[real_entry] = value;
 }
 
 double multiply_points(Point *row_point, Point *column_point) {
     int i, points_dim = point_get_dim(row_point);
     double sum = 0;
     for (i=0; i<points_dim; i++) {
-        sum += (point_get_index(row_point, i) * point_get_index(column_point, i));
+        sum += (point_get_entry(row_point, i) * point_get_entry(column_point, i));
     }
     return sum;
 }
@@ -66,7 +90,7 @@ double euclidean_distance(Point *p1, Point *p2) {
     double sum;
     int i, dim = point_get_dim(p1);
     for (i=0; i<dim; i++) {
-        sum += pow(point_get_index(p1, i) - point_get_index(p2, i), 2);
+        sum += pow(point_get_entry(p1, i) - point_get_entry(p2, i), 2);
     }
     return sqrt(sum);
 }
@@ -76,12 +100,21 @@ double euclidean_distance(Point *p1, Point *p2) {
 void print_point(Point *point) {
     int i;
     for (i=0; i<(point->dim); i++) {
-        printf("%f ", (point->data)[i]);
+        printf("%f ", point_get_entry(point, i));
     }
 }
 
-
-
 int main3() {
-    return 1;
+    int i;
+    int dim = 10;
+    double *data = (double *)calloc(sizeof(double), dim);
+    for (i=0; i<dim; i++) {
+        data[i] = i*2 + 1;
+    }
+    Point *p = create_point(data, dim, 0);
+    print_point(p);
+    printf("\n");
+    printf("\n");
+    Point *p2 = create_point(data, 5, 2);
+    print_point(p2);
 }
