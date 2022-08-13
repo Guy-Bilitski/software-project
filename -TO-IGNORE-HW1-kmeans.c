@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     if (maxiter <= 0 || k <= 0 || argc < 4 || argc > 5) {
         printf("Invalid Input!");
         return 1;
-    }
+    } 
 
     dim = get_dimension(input_filename);
     if (dim == -1){
