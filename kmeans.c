@@ -20,11 +20,11 @@ Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsi
     double max_distance;
 
     //Setting variables
-    dim = centroids->cols;
-    k = centroids->rows;
+    dim = matrix_get_cols_num(centroids);
+    k = matrix_get_rows_num(centroids);
     maxiter = maxiter == -1 ? INT_MAX: maxiter;
-    new_centroids = create_matrix(dim, k, 0);
-    reset_matrix_entries(new_centroids);
+    new_centroids = create_matrix(k, dim);
+    reset_matrix_entries_to_zero(new_centroids);
 
 
     for (iter=0; iter < maxiter; iter++) {
@@ -38,7 +38,7 @@ Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsi
         if (max_distance < epsilon) {
             break;
         }
-        reset_matrix_entries(new_centroids);
+        reset_matrix_entries_to_zero(new_centroids);
     }
     return centroids;
 }
@@ -50,85 +50,87 @@ double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroi
     int dim, k;
     int r, c;
 
-    double max_value = DBL_MIN;
-    double current_value;
-    double old_denomin, new_denomin;
+    double max_distance = DBL_MIN;
+    double current_distance;
 
-    dim = new_centroids->cols;
-    k = new_centroids->rows;
+    dim = matrix_get_cols_num(new_centroids);
+    k = matrix_get_rows_num(new_centroids);
+
+    Point *old_centroid = (Point *)malloc(sizeof(Point));
+    Point *new_centroid = (Point *)malloc(sizeof(Point));
+
 
     for (r=0; r < k; r++) {
-        current_value = 0.;
-        for (c=0; c < dim; c++) {
-            current_value += pow(
-                matrix_get(old_centroids, r, c) - matrix_get(new_centroids, r, c), 2
-                );
-        }
-        if (current_value > max_value) {
-            max_value = current_value;
+        matrix_get_row_to_point(old_centroids, old_centroid, r);
+        matrix_get_row_to_point(new_centroids, new_centroid, r);
+        current_distance = euclidean_distance(old_centroid, new_centroid);
+
+        if (current_distance > max_distance) {
+            max_distance = current_distance;
         }
     }
 
-    return sqrt(max_value);
+    free(old_centroid);
+    free(new_centroid);
+    return max_distance;
 }
 
 
 void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids) {
-    int dim, n;
     int r, c;
     int closet_centroid_index;
     double entry_value;
+    int dim = matrix_get_cols_num(data_points);
+    int n = matrix_get_rows_num(data_points);
+    int k = matrix_get_rows_num(centroids);
+    Point *current_vector = (Point *)malloc(sizeof(Point));
+    int *num_of_points_in_cluster = (int *)calloc(k, sizeof(int));
+
     
-    dim = data_points->cols;
-    n = data_points->rows;
-
-
-    for (i=0; i<n; i++) {
-        current_vector = PyList_GetItem(data_points, i);
+    for (r=0; r<n; r++) {
+        matrix_get_row_to_point(data_points, current_vector, r);
         closet_centroid_index = find_closest_centroid(current_vector, centroids);
-        closest_centroid = PyList_GetItem(new_centroids, closet_centroid_index);
-
-        for (j = 0; j < dim; j++) {
-            entry_value = PyFloat_AsDouble(PyList_GetItem(closest_centroid, j)) + PyFloat_AsDouble(PyList_GetItem(current_vector, j));
-            if (PyList_SetItem(closest_centroid, j, PyFloat_FromDouble(entry_value))){
-                printf("An Error Has Occurred\n");
-                exit(1);
-            }
-        }
-        entry_value = PyFloat_AsDouble(PyList_GetItem(closest_centroid, dim)) + 1.;
-        PyList_SetItem(closest_centroid, dim, PyFloat_FromDouble(entry_value));
+        matrix_add_point_to_row(new_centroids, closet_centroid_index, current_vector);
+        num_of_points_in_cluster[closet_centroid_index]++;
     }
+
+    for (r=0; r<k; r++){
+        assert(num_of_points_in_cluster[r] > 0);
+        for (c=0; c<dim; c++){
+            entry_value = matrix_get_entry(new_centroids, r, c) / num_of_points_in_cluster[r];
+            matrix_set_entry(new_centroids, r, c, entry_value);
+        }
+    }
+    free(current_vector);
+    free(num_of_points_in_cluster);
 }
 
 
 int find_closest_centroid(Point *vector, Matrix *centroids) {
     int dim, k;
     int centroid_idx, entry;
-    dim = centroids->dim;
-    k = centroids->k;
+    dim = matrix_get_cols_num(centroids);
+    k = matrix_get_rows_num(centroids);
 
     double min_distance = DBL_MAX;
     int min_index = -1;
-    double current_distance = 0;
+    double current_distance;
+    Point *current_centroid = (Point *)malloc(sizeof(Point));
 
     for (centroid_idx = 0; centroid_idx < k; centroid_idx++) {
-        current_distance = 0;
-        for (entry=0; entry < dim; entry++) {
-            current_value += pow(
-                point_get_index(vector, entry) - 
-                get_centroid_entry(centroids, centroid_idx, entry), 2);
-        }
+        matrix_get_row_to_point(centroids, current_centroid, centroid_idx);
+        current_distance = euclidean_distance(current_centroid, vector);
         if (current_distance < min_distance) {
             min_distance = current_distance;
             min_index = centroid_idx;
         }
     }
-
-    return closest_index;
+    free(current_centroid);
+    return min_index;
 }
 
 
-
+/* KMEANS CPYTHON API
 
 static PyObject* kmeans_capi(PyObject *self, PyObject *args){
     PyObject *data_points;
@@ -175,3 +177,5 @@ PyMODINIT_FUNC PyInit_mykmeanssp(void) {
     }
     return m;
 }
+
+*/

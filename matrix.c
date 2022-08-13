@@ -16,18 +16,12 @@ typedef struct Matrix {
     double *data;
 } Matrix;
 
-typedef struct Centroids { /*IMPORTANT: column oriented, unlike matrix*/
-    int k;
-    int dim;
-    int *vectors_in_cluster;
-    double *data;
-} Centroids;
-
 
 /* TODO: Check callocs/mallocs on failure */
 
 /* Matrix API */
-Matrix *create_matrix(int rows, int cols, int is_diag);  /* creates a matrix with dimensions rows X columns all zeros */
+Matrix *create_matrix(int rows, int cols);
+Matrix *create_diag_matrix(int n);  /* creates a matrix with dimensions rows X columns all zeros */
 
 int matrix_get_rows_num(Matrix *matrix);  /* returns the number of rows in the matrix */
 int matrix_get_cols_num(Matrix *matrix);  /* returns the number of columns in the matrix */
@@ -38,9 +32,13 @@ double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row,
 Point *matrix_get_row(Matrix *matrix, int row_index);  /* returns the <row_index> point (row) of the matrix */
 Point *matrix_get_column(Matrix *matrix, int column_index); /* returns the <column_index> column of the matrix */
 
+void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index);
+void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
 void matrix_set_row(Matrix *matrix, int row_index, Point *point);  /* sets a point (row) in the matrix in <row_index> */
+void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point);
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
+void reset_matrix_entries_to_zero(Matrix *matrix);
 
 /* Matrix inner functions */
 int _is_matrix_diag(Matrix *matrix);
@@ -49,8 +47,6 @@ void _diag_to_square_matrix(Matrix *matrix);
 void _clean_matrix(Matrix *matrix);
 
 
-/* Centroids API */
-Centroids *init_centroids(int dim, int k);
 
 /* debugging functions */
 void print_matrix(Matrix *matrix);
@@ -58,20 +54,26 @@ void space();
 
 
 /* Matrix API */
-Matrix *create_matrix(int rows, int cols, int is_diag) {
+Matrix *create_matrix(int rows, int cols) {
     int size_of_data;
-    if (is_diag) {
-        assert(rows==cols);
-        size_of_data = rows;
-    } else {
-        size_of_data = rows*cols;
-    }
+    size_of_data = rows*cols;
     assert(rows>0 && cols>0);
+
     Matrix *matrix = (Matrix *)malloc(sizeof(Matrix));
     matrix->rows = rows;
     matrix->cols = cols;
-    matrix->is_diag = is_diag;
+    matrix->is_diag = false;
     matrix->data = (double *)calloc(sizeof(double), size_of_data);
+    return matrix;
+}
+
+Matrix *create_diag_matrix(int n) {
+    assert(n>0);
+    Matrix *matrix = (Matrix *)malloc(sizeof(Matrix));
+    matrix->rows = n;
+    matrix->cols = n;
+    matrix->is_diag = true;
+    matrix->data = (double *)calloc(sizeof(double), n);
     return matrix;
 }
 
@@ -108,6 +110,7 @@ double matrix_get_entry(Matrix *matrix, int row, int col){
     }
 }
 
+/* TODO: FIX DATA LEAK */
 Point *matrix_get_row(Matrix *matrix, int row_index) { /* TODO: what about diag matrix? */
     assert(matrix_get_rows_num(matrix) > row_index);
     int cols_num = matrix_get_cols_num(matrix);
@@ -116,6 +119,7 @@ Point *matrix_get_row(Matrix *matrix, int row_index) { /* TODO: what about diag 
     return point;
 }
 
+/* TODO: FIX DATA LEAK */
 Point *matrix_get_column(Matrix *matrix, int column_index) {
     int cols_num = matrix_get_cols_num(matrix);
     assert(cols_num > column_index);
@@ -123,6 +127,22 @@ Point *matrix_get_column(Matrix *matrix, int column_index) {
     double *data = matrix_get_data(matrix) + column_index;
     Point *point = create_point(data, rows_num, cols_num);
     return point;
+}
+
+void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index) { /* TODO: what about diag matrix? */
+    assert(matrix_get_rows_num(matrix) > row_index);
+    int cols_num = matrix_get_cols_num(matrix);
+    point->dim = cols_num;
+    point->offset = 0;
+    point->data = matrix_get_data(matrix) + row_index*cols_num;
+}
+
+void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index) {
+    int cols_num = matrix_get_cols_num(matrix);
+    assert(cols_num > column_index);
+    point->dim = matrix_get_rows_num(matrix);
+    point->data = matrix_get_data(matrix) + column_index;
+    point->offset = cols_num;
 }
 
 void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
@@ -157,11 +177,24 @@ void matrix_set_row(Matrix *matrix, int row_index, Point *point) {
     }
 }
 
+
+void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point){
+    int j;
+    double entry;
+    int dim = point_get_dim(point);
+    assert(dim == matrix_get_cols_num(matrix));
+
+    for (j=0; j<dim; j++){
+        entry = matrix_get_entry(matrix, row_index, j) + point_get_entry(point, j);
+        matrix_set_entry(matrix, row_index, j, entry);
+    }
+}
+
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
     assert(matrix_get_cols_num(m1) == matrix_get_rows_num(m2));
     int i, j, rows_num = matrix_get_rows_num(m1), columns_num = matrix_get_cols_num(m2);
     Point *row, *column;
-    Matrix *new_matrix = create_matrix(rows_num, columns_num, false);
+    Matrix *new_matrix = create_matrix(rows_num, columns_num);
     for (i=0; i<rows_num; i++) {
         row = matrix_get_row(m1, i);
         for (j=0; j<columns_num; j++) {
@@ -172,6 +205,15 @@ Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
     return new_matrix;
 }
 
+
+void reset_matrix_entries_to_zero(Matrix *matrix){
+    int i,j;
+    int rows = matrix_get_rows_num(matrix);
+    int cols = matrix_get_cols_num(matrix);
+    for (i=0; i<rows; i++)
+        for (j=0; j<cols; j++)
+            matrix_set_entry(matrix, i,j,0);
+}
 
 /* Matrix inner functions */
 int _is_matrix_diag(Matrix *matrix) {
@@ -200,29 +242,6 @@ void _clean_matrix(Matrix *matrix) {
 }
 
 
-/* Centroids API */
-double get_centroid_entry(Centroids *centroids, int centroid_idx, int entry){
-    assert(0 <= centroid_idx && centroid_idx < (centroids->k)); /*TODO: Delete*/
-    assert(0 <= entry && entry < (centroids->dim)); /*TODO: Delete*/
-    assert(0 < (centroids->vectors_in_cluster)[centroid_idx]); /* to keep assertion */
-    int num_of_vectors_in_cluster = (centroids->vectors_in_cluster)[centroid_idx];
-    return (centroids->data)[centroid_idx*(centroids->dim)+entry] / num_of_vectors_in_cluster;
-}
-
-Centroids *init_centroids(int dim, int k) {
-    assert(dim>0 && k>0);
-    int i;
-    Centroids *centroids = (Centroids *)malloc(sizeof(Centroids));
-    centroids->dim = dim;
-    centroids->k = k;
-    centroids->vectors_in_cluster = (int *)calloc(sizeof(int), k);
-    centroids->data = (double *)calloc(sizeof(double), dim*k);
-    for (i=0; i<k; i++)
-        (centroids->vectors_in_cluster)[i] = 0;
-    for (i=0; i<dim*k; i++)
-        (centroids->data)[i] = 0.;
-    return centroids;
-}
 
 
 /* debugging function */
@@ -267,14 +286,23 @@ double RandomReal(double low, double high)
 
 Matrix *generate_matrix(int rows, int cols, int is_diag) {
     int i,j;
-    Matrix *m = create_matrix(rows, cols, false);
-    if (!is_diag) {
+    Matrix *m;
+
+    if (is_diag) {
+        m = create_diag_matrix(rows);
+        for (i=0; i<rows; i++) {
+            matrix_set_entry(m, i, i, RandomReal(0, 10));
+        }
+    }
+    else {
+        m = create_matrix(rows, cols);
         for (i=0; i<rows; i++) {
             for (j=0; j<cols; j++) {
                 matrix_set_entry(m, i, j, RandomReal(0, 10));
             }
         }
     }
+
     return m; 
 }
 
@@ -284,23 +312,33 @@ void space() {
 }
 
 
-int main2() {
+int main() {
     srand((int) time(NULL)); /* important for random */
     Matrix *m1 = generate_matrix(3, 5, false);
     Matrix *m2 = generate_matrix(5, 2, false);
     print_matrix(m1);
     space();
-    print_matrix(m2);
-    space();
-    
-    Matrix *product = multiply_matrices(m1, m2);
 
-    print_matrix_rows(product);
-    print_matrix_cols(product);
+    Point *p = (Point *)malloc(sizeof(Point));
+    matrix_get_column_to_point(m1, p, 2);
+    print_point(p);
+    space();
+    matrix_get_row_to_point(m1, p, 1);
+    print_point(p);
+    space();
+    free(p);
+
+    // print_matrix(m2);
+    // space();
     
-    _clean_matrix(m1);
-    _clean_matrix(m2);
-    _clean_matrix(product);    
+    // Matrix *product = multiply_matrices(m1, m2);
+
+    // print_matrix_rows(product);
+    // print_matrix_cols(product);
+    
+    // _clean_matrix(m1);
+    // _clean_matrix(m2);
+    // _clean_matrix(product);    
 
     return 1;
 }
