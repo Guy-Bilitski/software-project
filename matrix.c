@@ -45,8 +45,9 @@ int _is_matrix_diag(Matrix *matrix);
 int _get_matrix_index(Matrix *matrix, int row, int col);
 void _diag_to_square_matrix(Matrix *matrix);
 void _clean_matrix(Matrix *matrix);
-
-
+Matrix *_multiply_matrices_diag_with_diag(Matrix *m1, Matrix *m2);
+Matrix *_multiply_matrices_diag_with_nondiag(Matrix *m1, Matrix *m2);
+Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2);
 
 /* debugging functions */
 void print_matrix(Matrix *matrix);
@@ -152,7 +153,7 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     int matrix_index = _get_matrix_index(matrix, row, col);
 
     if (_is_matrix_diag(matrix)) {
-        if (row != col && value != 0) {
+        if (row != col && value != 0.) {
             _diag_to_square_matrix(matrix);
              matrix_data[matrix_index] = value;
         } else if (row != col && value == 0){ /* nothing to change */
@@ -192,17 +193,15 @@ void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point){
 
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
     assert(matrix_get_cols_num(m1) == matrix_get_rows_num(m2));
-    int i, j, rows_num = matrix_get_rows_num(m1), columns_num = matrix_get_cols_num(m2);
-    Point *row, *column;
-    Matrix *new_matrix = create_matrix(rows_num, columns_num);
-    for (i=0; i<rows_num; i++) {
-        row = matrix_get_row(m1, i);
-        for (j=0; j<columns_num; j++) {
-            column = matrix_get_column(m2, j);
-            matrix_set_entry(new_matrix, i, j, multiply_points(row, column));
-        }
-    }
-    return new_matrix;
+
+    if (_is_matrix_diag(m1) && _is_matrix_diag(m2))
+        return _multiply_matrices_diag_with_diag(m1, m2);
+
+    else if (!_is_matrix_diag(m1) && !_is_matrix_diag(m2))
+        return _multiply_matrices_nondiag_with_nondiag(m1, m2);
+    
+    else
+        return _multiply_matrices_diag_with_nondiag(m1, m2);
 }
 
 
@@ -221,7 +220,9 @@ int _is_matrix_diag(Matrix *matrix) {
 }
 
 int _get_matrix_index(Matrix *matrix, int row, int col) {
-    return row*(matrix->cols) + col;
+    if (!_is_matrix_diag(matrix))
+        return row*(matrix->cols) + col;
+
 }
 
 void _diag_to_square_matrix(Matrix *matrix) { 
@@ -240,6 +241,60 @@ void _clean_matrix(Matrix *matrix) {
     free(matrix_get_data(matrix));
     free(matrix);
 }
+
+
+Matrix *_multiply_matrices_diag_with_diag(Matrix *m1, Matrix *m2) {
+    int n = matrix_get_rows_num(m1);
+    Matrix *new_matrix = create_diag_matrix(n);
+    int i;
+    double entry_value;
+
+    for (i=0; i<n; i++){
+        entry_value = matrix_get_entry(m1, i, i) * matrix_get_entry(m2, i, i);
+        matrix_set_entry(new_matrix, i, i, entry_value);
+    }
+    return new_matrix;
+}
+
+Matrix *_multiply_matrices_diag_with_nondiag(Matrix *m1, Matrix *m2) {
+    int i, j;
+    double current_entry;
+    int rows_num = matrix_get_rows_num(m1);
+    int cols_num = matrix_get_cols_num(m2);
+    Matrix *new_matrix = create_matrix(rows_num, cols_num);
+    int first_is_diag = _is_matrix_diag(m1);
+
+    for (i=0; i<rows_num; i++) {
+        for (j=0; j<cols_num; j++) {
+            if (first_is_diag)
+                current_entry = matrix_get_entry(m1, i, i) * matrix_get_entry(m2, i, j);
+            else
+                current_entry = matrix_get_entry(m1, i, j) * matrix_get_entry(m2, j, j);
+            matrix_set_entry(new_matrix, i, j, current_entry);
+        }
+    }
+    return new_matrix;
+}
+
+
+Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2) {
+    int i, j;
+    int rows_num = matrix_get_rows_num(m1);
+    int cols_num = matrix_get_cols_num(m2);
+    Matrix *new_matrix = create_matrix(rows_num, cols_num);
+    Point *row_point = (Point *)malloc(sizeof(Point));
+    Point *col_point = (Point *)malloc(sizeof(Point));
+    
+    for (i=0; i<rows_num; i++) {
+        matrix_get_row_to_point(m1, row_point, i);
+        for (j=0; j<cols_num; j++) {
+            matrix_get_column_to_point(m2, col_point, j);
+            matrix_set_entry(new_matrix, i, j, inner_product(row_point, col_point));
+        }
+    }
+    return new_matrix;
+}
+
 
 
 
