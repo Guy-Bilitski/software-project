@@ -5,7 +5,7 @@
 
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
 Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
-
+Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 
 double gaussian_RBF(Point *p1, Point *p2) {
     double distance = euclidean_distance(p1, p2);
@@ -16,7 +16,7 @@ Matrix *create_weighted_matrix(Matrix *X) {
     int i, j, rows_num = matrix_get_rows_num(X);
     double value;
     Point *p1, *p2;
-    Matrix *matrix = create_matrix(rows_num, rows_num, false);
+    Matrix *matrix = create_matrix(rows_num, rows_num);
     for (i=0; i<rows_num; i++) {
         for (j=0; j<rows_num; j++) {
             if (i == j) {
@@ -36,7 +36,7 @@ Matrix *create_weighted_matrix(Matrix *X) {
 Matrix *create_diagonal_degree_matrix(Matrix *matrix) {
     int i, rows_num = matrix_get_rows_num(matrix);
     double value;
-    Matrix *diagonal_degree_matrix = create_matrix(rows_num, rows_num, true);
+    Matrix *diagonal_degree_matrix = create_diag_matrix(rows_num);
     for (i=0; i<rows_num; i++) {
         value = matrix_get_row_sum(matrix, i);
         matrix_set_entry(diagonal_degree_matrix, i, i, value);
@@ -57,36 +57,24 @@ void neg_root_to_diag_matrix(Matrix *matrix) {
 }
 
 
+Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
+    int n = matrix_get_rows_num(W);
+    Matrix *I = create_identity_matrix(n);
+    Matrix *temp = multiply_matrices(D_minus_05, W);
+    Matrix *X = multiply_matrices(X, D_minus_05);
+    Matrix *Lnorm = sub_matrices(I, X);
+
+    _free_matrix(I);
+    _free_matrix(temp);
+    _free_matrix(X);
+    return Lnorm;
+}
+
+
 /*int argc, char **argv*/
 int main() {
-    Matrix *X = generate_matrix(6,3, false);
-    Matrix *W = create_weighted_matrix(X);
-
-    print_matrix(X);
-    space();
-    print_matrix(W);
-    space();
-
-    printf("%lx", sizeof(W->data));
-    space();
-
-    Matrix *D = create_diagonal_degree_matrix(W);
-    print_matrix(D);
-    space();
-    printf("%lx", sizeof(D->data));
-    space();
-    neg_root_to_diag_matrix(D);
-    print_matrix(D);
-    space();
-    Point *p = matrix_get_row(D, 3);
-    print_point(p);
-
-
-
-    _clean_matrix(X);
-    _clean_matrix(W);
-    _clean_matrix(D);
-    
+    Matrix *I5 = create_identity_matrix(5);
+    print_matrix(I5);
 
 
     return 1;

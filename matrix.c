@@ -22,6 +22,7 @@ typedef struct Matrix {
 /* Matrix API */
 Matrix *create_matrix(int rows, int cols);
 Matrix *create_diag_matrix(int n);  /* creates a matrix with dimensions rows X columns all zeros */
+Matrix *create_identity_matrix(int n);
 
 int matrix_get_rows_num(Matrix *matrix);  /* returns the number of rows in the matrix */
 int matrix_get_cols_num(Matrix *matrix);  /* returns the number of columns in the matrix */
@@ -39,12 +40,13 @@ void matrix_set_row(Matrix *matrix, int row_index, Point *point);  /* sets a poi
 void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point);
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
 void reset_matrix_entries_to_zero(Matrix *matrix);
+Matrix *sub_matrices(Matrix *A, Matrix *B);
 
 /* Matrix inner functions */
 int _is_matrix_diag(Matrix *matrix);
 int _get_matrix_index(Matrix *matrix, int row, int col);
 void _diag_to_square_matrix(Matrix *matrix);
-void _clean_matrix(Matrix *matrix);
+void _free_matrix(Matrix *matrix);
 Matrix *_multiply_matrices_diag_with_diag(Matrix *m1, Matrix *m2);
 Matrix *_multiply_matrices_diag_with_nondiag(Matrix *m1, Matrix *m2);
 Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2);
@@ -76,6 +78,15 @@ Matrix *create_diag_matrix(int n) {
     matrix->is_diag = true;
     matrix->data = (double *)calloc(sizeof(double), n);
     return matrix;
+}
+
+Matrix *create_identity_matrix(int n) {
+    assert(n>0);
+    int i;
+    Matrix *I = create_matrix(n, n);
+    for (i=0; i<n; i++)
+        matrix_set_entry(I, i, i, 1.);
+    return I;
 }
 
 int matrix_get_rows_num(Matrix *matrix) {
@@ -237,7 +248,7 @@ void _diag_to_square_matrix(Matrix *matrix) {
     free(old_data);
 }
 
-void _clean_matrix(Matrix *matrix) {
+void _free_matrix(Matrix *matrix) {
     free(matrix_get_data(matrix));
     free(matrix);
 }
@@ -296,6 +307,26 @@ Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2) {
 }
 
 
+Matrix *sub_matrices(Matrix *A, Matrix *B) {
+    assert(matrix_get_cols_num(A) == matrix_get_cols_num(B));
+    assert(matrix_get_rows_num(A) == matrix_get_rows_num(B));
+    int i,j;
+    int cols = matrix_get_cols_num(A);
+    int rows = matrix_get_rows_num(A);
+    double value;
+    Matrix *result = (Matrix *)malloc(sizeof(Matrix));
+
+    
+    for (i=0; i<rows; i++){
+        for (j=0; j<cols; j++) {
+            value = matrix_get_entry(A, i, j)-matrix_get_entry(B, i, j);
+            matrix_set_entry(result, i, j, value);
+        }
+    }
+    return result;
+}
+
+
 
 
 
@@ -310,6 +341,25 @@ void print_matrix(Matrix *matrix) {
         }
         printf("\n");
     }
+}
+
+void print_matrix2(Matrix *matrix) {
+    int i, j;
+    double val;
+    printf("[");
+    for (i=0; i<matrix->rows; i++) {
+        printf("[");
+        for (j=0; j<matrix->cols; j++) {
+            val = matrix_get_entry(matrix, i, j);
+            printf("%lf", val);
+            if (j != matrix->cols - 1)
+                printf(", ");
+        }
+        if (i != matrix->rows - 1)
+            printf("],\n");
+        else printf("]]\n");
+    }
+    printf("\n");
 }
 
 void print_matrix_rows(Matrix *matrix) {
@@ -367,21 +417,24 @@ void space() {
 }
 
 
-int main() {
+int main9() {
     srand((int) time(NULL)); /* important for random */
-    Matrix *m1 = generate_matrix(3, 5, false);
-    Matrix *m2 = generate_matrix(5, 2, false);
-    print_matrix(m1);
+    Matrix *m1 = generate_matrix(5, 5, true);
+    Matrix *m2 = generate_matrix(5, 5, true);
+    Matrix *m3 = multiply_matrices(m1, m2);
+    print_matrix2(m1);
+    print_matrix2(m2);
+    print_matrix2(m3);
     space();
 
-    Point *p = (Point *)malloc(sizeof(Point));
-    matrix_get_column_to_point(m1, p, 2);
-    print_point(p);
-    space();
-    matrix_get_row_to_point(m1, p, 1);
-    print_point(p);
-    space();
-    free(p);
+    // Point *p = (Point *)malloc(sizeof(Point));
+    // matrix_get_column_to_point(m1, p, 2);
+    // print_point(p);
+    // space();
+    // matrix_get_row_to_point(m1, p, 1);
+    // print_point(p);
+    // space();
+    // free(p);
 
     // print_matrix(m2);
     // space();
