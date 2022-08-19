@@ -17,13 +17,13 @@ typedef struct S_and_C
 } S_and_C;
 
 /* MaxElemnt API TODO: move to new file*/
-int max_element_get_value(MaxElement max_element)
-int max_element_get_index1(MaxElement max_element)
-int max_element_get_index2(MaxElement max_element)
+int max_element_get_value(MaxElement max_element);
+int max_element_get_index1(MaxElement max_element);
+int max_element_get_index2(MaxElement max_element);
 
 /* S_and_C API TODO:move to new file*/
-int s_and_c_get_s(S_and_C s_and_c)
-int s_and_c_get_c(S_and_C s_and_c)
+int s_and_c_get_s(S_and_C s_and_c);
+int s_and_c_get_c(S_and_C s_and_c);
 
 
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
@@ -31,31 +31,31 @@ Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 MaxElement get_off_diagonal_absolute_max(Matrix *matrix);
 void normalize_matrix_rows(Matrix *matrix);
-S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max)
-Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement max_element, int dim) /* returns the rotation matrix p */
+S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max);
+Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement max_element, int dim); /* returns the rotation matrix p */
 
 
 /* MaxElemnt API */
-int get_value(MaxElement max_element) {
-    return max_element->value;
+int max_element_get_value(MaxElement max_element) {
+    return max_element.value;
 }
 
-int get_index1(MaxElement max_element) {
-    return max_element->i;
+int max_element_get_index1(MaxElement max_element) {
+    return max_element.i;
 }
 
-int get_index2(MaxElement max_element) {
-    return max_element->j;
+int max_element_get_index2(MaxElement max_element) {
+    return max_element.j;
 }
 
 
 /* S_and_C API */
-int int get_s(S_and_C s_and_c) {
-    return s_and_c->s;
+int s_and_c_get_s(S_and_C s_and_c) {
+    return s_and_c.s;
 }
 
-int int get_c(S_and_C s_and_c) {
-    return s_and_c->c;
+int s_and_c_get_c(S_and_C s_and_c) {
+    return s_and_c.c;
 }
 
 
@@ -68,7 +68,7 @@ double gaussian_RBF(Point *p1, Point *p2) {
 Matrix *create_weighted_matrix(Matrix *X) {
     int i, j, rows_num = matrix_get_rows_num(X);
     double value;
-    Point *p1, *p2;
+    Point *p1 = (Point *)malloc(sizeof(Point)), *p2 = (Point *)malloc(sizeof(Point));
     Matrix *matrix = create_matrix(rows_num, rows_num);
     for (i=0; i<rows_num; i++) {
         for (j=0; j<rows_num; j++) {
@@ -76,8 +76,8 @@ Matrix *create_weighted_matrix(Matrix *X) {
                 matrix_set_entry(matrix, i, j, 0);
             }
             else {
-                p1 = matrix_get_row(X, i);
-                p2 = matrix_get_row(X, j);
+                matrix_get_row_to_point(X, p1, i);
+                matrix_get_row_to_point(X, p2, j);
                 value = gaussian_RBF(p1, p2);
                 matrix_set_entry(matrix, i, j, value);
             }
@@ -108,7 +108,6 @@ void neg_root_to_diag_matrix(Matrix *matrix) {
         matrix_set_entry(matrix, i, i, value);
     }
 }
-
 
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
     int n = matrix_get_rows_num(W);
@@ -187,7 +186,7 @@ void normalize_matrix_rows(Matrix *matrix) {
         rows_norm = euclidean_norm(row);
 
         for (j=0; j<num_of_cols; j++) {
-            entry = matrix_get_entry(matirx, i, j) / rows_norm;
+            entry = matrix_get_entry(matrix, i, j) / rows_norm;
             matrix_set_entry(matrix, i, j, entry);
         }
     }
@@ -196,8 +195,7 @@ void normalize_matrix_rows(Matrix *matrix) {
 
 /*int argc, char **argv*/
 int main() {
-    Matrix *I5 = create_identity_matrix(5);
-    print_matrix(I5);
+
 
 
     return 1;

@@ -90,9 +90,9 @@ double inner_product(Point *row_point, Point *column_point) {
 
 double euclidean_norm(Point *p) {
     double sum = 0.;
-    int i, dim = point_get_dim(p1);
+    int i, dim = point_get_dim(p);
     for (i=0; i<dim; i++) {
-        sum += pow(point_get_entry(p1, i), 2);
+        sum += pow(point_get_entry(p, i), 2);
     }
     return sqrt(sum);
 }
