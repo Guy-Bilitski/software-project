@@ -1,3 +1,4 @@
 .vscode/settings.json
 a.out
 -TO-IGNORE-HW1-kmeans.c
+test.c

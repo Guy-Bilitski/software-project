@@ -366,8 +366,7 @@ void print_matrix_cols(Matrix *matrix) {
     free(point);
 }
 
-double RandomReal(double low, double high)
-{
+double RandomReal(double low, double high) {
   double d;
 
   d = (double) rand() / ((double) RAND_MAX + 1);
