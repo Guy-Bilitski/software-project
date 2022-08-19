@@ -22,6 +22,7 @@ Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 MaxElement get_off_diagonal_absolute_max(Matrix *matrix);
 MaxElement get_off_diagonal_absolute_max(Matrix *matrix);
+void normalize_matrix_rows(Matrix *matrix);
 
 
 
@@ -130,6 +131,29 @@ S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max) {
     result.c = c;
     return result;
 }
+
+
+void normalize_matrix_rows(Matrix *matrix) {
+    Point *row = (Point *)malloc(sizeof(Point));
+    int num_of_rows, num_of_cols;
+    double rows_norm, entry;
+    int i,j;
+    num_of_rows = matrix_get_rows_num(matrix);
+    num_of_cols = matrix_get_cols_num(matrix);
+
+    for (i=0; i<num_of_rows; i++) {
+        matrix_get_row_to_point(matrix, row, i);
+        rows_norm = euclidean_norm(row);
+
+        for (j=0; j<num_of_cols; j++) {
+            entry = matrix_get_entry(matirx, i, j) / rows_norm;
+            matrix_set_entry(matrix, i, j, entry);
+        }
+    }
+}
+
+
+
 
 
 
