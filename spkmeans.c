@@ -16,14 +16,46 @@ typedef struct S_and_C
     double c;
 } S_and_C;
 
+/* MaxElemnt API TODO: move to new file*/
+int max_element_get_value(MaxElement max_element)
+int max_element_get_index1(MaxElement max_element)
+int max_element_get_index2(MaxElement max_element)
+
+/* S_and_C API TODO:move to new file*/
+int s_and_c_get_s(S_and_C s_and_c)
+int s_and_c_get_c(S_and_C s_and_c)
+
 
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
 Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 MaxElement get_off_diagonal_absolute_max(Matrix *matrix);
-MaxElement get_off_diagonal_absolute_max(Matrix *matrix);
+S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max)
+Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement max_element, int dim) /* returns the rotation matrix p */
 
 
+/* MaxElemnt API */
+int get_value(MaxElement max_element) {
+    return max_element->value;
+}
+
+int get_index1(MaxElement max_element) {
+    return max_element->i;
+}
+
+int get_index2(MaxElement max_element) {
+    return max_element->j;
+}
+
+
+/* S_and_C API */
+int int get_s(S_and_C s_and_c) {
+    return s_and_c->s;
+}
+
+int int get_c(S_and_C s_and_c) {
+    return s_and_c->c;
+}
 
 
 
@@ -129,6 +161,17 @@ S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max) {
     result.s = s;
     result.c = c;
     return result;
+}
+
+
+Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement max_element, int dim) {
+    Matrix *p = create_identity_matrix(dim);
+    int s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c), i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
+    matrix_set_entry(p, i, i, c);
+    matrix_set_entry(p, j, j, c);
+    matrix_set_entry(p, i, j, s);
+    matrix_set_entry(p, j, i, -s);
+    return p;
 }
 
 
