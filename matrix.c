@@ -16,6 +16,8 @@ typedef struct Matrix {
     double *data;
 } Matrix;
 
+/*Check memory leaks caused by get_point_row / col*/
+
 
 /* TODO: Check callocs/mallocs on failure */
 

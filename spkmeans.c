@@ -2,6 +2,7 @@
 #include <math.h>
 #include <ctype.h>
 #include "matrix.c"
+
 typedef struct MaxElement
 {
     int i;
@@ -27,7 +28,7 @@ MaxElement get_off_diagonal_absolute_max(Matrix *matrix);
 
 
 double gaussian_RBF(Point *p1, Point *p2) {
-    double distance = euclidean_distance(p1, p2);
+    double distance = euclidean_distance(p1, p2); /*TODO: CHECK*/
     return exp(-(distance / 2));
 }
 
