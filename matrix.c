@@ -25,12 +25,13 @@ Matrix *create_diag_matrix(int n);  /* creates a matrix with dimensions rows X c
 Matrix *create_identity_matrix(int n);
 
 /* getters */
-int matrix_get_rows_num(Matrix *matrix);  /* returns the number of rows in the matrix */
-int matrix_get_cols_num(Matrix *matrix);  /* returns the number of columns in the matrix */
-double *matrix_get_data(Matrix *matrix);  /* returns the matrix data */
+int matrix_get_rows_num(Matrix *matrix);
+int matrix_get_cols_num(Matrix *matrix);
+double *matrix_get_data(Matrix *matrix);
 double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry */
 void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index); /* inserts a row into a given point */
 void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);  /* inserts a column into a given point */
+MaxElement *matrix_get_non_diagonal_max_element(Matrix *matrix);  /* returns the max element of the matrix */
 
 /* setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
@@ -38,6 +39,7 @@ void matrix_set_row(Matrix *matrix, int row_index, Point *point);  /* sets a poi
 
 /* utilities */
 double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
+void free_matrix(Matrix *matrix); /* cleanup matrix object and sub-objects */
 void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* TODO: check if relevant */
 void reset_matrix_entries_to_zero(Matrix *matrix);  /* resets all metrix entries to zero */
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
@@ -47,13 +49,13 @@ Matrix *sub_matrices(Matrix *A, Matrix *B); /* sub A - B */
 int _is_matrix_diag(Matrix *matrix);
 int _get_matrix_index(Matrix *matrix, int row, int col);
 void _diag_to_square_matrix(Matrix *matrix);
-void _free_matrix(Matrix *matrix);
 Matrix *_multiply_matrices_diag_with_diag(Matrix *m1, Matrix *m2);
 Matrix *_multiply_matrices_diag_with_nondiag(Matrix *m1, Matrix *m2);
 Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2);
 
 /* debugging functions */
 void print_matrix(Matrix *matrix);
+Matrix *generate_symmetric_matrix(int n);
 void space();
 
 
@@ -136,6 +138,23 @@ void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index) 
     point->offset = cols_num;
 }
 
+MaxElement *matrix_get_non_diagonal_max_element(Matrix *matrix) {
+    MaxElement *max_element = create_max_element(matrix_get_entry(matrix, 0, 0), 0, 0);
+    int i, j, cols_num = matrix_get_cols_num(matrix), rows_num = matrix_get_rows_num(matrix);
+    double current_value;
+    for (i=0; i<rows_num; i++) {
+        for (j=0; j<cols_num; j++) {
+            if (i != j) {
+                current_value = matrix_get_entry(matrix, i, j);
+                if (current_value > max_element_get_value(max_element)) {
+                    max_element_set_new_values(max_element, current_value, i, j);
+                }
+            }
+        }
+    }
+    return max_element;
+}
+
 /* setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     /* sets an entry in the matrix */
@@ -177,6 +196,11 @@ double matrix_get_row_sum(Matrix *matrix, int row_index) {
         sum += matrix_get_entry(matrix, row_index, col_index);
     }
     return sum;
+}
+
+void free_matrix(Matrix *matrix) {
+    free(matrix_get_data(matrix));
+    free(matrix);
 }
 
 void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point){
@@ -234,11 +258,6 @@ void _diag_to_square_matrix(Matrix *matrix) {
     }
     matrix->is_diag = 0;
     free(old_data);
-}
-
-void _free_matrix(Matrix *matrix) {
-    free(matrix_get_data(matrix));
-    free(matrix);
 }
 
 Matrix *_multiply_matrices_diag_with_diag(Matrix *m1, Matrix *m2) {
@@ -394,6 +413,17 @@ Matrix *generate_matrix(int rows, int cols, int is_diag) {
     }
 
     return m; 
+}
+
+Matrix *generate_symmetric_matrix(int n) {
+    Matrix *new_matrix = generate_matrix(n, n, false);
+    int i, j;
+    for (i=0; i<n; i++) {
+        for (j=i; j<n; j++) {
+            matrix_set_entry(new_matrix, j, i, matrix_get_entry(new_matrix, i, j));
+        }
+    }
+    return new_matrix;
 }
 
 void space() {
