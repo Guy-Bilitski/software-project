@@ -1,63 +1,20 @@
 #include <float.h>
 #include <math.h>
 #include <ctype.h>
+#include <s_and_c.h>
+#include <max_element.h>
 #include "matrix.c"
-
-typedef struct MaxElement
-{
-    int i;
-    int j;
-    double value;
-} MaxElement;
-
-typedef struct S_and_C
-{
-    double s;
-    double c;
-} S_and_C;
-
-/* MaxElemnt API TODO: move to new file*/
-int max_element_get_value(MaxElement max_element);
-int max_element_get_index1(MaxElement max_element);
-int max_element_get_index2(MaxElement max_element);
-
-/* S_and_C API TODO:move to new file*/
-int s_and_c_get_s(S_and_C s_and_c);
-int s_and_c_get_c(S_and_C s_and_c);
 
 
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
 Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
+Matrix *create_diagonal_degree_matrix(Matrix *matrix);
+void neg_root_to_diag_matrix(Matrix *matrix);
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 MaxElement get_off_diagonal_absolute_max(Matrix *matrix);
-void normalize_matrix_rows(Matrix *matrix);
 S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max);
 Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement max_element, int dim); /* returns the rotation matrix p */
-
-
-/* MaxElemnt API */
-int max_element_get_value(MaxElement max_element) {
-    return max_element.value;
-}
-
-int max_element_get_index1(MaxElement max_element) {
-    return max_element.i;
-}
-
-int max_element_get_index2(MaxElement max_element) {
-    return max_element.j;
-}
-
-
-/* S_and_C API */
-int s_and_c_get_s(S_and_C s_and_c) {
-    return s_and_c.s;
-}
-
-int s_and_c_get_c(S_and_C s_and_c) {
-    return s_and_c.c;
-}
-
+void normalize_matrix_rows(Matrix *matrix);
 
 
 double gaussian_RBF(Point *p1, Point *p2) {
@@ -124,7 +81,6 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 
 
 /* JACOBI */
-
 MaxElement get_off_diagonal_absolute_max(Matrix *matrix){
     MaxElement max = {-1, -1, 0.};
     if (_is_matrix_diag(matrix))
@@ -195,7 +151,6 @@ void normalize_matrix_rows(Matrix *matrix) {
 
 /*int argc, char **argv*/
 int main() {
-
 
 
     return 1;
