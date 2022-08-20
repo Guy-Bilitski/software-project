@@ -1,8 +1,8 @@
 #include <float.h>
 #include <math.h>
 #include <ctype.h>
-#include <s_and_c.h>
-#include <max_element.h>
+#include "s_and_c.c"
+#include "max_element.c"
 #include "matrix.c"
 
 
