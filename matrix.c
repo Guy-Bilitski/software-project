@@ -124,7 +124,7 @@ void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index) { /* T
     assert(matrix_get_rows_num(matrix) > row_index);
     int cols_num = matrix_get_cols_num(matrix);
     point->dim = cols_num;
-    point->offset = 0;
+    point->offset = 1;
     point->data = matrix_get_data(matrix) + row_index*cols_num;
 }
 

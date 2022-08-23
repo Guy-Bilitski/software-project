@@ -16,12 +16,13 @@ typedef struct Point {
 /* Point API */
 Point *create_point(double *data, int dim, int offset);  /* creates a point from list */
 
-int _convert_point_entry(Point *point, int entry);  /* converts given entry to the real one considering the offset */
+int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
 
 double point_get_entry(Point *point, int entry);  /* returns the value in index <index> of point */
 int point_get_dim(Point *point);  /* returs the point dimension */
 int point_get_offset(Point *point);  /* returs the point offset */
 double *point_get_data(Point *point);  /* returs the point data */
+void divide_point_by_value(Point *p, double value);
 
 void point_set_entry(Point *point, int index, double value);  /* sets value in index <index> */
 
@@ -43,20 +44,16 @@ Point *create_point(double *data, int dim, int offset) {
     return new_point;
 }
 
-int _convert_point_entry(Point *point, int entry) {
+int _convert_point_index(Point *point, int index) {
     int point_offset = point_get_offset(point);
-    if (point_offset == 0) {
-        return entry;
-    } else {
-        return point_offset*entry;
-    }
+    return point_offset*index;
 }
 
-double point_get_entry(Point *point, int entry) {
-    assert(entry >= 0 && entry < point->dim);
-    int real_entry = _convert_point_entry(point, entry);
+double point_get_entry(Point *point, int index) {
+    assert(index >= 0 && index < point->dim);
+    int real_index = _convert_point_index(point, index);
     double *data = point_get_data(point);
-    return data[real_entry];
+    return data[real_index];
     
 }
 
@@ -72,11 +69,11 @@ double *point_get_data(Point *point) {
     return point->data;
 }
 
-void point_set_entry(Point *point, int entry, double value) {
-    assert(entry >= 0 && entry < point->dim);
-    int real_entry = _convert_point_entry(point, entry);
+void point_set_entry(Point *point, int index, double value) {
+    assert(index >= 0 && index < point->dim);
+    int real_index = _convert_point_index(point, index);
     double *data = point_get_data(point);
-    data[real_entry] = value;
+    data[real_index] = value;
 }
 
 double inner_product(Point *row_point, Point *column_point) {
@@ -115,6 +112,16 @@ double sum_point_values(Point *point) {
     return sum;
 }
 
+void divide_point_by_value(Point *p, double value) {
+    int i, n, index;
+    n = point_get_dim(p); 
+
+    for (i=0; i<n; i++) {
+        index = _convert_point_index(p, i);
+        (p->data)[index] /= value;
+    }
+}
+
 
 /* debugging function */
 void print_point(Point *point) {
@@ -125,17 +132,19 @@ void print_point(Point *point) {
 }
 
 
-int main3() {
+int main() {
     int i;
-    int dim = 10;
+    int dim = 9;
     double *data = (double *)calloc(sizeof(double), dim);
     for (i=0; i<dim; i++) {
-        data[i] = i*2 + 1;
+        data[i] = i*2;
     }
-    Point *p = create_point(data, dim, 0);
+    Point *p = create_point(data, dim/3, 3);
     print_point(p);
     printf("\n");
     printf("\n");
-    Point *p2 = create_point(data, 5, 2);
-    print_point(p2);
+    divide_point_by_value(p, 2);
+    print_point(p);
+    printf("\n");
+    printf("\n");
 }

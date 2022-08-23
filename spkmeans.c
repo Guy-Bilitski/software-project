@@ -33,6 +33,7 @@ MaxElement get_off_diagonal_absolute_max(Matrix *matrix);
 void normalize_matrix_rows(Matrix *matrix);
 S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max);
 Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement max_element, int dim); /* returns the rotation matrix p */
+void normalize_matrix_rows(Matrix *matrix);
 
 
 /* MaxElemnt API */
@@ -176,25 +177,21 @@ Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement max_element, int dim) 
 void normalize_matrix_rows(Matrix *matrix) {
     Point *row = (Point *)malloc(sizeof(Point));
     int num_of_rows, num_of_cols;
-    double rows_norm, entry;
+    double row_norm, entry;
     int i,j;
     num_of_rows = matrix_get_rows_num(matrix);
     num_of_cols = matrix_get_cols_num(matrix);
 
     for (i=0; i<num_of_rows; i++) {
         matrix_get_row_to_point(matrix, row, i);
-        rows_norm = euclidean_norm(row);
-
-        for (j=0; j<num_of_cols; j++) {
-            entry = matrix_get_entry(matrix, i, j) / rows_norm;
-            matrix_set_entry(matrix, i, j, entry);
-        }
+        row_norm = euclidean_norm(row);
+        divide_point_by_value(row, row_norm);
     }
 }
 
 
 /*int argc, char **argv*/
-int main() {
+int main11() {
 
 
 
