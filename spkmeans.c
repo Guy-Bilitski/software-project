@@ -1,66 +1,33 @@
 #include <float.h>
 #include <math.h>
 #include <ctype.h>
+#include "s_and_c.c"
+#include "max_element.c"
 #include "matrix.c"
 
-typedef struct MaxElement
-{
-    int i;
-    int j;
-    double value;
-} MaxElement;
+#define epsilon = 0.00001;
+#define min_number_of_rotations = 100;
 
-typedef struct S_and_C
-{
-    double s;
-    double c;
-} S_and_C;
-
-/* MaxElemnt API TODO: move to new file*/
-int max_element_get_value(MaxElement max_element);
-int max_element_get_index1(MaxElement max_element);
-int max_element_get_index2(MaxElement max_element);
-
-/* S_and_C API TODO:move to new file*/
-int s_and_c_get_s(S_and_C s_and_c);
-int s_and_c_get_c(S_and_C s_and_c);
-
-
+/* spkmeans functions */
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
 Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
+Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix */
+void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all the diagonal entries */
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
-MaxElement get_off_diagonal_absolute_max(Matrix *matrix);
+
+/* JACOBI */
+MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
+S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
+Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
 void normalize_matrix_rows(Matrix *matrix);
-S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max);
-Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement max_element, int dim); /* returns the rotation matrix p */
+double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 void normalize_matrix_rows(Matrix *matrix);
 
-
-/* MaxElemnt API */
-int max_element_get_value(MaxElement max_element) {
-    return max_element.value;
-}
-
-int max_element_get_index1(MaxElement max_element) {
-    return max_element.i;
-}
-
-int max_element_get_index2(MaxElement max_element) {
-    return max_element.j;
-}
+/* utilities */
+double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
 
 
-/* S_and_C API */
-int s_and_c_get_s(S_and_C s_and_c) {
-    return s_and_c.s;
-}
-
-int s_and_c_get_c(S_and_C s_and_c) {
-    return s_and_c.c;
-}
-
-
-
+/* spkmeans functions */
 double gaussian_RBF(Point *p1, Point *p2) {
     double distance = euclidean_distance(p1, p2); /*TODO: CHECK*/
     return exp(-(distance / 2));
@@ -117,43 +84,41 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
     Matrix *X = multiply_matrices(X, D_minus_05);
     Matrix *Lnorm = sub_matrices(I, X);
 
-    _free_matrix(I);
-    _free_matrix(temp);
-    _free_matrix(X);
+    free_matrix(I);
+    free_matrix(temp);
+    free_matrix(X);
     return Lnorm;
 }
 
 
 /* JACOBI */
-
-MaxElement get_off_diagonal_absolute_max(Matrix *matrix){
-    MaxElement max = {-1, -1, 0.};
+MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
+    MaxElement *max_element = create_max_element(0., -1, -1);
     if (_is_matrix_diag(matrix))
-        return max;
+        return max_element;  /* TODO: why return this? */
 
-    int rows = matrix->rows;
-    int cols = matrix->cols;
+    int rows = matrix_get_rows_num(matrix);
+    int cols = matrix_get_cols_num(matrix);
     int i,j;
     double current_value;
 
     for (i=0; i<rows; i++){
         for (j=i+1; j<cols; j++){
             current_value = abs(matrix_get_entry(matrix, i, j));
-            if ( max.value <  current_value) {
-                max.value = current_value;
-                max.i = i;
-                max.j = j;
+            if ( max_element_get_value(max_element) <  current_value) {
+                max_element_set_new_values(max_element, current_value, i, j);
             }
         }
     }
-    return max;
+    return max_element;
 }
 
-S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max) {
-    double t, theta, s, c, sign;
+S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
+    double t, theta, s, c, sign, value = max_element_get_value(max_element);
     S_and_C result;
+    int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
 
-    theta = ( matrix_get_entry(A, max.j, max.j) - matrix_get_entry(A, max.i, max.i) ) / ( 2 * max.value );
+    theta = ( matrix_get_entry(A, j, j) - matrix_get_entry(A, i, i) ) / ( 2 * value );
     sign = (theta >= 0) ? 1:-1;
     t = sign / ( abs(theta) + sqrt( theta*theta + 1 ));
     c = 1.0 / sqrt( t*t + 1 );
@@ -164,7 +129,7 @@ S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement max) {
     return result;
 }
 
-Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement max_element, int dim) {
+Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement *max_element, int dim) {
     Matrix *p = create_identity_matrix(dim);
     int s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c), i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
     matrix_set_entry(p, i, i, c);
@@ -186,6 +151,59 @@ void normalize_matrix_rows(Matrix *matrix) {
         matrix_get_row_to_point(matrix, row, i);
         row_norm = euclidean_norm(row);
         divide_point_by_value(row, row_norm);
+    }
+}
+
+double off(Matrix *matrix) {
+    int i, j, rows_num = matrix_get_rows_num(matrix), cols_num = matrix_get_cols_num(matrix);
+    double sum = 0;
+    for (i=0; i<rows_num; i++) {
+        for (j=0; j<cols_num; j++) {
+            if (i != j) {
+                sum += matrix_get_entry(matrix, i, j);
+            }
+        }
+    }
+    return sum;
+}
+
+Matrix *transform_matrix(Matrix *matrix, S_and_C s_and_c, MaxElement *max_element) {
+    int row_index, col_index, rows_num = matrix_get_rows_num(matrix), cols_num = matrix_get_cols_num(matrix), i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
+    double matrix_entry, s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c);
+    Matrix *transformed_matrix = create_matrix(rows_num, cols_num);
+    for (row_index=0; row_index<rows_num; row_index++) {
+        for (col_index=0; col_index<cols_num; col_index++) {
+            matrix_entry = get_value_for_transformed_matrix(matrix, s, c, i, j, row_index, col_index);
+            matrix_set_entry(transformed_matrix, row_index, col_index, matrix_entry);
+        }
+    }
+    return transformed_matrix;
+} 
+
+/* utilities */
+double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index) {
+     if (col_index == i) {
+        if (row_index == i) {
+            return pow(c, 2)*matrix_get_entry(old_matrix, i, i) + pow(s, 2)*matrix_get_entry(old_matrix, j, j) - 2*s*c*matrix_get_entry(old_matrix, i ,j);
+        } else if (row_index == j) {
+            return 0;
+        } else {
+            return c*matrix_get_entry(old_matrix, row_index, i) - s*matrix_get_entry(old_matrix, row_index, j);
+        }
+    } else if (col_index == j) {
+        if (row_index == j) {
+            return pow(s, 2)*matrix_get_entry(old_matrix, i, i) + pow(c, 2)*matrix_get_entry(old_matrix, j, j) + 2*s*c*matrix_get_entry(old_matrix, i, j);
+        } else if (row_index == i) {
+            return 0;
+        } else {
+            return c*matrix_get_entry(old_matrix, row_index, j) + s*matrix_get_entry(old_matrix, row_index, i);
+        }
+    } else if (row_index == i) { /* edge cases have already been validated */
+        return c*matrix_get_entry(old_matrix, i, col_index) - s*matrix_get_entry(old_matrix, j, col_index);
+    } else if (row_index == j) {
+        return c*matrix_get_entry(old_matrix, j, col_index) + s*matrix_get_entry(old_matrix, i, col_index);
+    } else {
+        return matrix_get_entry(old_matrix, row_index, col_index); 
     }
 }
 
