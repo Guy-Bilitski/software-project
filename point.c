@@ -2,39 +2,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "spkmeans.h"
 
 #define true 1
 #define false 0
 
+#ifndef POINT_IS_DEFINED
+#define POINT_IS_DEFINED
 typedef struct Point {
     double *data;
     int dim;
     int offset; /* for column representation */
 } Point;
+#endif
 
 
-/* Point API */
-Point *create_point(double *data, int dim, int offset);  /* creates a point from list */
-
-int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
-
-/* getters */
-double point_get_entry(Point *point, int entry);  /* returns the value in index <index> of point */
-int point_get_dim(Point *point);  /* returs the point dimension */
-int point_get_offset(Point *point);  /* returs the point offset */
-double *point_get_data(Point *point);  /* returs the point data */
-void divide_point_by_value(Point *p, double value);
-
-/* setters */
-void point_set_entry(Point *point, int index, double value);  /* sets value in index <index> */
-
-double inner_product(Point *row_point, Point *column_point);  /* returns row X column scalar */
-double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
-double sum_point_values(Point *point); /* returns the sum of the points values */
-double euclidean_norm(Point *p);
-
-/* debugging functions */
-void print_point(Point *point);
 
 
 /* Point API */
@@ -134,7 +116,7 @@ void print_point(Point *point) {
 }
 
 
-int main() {
+int main55() {
     int i;
     int dim = 9;
     double *data = (double *)calloc(sizeof(double), dim);

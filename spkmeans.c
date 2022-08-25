@@ -1,12 +1,17 @@
 #include <float.h>
 #include <math.h>
 #include <ctype.h>
+#include <stdio.h>
+#include "spkmeans.h"
 #include "s_and_c.c"
 #include "max_element.c"
 #include "matrix.c"
+#include "eigenvector.c"
+#include "point.c"
 
-#define epsilon = 0.00001;
-#define min_number_of_rotations = 100;
+
+#define epsilon 0.00001
+#define min_number_of_rotations 100
 
 /* spkmeans functions */
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
@@ -22,6 +27,8 @@ Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement *max_element, int dim)
 void normalize_matrix_rows(Matrix *matrix);
 double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 void normalize_matrix_rows(Matrix *matrix);
+int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);
+Matrix *getU(Matrix *V, Matrix *A, int k);
 
 /* utilities */
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
@@ -180,6 +187,53 @@ Matrix *transform_matrix(Matrix *matrix, S_and_C s_and_c, MaxElement *max_elemen
     return transformed_matrix;
 } 
 
+Matrix *getU(Matrix *V, Matrix *A, int k) {
+    int i, j, n = A->cols;
+    double entry;
+    Eigenvector *eigen_vectors_array = (Eigenvector *)malloc(sizeof(Eigenvector)*n);
+    Eigenvector *current_eigen_vector;
+    Matrix *U;
+    Point *p;
+    for (i=0; i<n; i++){
+        p = &(eigen_vectors_array[i].point);
+        matrix_get_column_to_point(V, p, i);
+        eigen_vectors_array[i].eigenvalue = matrix_get_entry(A, i, i);
+    }
+    sort_eigenvectors_array(eigen_vectors_array, n);
+
+    if (k == -1)
+        k = get_k_from_sorted_eigenvectors_array(eigen_vectors_array, n);
+
+    U = create_matrix(n, k);
+
+    for (j=0; j<k; j++){
+        p = &(eigen_vectors_array[j].point); /* the jth eigen vector, jth column */
+        for (i=0; i<n; i++) {
+            entry = point_get_entry(p, i);
+            matrix_set_entry(U, i, j, entry);
+        }
+    }
+
+    return U;
+}
+
+int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n) {
+    double maxgap, currentgap;
+    int k, i;
+    maxgap = -1.;
+
+    for (i=0; i<n/2; i++){
+        currentgap = eigen_vectors_array[i].eigenvalue - eigen_vectors_array[i+1].eigenvalue;
+        assert(currentgap >= 0);
+        if (currentgap > maxgap){
+            maxgap = currentgap;
+            k = i;
+        }
+    }
+    return k;
+    
+}
+
 /* utilities */
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index) {
      if (col_index == i) {
@@ -209,7 +263,7 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
 
 
 /*int argc, char **argv*/
-int main11() {
+int main() {
 
 
 

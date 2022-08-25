@@ -1,32 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "spkmeans.h"
 
+#ifndef MAX_ELEMENT_IS_DEFINED
+#define MAX_ELEMENT_IS_DEFINED
 typedef struct MaxElement
 {
     int i;
     int j;
     double value;
 } MaxElement;
-
-/* MaxElemnt API */
-MaxElement *create_max_element(double value, int i, int j);
-
-/* getters */
-double max_element_get_value(MaxElement *max_element);
-int max_element_get_index1(MaxElement *max_element);
-int max_element_get_index2(MaxElement *max_element);
-
-/* setters */
-void max_element_set_new_values(MaxElement *max_element, double value, int i, int j);
-void max_element_set_value(MaxElement *max_element, double value);
-void max_element_set_index1(MaxElement *max_element, int i);
-void max_element_set_index2(MaxElement *max_element, int j);
-
-/* debugging */
-void print_max_element(MaxElement *max_element);
+#endif
 
 
-/* MaxElemnt API */
+
+
 MaxElement *create_max_element(double value, int i, int j) {
     MaxElement *max_element = (MaxElement *)malloc(sizeof(MaxElement));
     max_element->value = value;
