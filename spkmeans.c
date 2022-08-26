@@ -1,13 +1,13 @@
 #include <float.h>
 #include <math.h>
 #include <ctype.h>
-#include <stdio.h>
 #include "spkmeans.h"
 #include "s_and_c.c"
 #include "max_element.c"
 #include "matrix.c"
 #include "eigenvector.c"
 #include "point.c"
+#include "kmeans_io.c"
 
 
 #define EPSILON 0.00001
