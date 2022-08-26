@@ -13,32 +13,9 @@
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
 
-/* spkmeans functions */
-double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
-Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
-Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix */
-void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all the diagonal entries */
-Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
-
-/* JACOBI */
-Matrix *Jacobi(Matrix *A);
-MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
-S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
-Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
-void normalize_matrix_rows(Matrix *matrix);
-double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
-Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
-void normalize_matrix_rows(Matrix *matrix);
-int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);
-Matrix *getU(Matrix *V, Matrix *A, int k);
-
-/* utilities */
-double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
 
 
-
-
-int main(int argc, char **argv) {
+int main1(int argc, char **argv) {
     srand((int) time(NULL)); /* important for random */
     /*
     0.7482679812896987,0.9962678716348444,0.705752719530148,0.3327360839555057,0.556446876169447
