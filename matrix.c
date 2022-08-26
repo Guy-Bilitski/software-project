@@ -110,8 +110,7 @@ void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_
         for (j=0; j<cols_num; j++) {
             if (i != j) {
                 current_value = matrix_get_entry(matrix, i, j);
-                current_value = (current_value >= 0) ? current_value : -current_value;
-                if (current_value > max_element_get_value(max_element)) {
+                if (fabs(current_value) > fabs(max_element_get_value(max_element))) {
                     max_element_set_new_values(max_element, current_value, i, j);
                 }
             }
@@ -121,7 +120,6 @@ void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_
 
 /* setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
-    /* sets an entry in the matrix */
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
     double *matrix_data = matrix_get_data(matrix);
     int matrix_index = _get_matrix_index(matrix, row, col);

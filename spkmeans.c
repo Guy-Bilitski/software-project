@@ -17,38 +17,33 @@
 
 int main(int argc, char **argv) {
     srand((int) time(NULL)); /* important for random */
-    /*
-    0.7482679812896987,0.9962678716348444,0.705752719530148,0.3327360839555057,0.556446876169447
-0.9962678716348444,0.4881966580554369,0.0015561979296321304,0.4511027753265111,0.9266007970596744
-0.705752719530148,0.0015561979296321304,0.7712266730402363,0.004980905673753422,0.1562223832155636
-0.3327360839555057,0.4511027753265111,0.004980905673753422,0.8243926884444718,0.8673296129309216
-0.556446876169447,0.9266007970596744,0.1562223832155636,0.8673296129309216,0.500238930842554*/
+
     Matrix *A = create_matrix(5,5);
-    matrix_set_entry(A, 0, 0, 0.7482679812896987);
-    matrix_set_entry(A, 0, 1, 0.9962678716348444);
-    matrix_set_entry(A, 0, 2, 0.705752719530148);
-    matrix_set_entry(A, 0, 3, 0.3327360839555057);
-    matrix_set_entry(A, 0, 4, 0.556446876169447);
-    matrix_set_entry(A, 1, 0, 0.9962678716348444);
-    matrix_set_entry(A, 1, 1, 0.4881966580554369);
-    matrix_set_entry(A, 1, 2, 0.0015561979296321304);
-    matrix_set_entry(A, 1, 3, 0.4511027753265111);
-    matrix_set_entry(A, 1, 4, 0.9266007970596744);
-    matrix_set_entry(A, 2, 0, 0.705752719530148);
-    matrix_set_entry(A, 2, 1, 0.0015561979296321304);
-    matrix_set_entry(A, 2, 2, 0.7712266730402363);
-    matrix_set_entry(A, 2, 3, 0.004980905673753422);
-    matrix_set_entry(A, 2, 4, 0.1562223832155636);
-    matrix_set_entry(A, 3, 0, 0.3327360839555057);
-    matrix_set_entry(A, 3, 1, 0.4511027753265111);
-    matrix_set_entry(A, 3, 2, 0.004980905673753422);
-    matrix_set_entry(A, 3, 3, 0.8243926884444718);
-    matrix_set_entry(A, 3, 4, 0.8673296129309216);
-    matrix_set_entry(A, 4, 0, 0.556446876169447);
-    matrix_set_entry(A, 4, 1, 0.9266007970596744);
-    matrix_set_entry(A, 4, 2, 0.1562223832155636);
-    matrix_set_entry(A, 4, 3, 0.8673296129309216);
-    matrix_set_entry(A, 4, 4, 0.500238930842554);
+    matrix_set_entry(A, 0, 0, 0.9244561740566206);
+    matrix_set_entry(A, 0, 1, 0.8742308098340758);
+    matrix_set_entry(A, 0, 2, 0.8957630183913475);
+    matrix_set_entry(A, 0, 3, 0.9448353953575863);
+    matrix_set_entry(A, 0, 4, 0.2525962896380215);
+    matrix_set_entry(A, 1, 0, 0.8742308098340758);
+    matrix_set_entry(A, 1, 1, 0.47428491745836876);
+    matrix_set_entry(A, 1, 2, 0.02753243942768835);
+    matrix_set_entry(A, 1, 3, 0.30301127246390347);
+    matrix_set_entry(A, 1, 4, 0.038962315397181646);
+    matrix_set_entry(A, 2, 0, 0.8957630183913475);
+    matrix_set_entry(A, 2, 1, 0.02753243942768835);
+    matrix_set_entry(A, 2, 2, 0.27992567873413254);
+    matrix_set_entry(A, 2, 3, 0.7802355856161365);
+    matrix_set_entry(A, 2, 4, 0.7596530627838091);
+    matrix_set_entry(A, 3, 0, 0.9448353953575863);
+    matrix_set_entry(A, 3, 1, 0.30301127246390347);
+    matrix_set_entry(A, 3, 2, 0.7802355856161365);
+    matrix_set_entry(A, 3, 3, 0.985130302648835);
+    matrix_set_entry(A, 3, 4, 0.13884538443846695);
+    matrix_set_entry(A, 4, 0, 0.2525962896380215);
+    matrix_set_entry(A, 4, 1, 0.038962315397181646);
+    matrix_set_entry(A, 4, 2, 0.7596530627838091);
+    matrix_set_entry(A, 4, 3, 0.13884538443846695);
+    matrix_set_entry(A, 4, 4, 0.3869426064309628);
     Matrix *V = Jacobi(A);
     printf("V: ");
     print_matrix(V);
@@ -136,45 +131,29 @@ Matrix *Jacobi(Matrix *A) {
     MaxElement *max_element = create_empty_max_element();
 
     while (rotation_num <= MAX_NUMBER_OF_ROTATIONS) {
-        print_matrix(A);  /* delete */
+        printf("iteration num: %d", rotation_num);
+        printf("A: ");  /* delete */
+        print_matrix2(A);  /* delete */
         recent_off = matrix_off(A);
         matrix_get_non_diagonal_max_absolute_value(A, max_element);
         print_max_element(max_element); /* delete */
         get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
         print_s_and_c(s_and_c);  /* delete */
         Matrix *P = create_identity_matrix(dim); build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
-        printf("P: ");
-        print_matrix(P);
+        printf("P: ");  /* delete */
+        print_matrix2(P);  /* delete */
         A = transform_matrix(A, s_and_c, max_element);
-        V = multiply_matrices(V, P), free_matrix(P);
+        V = multiply_matrices(V, P); free_matrix(P);
+        printf("V: ");
+        print_matrix2(V);
         if (matrix_converge(recent_off, A)) {
             break;
         }
     }
 
     free(max_element);
+    free(s_and_c);
     return V;
-}
-
-MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
-    MaxElement *max_element = create_max_element(0., -1, -1);
-    if (_is_matrix_diag(matrix))
-        return max_element;  /* TODO: why return this? */
-
-    int rows = matrix_get_rows_num(matrix);
-    int cols = matrix_get_cols_num(matrix);
-    int i,j;
-    double current_value;
-
-    for (i=0; i<rows; i++){
-        for (j=i+1; j<cols; j++){
-            current_value = abs(matrix_get_entry(matrix, i, j));
-            if ( max_element_get_value(max_element) <  current_value) {
-                max_element_set_new_values(max_element, current_value, i, j);
-            }
-        }
-    }
-    return max_element;
 }
 
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c) {
@@ -220,7 +199,7 @@ double matrix_off(Matrix *matrix) {
     for (i=0; i<rows_num; i++) {
         for (j=0; j<cols_num; j++) {
             if (i != j) {
-                sum += matrix_get_entry(matrix, i, j);
+                sum += pow(matrix_get_entry(matrix, i, j), 2);
             }
         }
     }
