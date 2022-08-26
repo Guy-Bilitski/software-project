@@ -1,33 +1,7 @@
 #include "spkmeans.h"
 
 
-int main (int argc, char **argv) {
-    const char *goal_strings[invalid - spk + 1] = { "spk", "wam", "ddg", "lnorm", "jacobi", "invalid" };
-    int dim, n;
-    char *input_filename;
-    enum goal goal;
-    Matrix *data_points, *output;
-
-    if (argc != 3) {
-        printf("Invalid Input!\n");
-        exit(1);
-    }
-    
-    goal = get_goal(argv[1]);
-    input_filename = argv[2];
-
-    dim = get_dimension(input_filename);
-    n = get_n(input_filename);
-    data_points = input_file_to_matrix(input_filename, dim, n);
-
-    output = achieve_goal(data_points, goal);
-    print_matrix(output);
-    return 1;
-}
-
-
-
-int get_dimension(char *input_file) {
+int get_dimension(const char *input_file) {
     FILE *ifp = NULL;
     char c;
     int dim=1;
@@ -54,9 +28,8 @@ int get_dimension(char *input_file) {
 }
 
 
-int get_n(char *input_file) {
+int get_n(const char *input_file) {
     FILE *ifp;
-    int i,j;
     char delimiter;
     double temp;
     int n = 0;
@@ -81,18 +54,33 @@ int get_n(char *input_file) {
 }
 
 
-enum goal get_goal(char *goal) {
+void achieve_goal(Matrix *data_points, char *goal) {
     if (!strcmp(goal, "wam")){
-        return wam;
+        Matrix *W = wam(data_points);
+        print_matrix(W);
+        free_matrix(W);
+        return;
     }
     else if (!strcmp(goal, "ddg")){
-        return ddg;
+        Matrix *D = ddg(data_points);
+        print_matrix(D);
+        free_matrix(D);
+        return;
     }
     else if (!strcmp(goal, "lnorm")){
-        return lnorm;
+        Matrix *Lnorm = lnorm(data_points);
+        print_matrix(Lnorm);
+        free_matrix(Lnorm);
+        return;
     }
     else if (!strcmp(goal, "jacobi")){
-        return jacobi;
+        JacobiOutput *Jout = jacobi(data_points, 0);
+        print_matrix_diag(Jout->A);
+        print_matrix(Jout->V);
+        free_matrix(Jout->A);
+        free_matrix(Jout->V);
+        free(Jout);
+        return;
     }
     else {
         printf("Invalid Input!\n");
@@ -102,12 +90,16 @@ enum goal get_goal(char *goal) {
 
 
 
-Matrix *input_file_to_matrix(char *input_file, int dim, int n) {
+Matrix *input_file_to_matrix(const char *input_file) {
     FILE *ifp;
     int i,j;
     char delimiter;
     double element;
     int elements_count = 0;
+    int dim, n;
+
+    dim = get_dimension(input_file);
+    n = get_n(input_file);
     Matrix *data_points = create_matrix(n, dim);
 
     ifp = fopen(input_file, "r");
@@ -133,32 +125,4 @@ Matrix *input_file_to_matrix(char *input_file, int dim, int n) {
 
     fclose(ifp);
     return data_points;
-}
-
-
-Matrix *achieve_goal(Matrix *data_points, enum goal goal) {
-    Matrix *W, *D, *Lnorm;
-
-    switch (goal)
-    {
-        case wam:
-            W = create_weighted_matrix(data_points);
-            return W;
-        
-        case ddg:
-            W = create_weighted_matrix(data_points);
-            D = create_diagonal_degree_matrix(W);
-            free_matrix(W);
-            return D;
-
-        case lnorm:
-            W = create_weighted_matrix(data_points);
-            D = create_diagonal_degree_matrix(W);
-            neg_root_to_diag_matrix(D);
-            Lnorm = normalized_graph_laplacian(D, W);
-            free_matrix(W);
-            free_matrix(D);
-            return Lnorm;
-        
-    }
 }

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h> /* delete */
-#include <assert.h>
 #include "spkmeans.h"
 
 #define true 1
@@ -51,7 +50,7 @@ Matrix *create_diag_matrix(int n) {
 Matrix *create_identity_matrix(int n) {
     assert(n>0);
     int i;
-    Matrix *I = create_matrix(n, n);
+    Matrix *I = create_diag_matrix(n);
     for (i=0; i<n; i++)
         matrix_set_entry(I, i, i, 1.);
     return I;
@@ -168,6 +167,7 @@ int check_if_matrix_is_diagonal(Matrix *matrix) {
 double matrix_get_row_sum(Matrix *matrix, int row_index) {
     int col_index, cols_num = matrix_get_cols_num(matrix);
     double sum;
+    sum = 0;
     for (col_index=0; col_index<cols_num; col_index++) {
         sum += matrix_get_entry(matrix, row_index, col_index);
     }
@@ -221,7 +221,8 @@ int _is_matrix_diag(Matrix *matrix) {
 int _get_matrix_index(Matrix *matrix, int row, int col) {
     if (!_is_matrix_diag(matrix))
         return row*(matrix->cols) + col;
-
+    else
+        return row;
 }
 
 void _diag_to_square_matrix(Matrix *matrix) { 
@@ -284,6 +285,8 @@ Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2) {
             matrix_set_entry(new_matrix, i, j, inner_product(row_point, col_point));
         }
     }
+    free(row_point);
+    free(col_point);
     return new_matrix;
 }
 
@@ -294,7 +297,7 @@ Matrix *sub_matrices(Matrix *A, Matrix *B) {
     int cols = matrix_get_cols_num(A);
     int rows = matrix_get_rows_num(A);
     double value;
-    Matrix *result = (Matrix *)malloc(sizeof(Matrix));
+    Matrix *result = create_matrix(rows, cols);
 
     
     for (i=0; i<rows; i++){
@@ -309,17 +312,22 @@ Matrix *sub_matrices(Matrix *A, Matrix *B) {
 
 /* debugging function */
 void print_matrix(Matrix *matrix) {
-    space();
     int i, j;
     double val;
-    for (i=0; i<matrix->rows; i++) {
-        for (j=0; j<matrix->cols; j++) {
+    int cols_num = matrix->cols;
+    int rows_num = matrix->rows;
+
+    for (i=0; i<rows_num; i++) {
+        for (j=0; j<cols_num; j++) {
             val = matrix_get_entry(matrix, i, j);
-            printf("%f  ", val);
+            printf("%.4f", val);
         }
-        printf("\n");
+        if (j < cols_num-1){
+            printf(",");
+        } else {
+            printf("\n");
+        }
     }
-    space();
 }
 
 void print_matrix2(Matrix *matrix) {
@@ -340,6 +348,21 @@ void print_matrix2(Matrix *matrix) {
     }
     printf("\n");
 }
+
+void print_matrix_diag(Matrix *matrix) {
+    assert(matrix_get_cols_num(matrix) == matrix_get_cols_num(matrix));
+    int i;
+    double val;
+    int n = matrix->cols;
+
+    for (i=0; i<n; i++) {
+        val = matrix_get_entry(matrix, i, i);
+        printf("%.4f", val);
+        if (i < n-1) printf(",");
+    }
+    printf("\n");
+}
+
 
 void print_matrix_rows(Matrix *matrix) {
     int i;

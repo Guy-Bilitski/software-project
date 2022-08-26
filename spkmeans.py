@@ -7,10 +7,8 @@ import mykmeanssp
 class Env:
     """ Class for global variables used in the system """
     k = "k"
-    epsilon = "epsilon"
-    input_file1 = "input_file1"
-    input_file2 = "input_file2"
-    maxiter = "maxiter"
+    goal = "goal"
+    input_file = "input_file"
 
 def main():
     try:
@@ -19,18 +17,25 @@ def main():
         print(ex)
         return 1
     try:
-        input_data_frame = get_df(args.get(Env.input_file1),
-                                  args.get(Env.input_file2))
+        input_data_frame = pd.read_csv(args.get(Env.input_file), header=None, dtype=float)
         data_points = pd.DataFrame.to_numpy(input_data_frame, dtype=float)
-        indices, initial_centroids = get_centriods(data_points, args.get(Env.k))
-        data_points = [c.tolist() for c in data_points[:,1:]]
-        final_centroids = mykmeanssp.fit(data_points, initial_centroids, args.get(Env.maxiter, -1), args.get(Env.epsilon))
-        print_centroids(indices, final_centroids)
+        
+        kmeans_pp(data_points, args.get(Env.k))
     except Exception as ex:
         print("An Error Has Occurred")
         return 1
     return 0
 
+
+
+def kmeans_pp(data_points, k):
+    try:
+        indices, initial_centroids = get_centriods(data_points, k)
+        data_points_as_pylists = [c.tolist() for c in data_points[:,1:]]
+        final_centroids = mykmeanssp.fit(data_points_as_pylists, initial_centroids)
+        print_centroids(indices, final_centroids)
+    except Exception as ex:
+        raise Exception("An Error Has Occurred")
 
 def print_centroids(indices, centroids):
     line = []
@@ -69,39 +74,21 @@ def get_centriods(np_array, k):
     return (indices, centroids)
 
 
-def get_df(input_file1, input_file2):
-    df1 = pd.read_csv(input_file1, header=None, dtype=float)
-    df2 = pd.read_csv(input_file2, header=None, dtype=float)
-    final_df = pd.merge(df1, df2, how='inner', on=0, copy=False, sort=True)
-    return final_df
-
 
 def load_args():
     """ returns a dict with all args that mentioned in ENV class and inputted """
     inp = sys.argv
 
     args = {}
-    if len(inp) < 5 or len(inp) > 6:
+    if len(inp) != 4:
         raise Exception("Invalid Input!")
     try:
         args[Env.k] = int(inp[1])
-        if args[Env.k] < 1:
+        if args[Env.k] < 0:
             raise
 
-        args[Env.input_file1] = inp[-2]
-        args[Env.input_file2] = inp[-1]
-        epsilon = float(inp[-3])
-        if epsilon <= 0:
-            raise
-        else:
-            args[Env.epsilon] = epsilon
-
-        if len(inp) == 6: # Checking maxiter exists
-            maxiter = int(inp[2])
-            if maxiter <= 0: # Validating maxiter value
-                raise
-            else:
-                args[Env.maxiter] = maxiter # If exists, added to args.
+        args[Env.goal] = inp[2]
+        args[Env.input_file] = inp[3]
         
     except Exception:
         raise Exception("Invalid Input!")

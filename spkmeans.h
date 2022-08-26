@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <assert.h>
 
 /* ---------------- STRUCTS ---------------- */
 
@@ -54,11 +55,15 @@ typedef struct MaxElement
 } MaxElement;
 #endif
 
-#ifndef GOAL_IS_DEFINED
-#define GOAL_IS_DEFINED
-enum goal {
-    spk, wam, ddg, lnorm, jacobi, invalid
-  };
+
+#ifndef JACOBI_OUTPUT_IS_DEFINED
+#define JACOBI_OUTPUT_IS_DEFINED
+typedef struct JacobiOutput
+{
+    Matrix *V;
+    Matrix *A;
+    int k;
+} JacobiOutput;
 #endif
 
 
@@ -131,6 +136,7 @@ Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2);
 
 /* debugging functions */
 void print_matrix(Matrix *matrix);
+void print_matrix_diag(Matrix *matrix);
 Matrix *generate_symmetric_matrix(int n);
 void space();
 
@@ -178,15 +184,14 @@ void print_max_element(MaxElement *max_element);
 
 /* -------------------- KMEANS-IO PROTOTYPES -------------------- */
 
-int get_dimension(char *input_file);
-int get_n(char *input_file);
-enum goal get_goal(char *goal);
-Matrix *input_file_to_matrix(char *input_file, int dim, int n);
-Matrix *achieve_goal(Matrix *data_points, enum goal goal);
+int get_dimension(const char *input_file);
+int get_n(const char *input_file);
+Matrix *input_file_to_matrix(const char *input_file);
+void achieve_goal(Matrix *data_points, char *goal);
 
 /* -------------------- KMEANS PROTOTYPES -------------------- */
 
-Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsilon);
+Matrix * kmeans(Matrix *data_points, Matrix *centroids);
 double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids);
 void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids);
 int find_closest_centroid(Point *vector, Matrix *centroids);
@@ -202,7 +207,7 @@ void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all th
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 
 /* JACOBI */
-Matrix *Jacobi(Matrix *A);
+/*Matrix *Jacobi(Matrix *A);*/
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
 S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
 Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
@@ -215,6 +220,13 @@ Matrix *getU(Matrix *V, Matrix *A, int k);
 
 /* utilities */
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
+
+
+/* SPKMEANS API */
+Matrix *wam(Matrix* data_points);
+Matrix *ddg(Matrix* data_points);
+Matrix *lnorm(Matrix* data_points);
+JacobiOutput *jacobi(Matrix* matrix, int k);
 
 
 

@@ -8,52 +8,31 @@
 #include "eigenvector.c"
 #include "point.c"
 #include "kmeans_io.c"
+#include "kmeans.c"
+
 
 
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
 
+int main (int argc, char **argv) {
+    const char *input_filename;
+    char *goal;
+    Matrix *data_points;
 
+    if (argc != 3) {
+        printf("Invalid Input!\n");
+        exit(1);
+    }
+    
+    goal = argv[1];
+    input_filename = argv[2];
 
-int main1(int argc, char **argv) {
-    srand((int) time(NULL)); /* important for random */
-    /*
-    0.7482679812896987,0.9962678716348444,0.705752719530148,0.3327360839555057,0.556446876169447
-0.9962678716348444,0.4881966580554369,0.0015561979296321304,0.4511027753265111,0.9266007970596744
-0.705752719530148,0.0015561979296321304,0.7712266730402363,0.004980905673753422,0.1562223832155636
-0.3327360839555057,0.4511027753265111,0.004980905673753422,0.8243926884444718,0.8673296129309216
-0.556446876169447,0.9266007970596744,0.1562223832155636,0.8673296129309216,0.500238930842554*/
-    Matrix *A = create_matrix(5,5);
-    matrix_set_entry(A, 0, 0, 0.7482679812896987);
-    matrix_set_entry(A, 0, 1, 0.9962678716348444);
-    matrix_set_entry(A, 0, 2, 0.705752719530148);
-    matrix_set_entry(A, 0, 3, 0.3327360839555057);
-    matrix_set_entry(A, 0, 4, 0.556446876169447);
-    matrix_set_entry(A, 1, 0, 0.9962678716348444);
-    matrix_set_entry(A, 1, 1, 0.4881966580554369);
-    matrix_set_entry(A, 1, 2, 0.0015561979296321304);
-    matrix_set_entry(A, 1, 3, 0.4511027753265111);
-    matrix_set_entry(A, 1, 4, 0.9266007970596744);
-    matrix_set_entry(A, 2, 0, 0.705752719530148);
-    matrix_set_entry(A, 2, 1, 0.0015561979296321304);
-    matrix_set_entry(A, 2, 2, 0.7712266730402363);
-    matrix_set_entry(A, 2, 3, 0.004980905673753422);
-    matrix_set_entry(A, 2, 4, 0.1562223832155636);
-    matrix_set_entry(A, 3, 0, 0.3327360839555057);
-    matrix_set_entry(A, 3, 1, 0.4511027753265111);
-    matrix_set_entry(A, 3, 2, 0.004980905673753422);
-    matrix_set_entry(A, 3, 3, 0.8243926884444718);
-    matrix_set_entry(A, 3, 4, 0.8673296129309216);
-    matrix_set_entry(A, 4, 0, 0.556446876169447);
-    matrix_set_entry(A, 4, 1, 0.9266007970596744);
-    matrix_set_entry(A, 4, 2, 0.1562223832155636);
-    matrix_set_entry(A, 4, 3, 0.8673296129309216);
-    matrix_set_entry(A, 4, 4, 0.500238930842554);
-    print_matrix(A);
-    Matrix *V = Jacobi(A);
-    print_matrix(V);
+    data_points = input_file_to_matrix(input_filename);
+
+    achieve_goal(data_points, goal);
+    return 0;
 }
-
 
 /* spkmeans functions */
 double gaussian_RBF(Point *p1, Point *p2) {
@@ -95,15 +74,17 @@ Matrix *create_diagonal_degree_matrix(Matrix *matrix) {
     return diagonal_degree_matrix;
 }
 
-void neg_root_to_diag_matrix(Matrix *matrix) {
-    assert(_is_matrix_diag(matrix));
-    int i, rows_num = matrix_get_rows_num(matrix);
+void neg_root_to_diag_matrix(Matrix *D) {
+    int i, rows_num;
     double value;
+    assert(_is_matrix_diag(D));
+    rows_num = matrix_get_rows_num(D);
+
     for (i=0; i<rows_num; i++) {
-        value = matrix_get_entry(matrix, i, i);
+        value = matrix_get_entry(D, i, i);
         assert(value != 0);
         value = 1 / sqrt(value);
-        matrix_set_entry(matrix, i, i, value);
+        matrix_set_entry(D, i, i, value);
     }
 }
 
@@ -111,7 +92,7 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
     int n = matrix_get_rows_num(W);
     Matrix *I = create_identity_matrix(n);
     Matrix *temp = multiply_matrices(D_minus_05, W);
-    Matrix *X = multiply_matrices(X, D_minus_05);
+    Matrix *X = multiply_matrices(temp, D_minus_05);
     Matrix *Lnorm = sub_matrices(I, X);
 
     free_matrix(I);
@@ -121,11 +102,11 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 }
 
 
-/* JACOBI */
+/* JACOBI 
 Matrix *Jacobi(Matrix *A) {
     int dim = matrix_get_rows_num(A);
     Matrix *P, *V = create_identity_matrix(dim);
-    if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
+    if(check_if_matrix_is_diagonal(A)) { / * edge case when is already diagonal * /
         return V;
     }
 
@@ -151,19 +132,25 @@ Matrix *Jacobi(Matrix *A) {
     return V;
 }
 
+
 int is_jacobi_stop_point(Matrix *A, Matrix *A_tag, int rotation_num) {
     return rotation_num == MAX_NUMBER_OF_ROTATIONS || matrix_converge(A, A_tag);
 }
+*/
 
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
-    MaxElement *max_element = create_max_element(0., -1, -1);
+    int rows, cols;
+    int i,j;
+    double current_value;
+    MaxElement *max_element; 
+    max_element = create_max_element(0., -1, -1);
+    
     if (_is_matrix_diag(matrix))
         return max_element;  /* TODO: why return this? */
 
-    int rows = matrix_get_rows_num(matrix);
-    int cols = matrix_get_cols_num(matrix);
-    int i,j;
-    double current_value;
+    rows = matrix_get_rows_num(matrix);
+    cols = matrix_get_cols_num(matrix);
+
 
     for (i=0; i<rows; i++){
         for (j=i+1; j<cols; j++){
@@ -179,6 +166,7 @@ MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
 S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
+    S_and_C *s_and_c;
 
     theta = ( matrix_get_entry(A, j, j) - matrix_get_entry(A, i, i) ) / ( 2 * value );
     sign = (theta >= 0) ? 1 : -1;
@@ -186,7 +174,7 @@ S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
     c = 1.0 / sqrt( t*t + 1 );
     s = t*c;
     
-    S_and_C *s_and_c = create_S_and_C(s, c);
+    s_and_c = create_S_and_C(s, c);
     return s_and_c;
 }
 
@@ -203,11 +191,10 @@ Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim
 
 void normalize_matrix_rows(Matrix *matrix) {
     Point *row = (Point *)malloc(sizeof(Point));
-    int num_of_rows, num_of_cols;
-    double row_norm, entry;
-    int i,j;
+    int num_of_rows;
+    double row_norm;
+    int i;
     num_of_rows = matrix_get_rows_num(matrix);
-    num_of_cols = matrix_get_cols_num(matrix);
 
     for (i=0; i<num_of_rows; i++) {
         matrix_get_row_to_point(matrix, row, i);
@@ -246,7 +233,6 @@ Matrix *getU(Matrix *V, Matrix *A, int k) {
     int i, j, n = A->cols;
     double entry;
     Eigenvector *eigen_vectors_array = (Eigenvector *)malloc(sizeof(Eigenvector)*n);
-    Eigenvector *current_eigen_vector;
     Matrix *U;
     Point *p;
     for (i=0; i<n; i++){
@@ -275,6 +261,7 @@ Matrix *getU(Matrix *V, Matrix *A, int k) {
 int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n) {
     double maxgap, currentgap;
     int k, i;
+    k = -1;
     maxgap = -1.;
 
     for (i=0; i<n/2; i++){
@@ -320,3 +307,40 @@ int matrix_converge(Matrix *A, Matrix *A_tag) {
     return off(A) - off(A_tag) <= EPSILON;
 }
 
+
+
+
+
+/* SPKMEANS API */
+
+Matrix *wam(Matrix* data_points){
+    return create_weighted_matrix(data_points);
+}
+
+Matrix *ddg(Matrix* data_points){
+    Matrix *W, *D;
+    W = create_weighted_matrix(data_points);
+    D = create_diagonal_degree_matrix(W);
+    free_matrix(W);
+    return D;
+}
+
+Matrix *lnorm(Matrix* data_points){
+    Matrix *W, *D, *Lnorm;
+    W = create_weighted_matrix(data_points);
+    D = create_diagonal_degree_matrix(W);
+    neg_root_to_diag_matrix(D);
+    Lnorm = normalized_graph_laplacian(D, W);
+    free_matrix(W);
+    free_matrix(D);
+    return Lnorm;
+}
+
+JacobiOutput *jacobi(Matrix* matrix, int k){
+    JacobiOutput *X;
+    int a;
+    a = matrix_get_entry(matrix,k,1);
+    printf("%d",a);
+    X = malloc(sizeof(JacobiOutput));
+    return X;
+}

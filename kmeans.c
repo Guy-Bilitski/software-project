@@ -4,17 +4,18 @@
 #include "spkmeans.h"
 
 
-Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsilon)
+Matrix * kmeans(Matrix *data_points, Matrix *centroids)
 {
     Matrix *new_centroids, *temp;
     int dim, k;
-    int iter;
-    double max_distance;
+    int maxiter, iter;
+    double max_distance, epsilon;
 
     //Setting variables
     dim = matrix_get_cols_num(centroids);
     k = matrix_get_rows_num(centroids);
-    maxiter = maxiter == -1 ? INT_MAX: maxiter;
+    maxiter = 300;
+    epsilon = 0.;
     new_centroids = create_matrix(k, dim);
     reset_matrix_entries_to_zero(new_centroids);
 
@@ -27,7 +28,7 @@ Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsi
         centroids = new_centroids;
         new_centroids = temp;
         
-        if (max_distance < epsilon) {
+        if (max_distance <= epsilon) {
             break;
         }
         reset_matrix_entries_to_zero(new_centroids);
@@ -39,13 +40,12 @@ Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsi
 
 
 double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids) {
-    int dim, k;
-    int r, c;
+    int k;
+    int r;
 
     double max_distance = DBL_MIN;
     double current_distance;
 
-    dim = matrix_get_cols_num(new_centroids);
     k = matrix_get_rows_num(new_centroids);
 
     Point *old_centroid = (Point *)malloc(sizeof(Point));
@@ -99,9 +99,8 @@ void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centr
 
 
 int find_closest_centroid(Point *vector, Matrix *centroids) {
-    int dim, k;
-    int centroid_idx, entry;
-    dim = matrix_get_cols_num(centroids);
+    int k;
+    int centroid_idx;
     k = matrix_get_rows_num(centroids);
 
     double min_distance = DBL_MAX;

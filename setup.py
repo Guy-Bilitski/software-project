@@ -5,7 +5,7 @@ setup(
     version = '1.0',
     author='Guy Bilitzki and Sagi Ahrac',
     author_email='sagiahrac@mail.tau.ac.il',
-    description='C-API for k-means func',
+    description='C-API for spkmeans methods',
     packages=find_packages(),
     license='GPL-2',
     classifiers=[
@@ -17,8 +17,9 @@ setup(
     ],
     ext_modules=[
         Extension(
-            'mykmeanssp',
-            ['kmeans.c']
-        ),
+            name='mykmeanssp',
+            sources=['spkmeans.c'],
+            depends=['spkmeans.h', 'spkmeansmodule.c', 'kmeans.c', 'eigenvector.c', 'kmeans_io.c', 'matrix.c', 'point.c', 's_and_c.c']
+        )
     ]
 )

@@ -131,4 +131,5 @@ int main55() {
     print_point(p);
     printf("\n");
     printf("\n");
+    return 1;
 }

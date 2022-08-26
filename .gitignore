@@ -2,3 +2,17 @@
 a.out
 -TO-IGNORE-HW1-kmeans.c
 test.c
+build/temp.linux-x86_64-3.7/spkmeansmodule.o
+.gitignore
+build/temp.linux-x86_64-3.7/s_and_c.o
+build/temp.linux-x86_64-3.7/point.o
+build/temp.linux-x86_64-3.7/matrix.o
+build/temp.linux-x86_64-3.7/kmeans.o
+build/temp.linux-x86_64-3.7/kmeans_io.o
+build/temp.linux-x86_64-3.7/spkmeans.o
+build/temp.linux-x86_64-3.7/eigenvector.o
+build/lib.linux-x86_64-3.7/mykmeanssp.cpython-37m-x86_64-linux-gnu.so
+test.py
+run.sh
+mykmeanssp.cpython-37m-x86_64-linux-gnu.so
+test1.py
