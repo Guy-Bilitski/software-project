@@ -10,8 +10,72 @@
 #include "kmeans_io.c"
 
 
-#define epsilon 0.00001
-#define min_number_of_rotations 100
+#define EPSILON 0.00001
+#define MAX_NUMBER_OF_ROTATIONS 100
+
+/* spkmeans functions */
+double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
+Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
+Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix */
+void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all the diagonal entries */
+Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
+
+/* JACOBI */
+Matrix *Jacobi(Matrix *A);
+MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
+S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
+Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
+void normalize_matrix_rows(Matrix *matrix);
+double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
+Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
+void normalize_matrix_rows(Matrix *matrix);
+int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);
+Matrix *getU(Matrix *V, Matrix *A, int k);
+
+/* utilities */
+double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
+
+
+
+
+int main(int argc, char **argv) {
+    srand((int) time(NULL)); /* important for random */
+    /*
+    0.7482679812896987,0.9962678716348444,0.705752719530148,0.3327360839555057,0.556446876169447
+0.9962678716348444,0.4881966580554369,0.0015561979296321304,0.4511027753265111,0.9266007970596744
+0.705752719530148,0.0015561979296321304,0.7712266730402363,0.004980905673753422,0.1562223832155636
+0.3327360839555057,0.4511027753265111,0.004980905673753422,0.8243926884444718,0.8673296129309216
+0.556446876169447,0.9266007970596744,0.1562223832155636,0.8673296129309216,0.500238930842554*/
+    Matrix *A = create_matrix(5,5);
+    matrix_set_entry(A, 0, 0, 0.7482679812896987);
+    matrix_set_entry(A, 0, 1, 0.9962678716348444);
+    matrix_set_entry(A, 0, 2, 0.705752719530148);
+    matrix_set_entry(A, 0, 3, 0.3327360839555057);
+    matrix_set_entry(A, 0, 4, 0.556446876169447);
+    matrix_set_entry(A, 1, 0, 0.9962678716348444);
+    matrix_set_entry(A, 1, 1, 0.4881966580554369);
+    matrix_set_entry(A, 1, 2, 0.0015561979296321304);
+    matrix_set_entry(A, 1, 3, 0.4511027753265111);
+    matrix_set_entry(A, 1, 4, 0.9266007970596744);
+    matrix_set_entry(A, 2, 0, 0.705752719530148);
+    matrix_set_entry(A, 2, 1, 0.0015561979296321304);
+    matrix_set_entry(A, 2, 2, 0.7712266730402363);
+    matrix_set_entry(A, 2, 3, 0.004980905673753422);
+    matrix_set_entry(A, 2, 4, 0.1562223832155636);
+    matrix_set_entry(A, 3, 0, 0.3327360839555057);
+    matrix_set_entry(A, 3, 1, 0.4511027753265111);
+    matrix_set_entry(A, 3, 2, 0.004980905673753422);
+    matrix_set_entry(A, 3, 3, 0.8243926884444718);
+    matrix_set_entry(A, 3, 4, 0.8673296129309216);
+    matrix_set_entry(A, 4, 0, 0.556446876169447);
+    matrix_set_entry(A, 4, 1, 0.9266007970596744);
+    matrix_set_entry(A, 4, 2, 0.1562223832155636);
+    matrix_set_entry(A, 4, 3, 0.8673296129309216);
+    matrix_set_entry(A, 4, 4, 0.500238930842554);
+    print_matrix(A);
+    Matrix *V = Jacobi(A);
+    print_matrix(V);
+}
 
 
 /* spkmeans functions */
@@ -38,6 +102,8 @@ Matrix *create_weighted_matrix(Matrix *X) {
             }
         }
     }
+    free(p1);
+    free(p2);
     return matrix;
 }
 
@@ -79,6 +145,39 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 
 
 /* JACOBI */
+Matrix *Jacobi(Matrix *A) {
+    int dim = matrix_get_rows_num(A);
+    Matrix *P, *V = create_identity_matrix(dim);
+    if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
+        return V;
+    }
+
+    int rotation_num = 0, need_to_stop = 0;
+    Matrix *A_tag;
+    S_and_C *s_and_c;
+    MaxElement *max_element;
+
+    do {
+        max_element = matrix_get_non_diagonal_max_absolute_value(A);
+        s_and_c = get_s_and_c_for_rotation_matrix(A, max_element);
+        P = build_rotation_matrix(s_and_c, max_element, dim);
+        rotation_num ++;
+        A_tag = transform_matrix(A, s_and_c, max_element);
+        need_to_stop = is_jacobi_stop_point(A, A_tag, rotation_num);
+        V = multiply_matrices(V, P);
+        A = A_tag;
+        print_matrix(V);
+    } while (!need_to_stop);
+    free(max_element);
+    free_matrix(A_tag);
+    free_matrix(P);
+    return V;
+}
+
+int is_jacobi_stop_point(Matrix *A, Matrix *A_tag, int rotation_num) {
+    return rotation_num == MAX_NUMBER_OF_ROTATIONS || matrix_converge(A, A_tag);
+}
+
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
     MaxElement *max_element = create_max_element(0., -1, -1);
     if (_is_matrix_diag(matrix))
@@ -100,30 +199,29 @@ MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
     return max_element;
 }
 
-S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
+S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
-    S_and_C result;
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
 
     theta = ( matrix_get_entry(A, j, j) - matrix_get_entry(A, i, i) ) / ( 2 * value );
-    sign = (theta >= 0) ? 1:-1;
+    sign = (theta >= 0) ? 1 : -1;
     t = sign / ( abs(theta) + sqrt( theta*theta + 1 ));
     c = 1.0 / sqrt( t*t + 1 );
     s = t*c;
     
-    result.s = s;
-    result.c = c;
-    return result;
+    S_and_C *s_and_c = create_S_and_C(s, c);
+    return s_and_c;
 }
 
-Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement *max_element, int dim) {
-    Matrix *p = create_identity_matrix(dim);
-    int s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c), i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
-    matrix_set_entry(p, i, i, c);
-    matrix_set_entry(p, j, j, c);
-    matrix_set_entry(p, i, j, s);
-    matrix_set_entry(p, j, i, -s);
-    return p;
+Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim) {
+    Matrix *rotation_matrix = create_identity_matrix(dim);
+    double s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c);
+    int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
+    matrix_set_entry(rotation_matrix, i, i, c);
+    matrix_set_entry(rotation_matrix, j, j, c);
+    matrix_set_entry(rotation_matrix, i, j, s);
+    matrix_set_entry(rotation_matrix, j, i, -s);
+    return rotation_matrix;
 }
 
 void normalize_matrix_rows(Matrix *matrix) {
@@ -154,7 +252,7 @@ double off(Matrix *matrix) {
     return sum;
 }
 
-Matrix *transform_matrix(Matrix *matrix, S_and_C s_and_c, MaxElement *max_element) {
+Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element) {
     int row_index, col_index, rows_num = matrix_get_rows_num(matrix), cols_num = matrix_get_cols_num(matrix), i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
     double matrix_entry, s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c);
     Matrix *transformed_matrix = create_matrix(rows_num, cols_num);
@@ -240,3 +338,8 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
         return matrix_get_entry(old_matrix, row_index, col_index); 
     }
 }
+
+int matrix_converge(Matrix *A, Matrix *A_tag) {
+    return off(A) - off(A_tag) <= EPSILON;
+}
+

@@ -106,13 +106,14 @@ double *matrix_get_data(Matrix *matrix);
 double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry */
 void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index); /* inserts a row into a given point */
 void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);  /* inserts a column into a given point */
-MaxElement *matrix_get_non_diagonal_max_element(Matrix *matrix);  /* returns the max element of the matrix */
+MaxElement *matrix_get_non_diagonal_max_absolute_value(Matrix *matrix);  /* returns the max element of the matrix */
 
 /* setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
 void matrix_set_row(Matrix *matrix, int row_index, Point *point);  /* sets a point (row) in the matrix in <row_index> */
 
 /* utilities */
+int check_if_matrix_is_diagonal(Matrix *matrix);  /* goes through matrix non diagonal and check if one of them is not 0 */
 double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
 void free_matrix(Matrix *matrix); /* cleanup matrix object and sub-objects */
 void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* TODO: check if relevant */
@@ -145,8 +146,12 @@ void sort_eigenvectors_array(Eigenvector *array, size_t n);
 
 /* -------------------- S AND C PROTOTYPES -------------------- */
 
-double s_and_c_get_s(S_and_C s_and_c);
-double s_and_c_get_c(S_and_C s_and_c);
+/* S AND C API */
+S_and_C *create_S_and_C(double s, double c);
+
+/* getters */
+double s_and_c_get_s(S_and_C *s_and_c);
+double s_and_c_get_c(S_and_C *s_and_c);
 
 
 

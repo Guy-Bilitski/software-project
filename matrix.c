@@ -102,14 +102,14 @@ void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index) 
     point->offset = cols_num;
 }
 
-MaxElement *matrix_get_non_diagonal_max_element(Matrix *matrix) {
+MaxElement *matrix_get_non_diagonal_max_absolute_value(Matrix *matrix) {
     MaxElement *max_element = create_max_element(matrix_get_entry(matrix, 0, 0), 0, 0);
     int i, j, cols_num = matrix_get_cols_num(matrix), rows_num = matrix_get_rows_num(matrix);
     double current_value;
     for (i=0; i<rows_num; i++) {
         for (j=0; j<cols_num; j++) {
             if (i != j) {
-                current_value = matrix_get_entry(matrix, i, j);
+                current_value = abs(matrix_get_entry(matrix, i, j));
                 if (current_value > max_element_get_value(max_element)) {
                     max_element_set_new_values(max_element, current_value, i, j);
                 }
@@ -153,6 +153,18 @@ void matrix_set_row(Matrix *matrix, int row_index, Point *point) {
 }
 
 /* utilities */
+int check_if_matrix_is_diagonal(Matrix *matrix) {
+    int i, j;
+    for (i=0; i<matrix_get_rows_num(matrix); i++) {
+        for (j=0; j<matrix_get_cols_num(matrix); j++) {
+            if (i != j && matrix_get_entry(matrix, i, j) != 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 double matrix_get_row_sum(Matrix *matrix, int row_index) {
     int col_index, cols_num = matrix_get_cols_num(matrix);
     double sum;
@@ -297,6 +309,7 @@ Matrix *sub_matrices(Matrix *A, Matrix *B) {
 
 /* debugging function */
 void print_matrix(Matrix *matrix) {
+    space();
     int i, j;
     double val;
     for (i=0; i<matrix->rows; i++) {
@@ -306,6 +319,7 @@ void print_matrix(Matrix *matrix) {
         }
         printf("\n");
     }
+    space();
 }
 
 void print_matrix2(Matrix *matrix) {
