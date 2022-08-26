@@ -16,3 +16,9 @@ double s_and_c_get_s(S_and_C s_and_c) {
 double s_and_c_get_c(S_and_C s_and_c) {
     return s_and_c.c;
 }
+
+void print_s_and_c(S_and_C s_and_c) {
+    space();
+    printf("c is: %f s is: %f", s_and_c_get_c(s_and_c), s_and_c_get_s(s_and_c));
+    space();
+}

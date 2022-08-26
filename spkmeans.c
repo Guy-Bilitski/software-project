@@ -39,6 +39,7 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
 
 
 int main(int argc, char **argv) {
+    srand((int) time(NULL)); /* important for random */
     Matrix *A = generate_symmetric_matrix(5);
     print_matrix(A);
     Matrix *V = Jacobi(A);
@@ -70,6 +71,8 @@ Matrix *create_weighted_matrix(Matrix *X) {
             }
         }
     }
+    free(p1);
+    free(p2);
     return matrix;
 }
 
@@ -127,15 +130,20 @@ Matrix *Jacobi(Matrix *A) {
     do {
         printf("hi");
         max_element = matrix_get_non_diagonal_max_element(A);
+        print_max_element(max_element);
         s_and_c = get_s_and_c_for_rotation_matrix(A, max_element);
+        print_s_and_c(s_and_c);
         P = build_rotation_matrix(s_and_c, max_element, dim);
+        print_matrix(P);
         rotation_num ++;
         A_tag = transform_matrix(A, s_and_c, max_element);
         need_to_stop = is_jacobi_stop_point(A, A_tag, rotation_num);
         V = multiply_matrices(V, P);
         A = A_tag;
     } while (need_to_stop);
-
+    free(max_element);
+    free_matrix(A_tag);
+    free_matrix(P);
     return V;
 }
 
@@ -181,13 +189,13 @@ S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
 }
 
 Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement *max_element, int dim) {
-    Matrix *p = create_identity_matrix(dim);
+    Matrix *rotation_matrix = create_identity_matrix(dim);
     int s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c), i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
-    matrix_set_entry(p, i, i, c);
-    matrix_set_entry(p, j, j, c);
-    matrix_set_entry(p, i, j, s);
-    matrix_set_entry(p, j, i, -s);
-    return p;
+    matrix_set_entry(rotation_matrix, i, i, c);
+    matrix_set_entry(rotation_matrix, j, j, c);
+    matrix_set_entry(rotation_matrix, i, j, s);
+    matrix_set_entry(rotation_matrix, j, i, -s);
+    return rotation_matrix;
 }
 
 void normalize_matrix_rows(Matrix *matrix) {

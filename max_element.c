@@ -57,7 +57,9 @@ void max_element_set_index2(MaxElement *max_element, int j) {
 
 /* debugging */
 void print_max_element(MaxElement *max_element) { 
+    space();
     printf("max element value: %f ", max_element_get_value(max_element));
     printf("max element i: %d ", max_element_get_index1(max_element));
     printf("max element j: %d", max_element_get_index2(max_element));
+    space();
 }
