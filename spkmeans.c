@@ -10,8 +10,8 @@
 #include "point.c"
 
 
-#define epsilon 0.00001
-#define min_number_of_rotations 100
+#define EPSILON 0.00001
+#define MAX_NUMBER_OF_ROTATIONS 100
 
 /* spkmeans functions */
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
@@ -117,7 +117,6 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 Matrix *Jacobi(Matrix *A) {
     int dim = matrix_get_rows_num(A);
     Matrix *P, *V = create_identity_matrix(dim);
-    print_matrix(V);
     if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
         return V;
     }
@@ -128,19 +127,17 @@ Matrix *Jacobi(Matrix *A) {
     MaxElement *max_element;
 
     do {
-        printf("hi");
         max_element = matrix_get_non_diagonal_max_element(A);
-        print_max_element(max_element);
         s_and_c = get_s_and_c_for_rotation_matrix(A, max_element);
-        print_s_and_c(s_and_c);
         P = build_rotation_matrix(s_and_c, max_element, dim);
-        print_matrix(P);
         rotation_num ++;
         A_tag = transform_matrix(A, s_and_c, max_element);
         need_to_stop = is_jacobi_stop_point(A, A_tag, rotation_num);
         V = multiply_matrices(V, P);
+        printf("%d", rotation_num);
+        print_matrix(A_tag);
         A = A_tag;
-    } while (need_to_stop);
+    } while (!need_to_stop);
     free(max_element);
     free_matrix(A_tag);
     free_matrix(P);
@@ -148,7 +145,7 @@ Matrix *Jacobi(Matrix *A) {
 }
 
 int is_jacobi_stop_point(Matrix *A, Matrix *A_tag, int rotation_num) {
-    return rotation_num == 100 || matrix_converge(A, A_tag);
+    return rotation_num == MAX_NUMBER_OF_ROTATIONS || matrix_converge(A, A_tag);
 }
 
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
@@ -313,6 +310,6 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
 }
 
 int matrix_converge(Matrix *A, Matrix *A_tag) {
-    return off(A) - off(A_tag) <= epsilon;
+    return off(A) - off(A_tag) <= EPSILON;
 }
 
