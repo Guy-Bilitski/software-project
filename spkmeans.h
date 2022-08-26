@@ -61,6 +61,16 @@ enum goal {
   };
 #endif
 
+#ifndef YACOBI_OUTPUT_IS_DEFINED
+#define YACOBI_OUTPUT_IS_DEFINED
+typedef struct YacobiOutput
+{
+    Matrix *A;
+    Matrix *V;
+    int k;
+} YacobiOutput;
+#endif
+
 
 /* -------------------- POINT PROTOTYPES -------------------- */
 
@@ -179,6 +189,12 @@ void max_element_set_index2(MaxElement *max_element, int j);
 void print_max_element(MaxElement *max_element);
 
 
+/* -------------------- YACOBI OUTPUT PROTOTYPES -------------------- */
+
+YacobiOutput *create_empty_yacobi_output();
+void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V, int k);
+void free_yacobi_output(YacobiOutput *yacobi_output);
+
 
 /* -------------------- KMEANS-IO PROTOTYPES -------------------- */
 
@@ -206,7 +222,7 @@ void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all th
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 
 /* JACOBI */
-Matrix *Jacobi(Matrix *A);
+YacobiOutput *Jacobi(Matrix *A, int k, YacobiOutput *yacobi_output);
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
 void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, Matrix *identity_matrix); /* inserts the rotation matrix to a given identity matrix */
 void normalize_matrix_rows(Matrix *matrix);
@@ -218,6 +234,8 @@ Matrix *getU(Matrix *V, Matrix *A, int k);
 
 /* utilities */
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
+
+
 
 
 

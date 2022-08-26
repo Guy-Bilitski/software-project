@@ -17,7 +17,7 @@
 
 int main(int argc, char **argv) {
     srand((int) time(NULL)); /* important for random */
-
+    /* this is matrix 1 for yacobi */
     Matrix *A = create_matrix(5,5);
     matrix_set_entry(A, 0, 0, 0.9244561740566206);
     matrix_set_entry(A, 0, 1, 0.8742308098340758);
@@ -44,9 +44,8 @@ int main(int argc, char **argv) {
     matrix_set_entry(A, 4, 2, 0.7596530627838091);
     matrix_set_entry(A, 4, 3, 0.13884538443846695);
     matrix_set_entry(A, 4, 4, 0.3869426064309628);
-    Matrix *V = Jacobi(A);
-    printf("V: ");
-    print_matrix(V);
+    YacobiOutput *yacobi_output = create_empty_yacobi_output();
+    Jacobi(A, 3, yacobi_output);
 }
 
 
@@ -117,43 +116,34 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 
 
 /* JACOBI */
-Matrix *Jacobi(Matrix *A) {
+YacobiOutput *Jacobi(Matrix *A, int k, YacobiOutput *yacobi_output) {
     int dim = matrix_get_rows_num(A);
     Matrix *V = create_identity_matrix(dim);
     if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
-        return V;
+        set_yacobi_output_values(yacobi_output, A, V, k);
+        return yacobi_output;
     }
 
-    
     int rotation_num = 0, need_to_stop = 0;
     double recent_off;
     S_and_C *s_and_c = create_empty_S_and_C();
     MaxElement *max_element = create_empty_max_element();
 
     while (rotation_num <= MAX_NUMBER_OF_ROTATIONS) {
-        printf("iteration num: %d", rotation_num);
-        printf("A: ");  /* delete */
-        print_matrix2(A);  /* delete */
         recent_off = matrix_off(A);
         matrix_get_non_diagonal_max_absolute_value(A, max_element);
-        print_max_element(max_element); /* delete */
         get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
-        print_s_and_c(s_and_c);  /* delete */
         Matrix *P = create_identity_matrix(dim); build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
-        printf("P: ");  /* delete */
-        print_matrix2(P);  /* delete */
         A = transform_matrix(A, s_and_c, max_element);
         V = multiply_matrices(V, P); free_matrix(P);
-        printf("V: ");
-        print_matrix2(V);
         if (matrix_converge(recent_off, A)) {
             break;
         }
     }
-
+    set_yacobi_output_values(yacobi_output, A, V, k);
     free(max_element);
     free(s_and_c);
-    return V;
+    return yacobi_output;
 }
 
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c) {
@@ -162,7 +152,7 @@ void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C
 
     theta = ( matrix_get_entry(A, j, j) - matrix_get_entry(A, i, i) ) / ( 2 * value );
     sign = (theta >= 0) ? 1 : -1;
-    t = sign / ( abs(theta) + sqrt( theta*theta + 1 ));
+    t = sign / ( fabs(theta) + sqrt( theta*theta + 1 ));
     c = 1.0 / sqrt( t*t + 1 );
     s = t*c;
     
