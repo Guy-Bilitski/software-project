@@ -101,8 +101,8 @@ void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index) 
     point->offset = cols_num;
 }
 
-MaxElement *matrix_get_non_diagonal_max_absolute_value(Matrix *matrix) {
-    MaxElement *max_element = create_max_element(matrix_get_entry(matrix, 0, 0), 0, 0);
+void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element) {
+    max_element_set_new_values(max_element, matrix_get_entry(matrix, 0, 1), 0, 1);
     int i, j, cols_num = matrix_get_cols_num(matrix), rows_num = matrix_get_rows_num(matrix);
     double current_value;
     for (i=0; i<rows_num; i++) {
@@ -115,7 +115,6 @@ MaxElement *matrix_get_non_diagonal_max_absolute_value(Matrix *matrix) {
             }
         }
     }
-    return max_element;
 }
 
 /* setters */

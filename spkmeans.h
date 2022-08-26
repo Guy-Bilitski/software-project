@@ -111,7 +111,7 @@ double *matrix_get_data(Matrix *matrix);
 double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry */
 void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index); /* inserts a row into a given point */
 void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);  /* inserts a column into a given point */
-MaxElement *matrix_get_non_diagonal_max_absolute_value(Matrix *matrix);  /* returns the max element of the matrix */
+void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element);  /* returns the max element of the matrix */
 
 /* setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
@@ -153,17 +153,21 @@ void sort_eigenvectors_array(Eigenvector *array, size_t n);
 /* -------------------- S AND C PROTOTYPES -------------------- */
 
 /* S AND C API */
-S_and_C *create_S_and_C(double s, double c);
+S_and_C *create_empty_S_and_C();
 
 /* getters */
 double s_and_c_get_s(S_and_C *s_and_c);
 double s_and_c_get_c(S_and_C *s_and_c);
+
+/* setters */
+void S_and_C_set_values(S_and_C *s_and_c, double s, double c);
 
 
 
 /* -------------------- MAX ELEMENT PROTOTYPES -------------------- */
 
 /* MaxElemnt API */
+MaxElement *create_empty_max_element();
 MaxElement *create_max_element(double value, int i, int j);
 
 /* getters */
@@ -209,7 +213,7 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 /* JACOBI */
 /*Matrix *Jacobi(Matrix *A);*/
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
-S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
+void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
 Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
 void normalize_matrix_rows(Matrix *matrix);
 double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
