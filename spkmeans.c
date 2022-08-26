@@ -34,6 +34,13 @@ Matrix *getU(Matrix *V, Matrix *A, int k);
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
 
 
+
+
+int main(int argc, char **argv) {
+    
+}
+
+
 /* spkmeans functions */
 double gaussian_RBF(Point *p1, Point *p2) {
     double distance = euclidean_distance(p1, p2); /*TODO: CHECK*/
@@ -259,13 +266,4 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
     } else {
         return matrix_get_entry(old_matrix, row_index, col_index); 
     }
-}
-
-
-/*int argc, char **argv*/
-int main() {
-
-
-
-    return 1;
 }
