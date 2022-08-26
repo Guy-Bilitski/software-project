@@ -40,7 +40,38 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
 
 int main(int argc, char **argv) {
     srand((int) time(NULL)); /* important for random */
-    Matrix *A = generate_symmetric_matrix(5);
+    /*
+    0.7482679812896987,0.9962678716348444,0.705752719530148,0.3327360839555057,0.556446876169447
+0.9962678716348444,0.4881966580554369,0.0015561979296321304,0.4511027753265111,0.9266007970596744
+0.705752719530148,0.0015561979296321304,0.7712266730402363,0.004980905673753422,0.1562223832155636
+0.3327360839555057,0.4511027753265111,0.004980905673753422,0.8243926884444718,0.8673296129309216
+0.556446876169447,0.9266007970596744,0.1562223832155636,0.8673296129309216,0.500238930842554*/
+    Matrix *A = create_matrix(5,5);
+    matrix_set_entry(A, 0, 0, 0.7482679812896987);
+    matrix_set_entry(A, 0, 1, 0.9962678716348444);
+    matrix_set_entry(A, 0, 2, 0.705752719530148);
+    matrix_set_entry(A, 0, 3, 0.3327360839555057);
+    matrix_set_entry(A, 0, 4, 0.556446876169447);
+    matrix_set_entry(A, 1, 0, 0.9962678716348444);
+    matrix_set_entry(A, 1, 1, 0.4881966580554369);
+    matrix_set_entry(A, 1, 2, 0.0015561979296321304);
+    matrix_set_entry(A, 1, 3, 0.4511027753265111);
+    matrix_set_entry(A, 1, 4, 0.9266007970596744);
+    matrix_set_entry(A, 2, 0, 0.705752719530148);
+    matrix_set_entry(A, 2, 1, 0.0015561979296321304);
+    matrix_set_entry(A, 2, 2, 0.7712266730402363);
+    matrix_set_entry(A, 2, 3, 0.004980905673753422);
+    matrix_set_entry(A, 2, 4, 0.1562223832155636);
+    matrix_set_entry(A, 3, 0, 0.3327360839555057);
+    matrix_set_entry(A, 3, 1, 0.4511027753265111);
+    matrix_set_entry(A, 3, 2, 0.004980905673753422);
+    matrix_set_entry(A, 3, 3, 0.8243926884444718);
+    matrix_set_entry(A, 3, 4, 0.8673296129309216);
+    matrix_set_entry(A, 4, 0, 0.556446876169447);
+    matrix_set_entry(A, 4, 1, 0.9266007970596744);
+    matrix_set_entry(A, 4, 2, 0.1562223832155636);
+    matrix_set_entry(A, 4, 3, 0.8673296129309216);
+    matrix_set_entry(A, 4, 4, 0.500238930842554);
     print_matrix(A);
     Matrix *V = Jacobi(A);
     print_matrix(V);
@@ -127,16 +158,15 @@ Matrix *Jacobi(Matrix *A) {
     MaxElement *max_element;
 
     do {
-        max_element = matrix_get_non_diagonal_max_element(A);
+        max_element = matrix_get_non_diagonal_max_absolute_value(A);
         s_and_c = get_s_and_c_for_rotation_matrix(A, max_element);
         P = build_rotation_matrix(s_and_c, max_element, dim);
         rotation_num ++;
         A_tag = transform_matrix(A, s_and_c, max_element);
         need_to_stop = is_jacobi_stop_point(A, A_tag, rotation_num);
         V = multiply_matrices(V, P);
-        printf("%d", rotation_num);
-        print_matrix(A_tag);
         A = A_tag;
+        print_matrix(V);
     } while (!need_to_stop);
     free(max_element);
     free_matrix(A_tag);
@@ -174,7 +204,7 @@ S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
 
     theta = ( matrix_get_entry(A, j, j) - matrix_get_entry(A, i, i) ) / ( 2 * value );
-    sign = (theta >= 0) ? 1:-1;
+    sign = (theta >= 0) ? 1 : -1;
     t = sign / ( abs(theta) + sqrt( theta*theta + 1 ));
     c = 1.0 / sqrt( t*t + 1 );
     s = t*c;

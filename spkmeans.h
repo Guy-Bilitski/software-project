@@ -95,7 +95,7 @@ double *matrix_get_data(Matrix *matrix);
 double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry */
 void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index); /* inserts a row into a given point */
 void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);  /* inserts a column into a given point */
-MaxElement *matrix_get_non_diagonal_max_element(Matrix *matrix);  /* returns the max element of the matrix */
+MaxElement *matrix_get_non_diagonal_max_absolute_value(Matrix *matrix);  /* returns the max element of the matrix */
 
 /* setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
