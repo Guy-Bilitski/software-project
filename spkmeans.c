@@ -23,7 +23,7 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 /* JACOBI */
 Matrix *Jacobi(Matrix *A);
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
-S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
+void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
 Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
 void normalize_matrix_rows(Matrix *matrix);
 double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
     matrix_set_entry(A, 4, 4, 0.500238930842554);
     print_matrix(A);
     Matrix *V = Jacobi(A);
+    printf("V: ");
     print_matrix(V);
 }
 
@@ -154,19 +155,21 @@ Matrix *Jacobi(Matrix *A) {
 
     int rotation_num = 0, need_to_stop = 0;
     Matrix *A_tag;
-    S_and_C *s_and_c;
-    MaxElement *max_element;
+    S_and_C *s_and_c = create_empty_S_and_C();
+    MaxElement *max_element = create_empty_max_element();
 
     do {
-        max_element = matrix_get_non_diagonal_max_absolute_value(A);
-        s_and_c = get_s_and_c_for_rotation_matrix(A, max_element);
+        print_matrix(A); /* delete */
+        matrix_get_non_diagonal_max_absolute_value(A, max_element);
+        print_max_element(max_element);  /* delete */
+        get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
+        print_s_and_c(s_and_c);  /* delete */
         P = build_rotation_matrix(s_and_c, max_element, dim);
         rotation_num ++;
         A_tag = transform_matrix(A, s_and_c, max_element);
         need_to_stop = is_jacobi_stop_point(A, A_tag, rotation_num);
         V = multiply_matrices(V, P);
         A = A_tag;
-        print_matrix(V);
     } while (!need_to_stop);
     free(max_element);
     free_matrix(A_tag);
@@ -199,7 +202,7 @@ MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
     return max_element;
 }
 
-S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
+void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
 
@@ -209,8 +212,7 @@ S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
     c = 1.0 / sqrt( t*t + 1 );
     s = t*c;
     
-    S_and_C *s_and_c = create_S_and_C(s, c);
-    return s_and_c;
+    S_and_C_set_values(s_and_c, s, c);
 }
 
 Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim) {
