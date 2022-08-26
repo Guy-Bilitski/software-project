@@ -13,29 +13,6 @@
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
 
-/* spkmeans functions */
-double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
-Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
-Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix */
-void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all the diagonal entries */
-Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
-
-/* JACOBI */
-Matrix *Jacobi(Matrix *A);
-MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
-void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
-Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
-void normalize_matrix_rows(Matrix *matrix);
-double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
-Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
-void normalize_matrix_rows(Matrix *matrix);
-int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);
-Matrix *getU(Matrix *V, Matrix *A, int k);
-
-/* utilities */
-double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
-
-
 
 
 int main(int argc, char **argv) {
@@ -72,7 +49,6 @@ int main(int argc, char **argv) {
     matrix_set_entry(A, 4, 2, 0.1562223832155636);
     matrix_set_entry(A, 4, 3, 0.8673296129309216);
     matrix_set_entry(A, 4, 4, 0.500238930842554);
-    print_matrix(A);
     Matrix *V = Jacobi(A);
     printf("V: ");
     print_matrix(V);
@@ -148,37 +124,36 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 /* JACOBI */
 Matrix *Jacobi(Matrix *A) {
     int dim = matrix_get_rows_num(A);
-    Matrix *P, *V = create_identity_matrix(dim);
+    Matrix *V = create_identity_matrix(dim);
     if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
         return V;
     }
 
+    
     int rotation_num = 0, need_to_stop = 0;
-    Matrix *A_tag;
+    double recent_off;
     S_and_C *s_and_c = create_empty_S_and_C();
     MaxElement *max_element = create_empty_max_element();
 
-    do {
-        print_matrix(A); /* delete */
+    while (rotation_num <= MAX_NUMBER_OF_ROTATIONS) {
+        print_matrix(A);  /* delete */
+        recent_off = matrix_off(A);
         matrix_get_non_diagonal_max_absolute_value(A, max_element);
-        print_max_element(max_element);  /* delete */
+        print_max_element(max_element); /* delete */
         get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
         print_s_and_c(s_and_c);  /* delete */
-        P = build_rotation_matrix(s_and_c, max_element, dim);
-        rotation_num ++;
-        A_tag = transform_matrix(A, s_and_c, max_element);
-        need_to_stop = is_jacobi_stop_point(A, A_tag, rotation_num);
-        V = multiply_matrices(V, P);
-        A = A_tag;
-    } while (!need_to_stop);
-    free(max_element);
-    free_matrix(A_tag);
-    free_matrix(P);
-    return V;
-}
+        Matrix *P = create_identity_matrix(dim); build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
+        printf("P: ");
+        print_matrix(P);
+        A = transform_matrix(A, s_and_c, max_element);
+        V = multiply_matrices(V, P), free_matrix(P);
+        if (matrix_converge(recent_off, A)) {
+            break;
+        }
+    }
 
-int is_jacobi_stop_point(Matrix *A, Matrix *A_tag, int rotation_num) {
-    return rotation_num == MAX_NUMBER_OF_ROTATIONS || matrix_converge(A, A_tag);
+    free(max_element);
+    return V;
 }
 
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
@@ -215,15 +190,13 @@ void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C
     S_and_C_set_values(s_and_c, s, c);
 }
 
-Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim) {
-    Matrix *rotation_matrix = create_identity_matrix(dim);
+void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, Matrix *identity_matrix) {
     double s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c);
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
-    matrix_set_entry(rotation_matrix, i, i, c);
-    matrix_set_entry(rotation_matrix, j, j, c);
-    matrix_set_entry(rotation_matrix, i, j, s);
-    matrix_set_entry(rotation_matrix, j, i, -s);
-    return rotation_matrix;
+    matrix_set_entry(identity_matrix, i, i, c);
+    matrix_set_entry(identity_matrix, j, j, c);
+    matrix_set_entry(identity_matrix, i, j, s);
+    matrix_set_entry(identity_matrix, j, i, -s);
 }
 
 void normalize_matrix_rows(Matrix *matrix) {
@@ -241,7 +214,7 @@ void normalize_matrix_rows(Matrix *matrix) {
     }
 }
 
-double off(Matrix *matrix) {
+double matrix_off(Matrix *matrix) {
     int i, j, rows_num = matrix_get_rows_num(matrix), cols_num = matrix_get_cols_num(matrix);
     double sum = 0;
     for (i=0; i<rows_num; i++) {
@@ -257,7 +230,7 @@ double off(Matrix *matrix) {
 Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element) {
     int row_index, col_index, rows_num = matrix_get_rows_num(matrix), cols_num = matrix_get_cols_num(matrix), i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
     double matrix_entry, s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c);
-    Matrix *transformed_matrix = create_matrix(rows_num, cols_num);
+    Matrix *transformed_matrix = create_matrix(rows_num, rows_num);
     for (row_index=0; row_index<rows_num; row_index++) {
         for (col_index=0; col_index<cols_num; col_index++) {
             matrix_entry = get_value_for_transformed_matrix(matrix, s, c, i, j, row_index, col_index);
@@ -341,7 +314,7 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
     }
 }
 
-int matrix_converge(Matrix *A, Matrix *A_tag) {
-    return off(A) - off(A_tag) <= EPSILON;
+int matrix_converge(double A_off, Matrix *A) {
+    return A_off - matrix_off(A) <= EPSILON;
 }
 

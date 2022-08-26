@@ -209,9 +209,9 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 Matrix *Jacobi(Matrix *A);
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
-Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
+void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, Matrix *identity_matrix); /* inserts the rotation matrix to a given identity matrix */
 void normalize_matrix_rows(Matrix *matrix);
-double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
+double matrix_off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
 void normalize_matrix_rows(Matrix *matrix);
 int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);

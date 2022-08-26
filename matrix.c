@@ -109,7 +109,8 @@ void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_
     for (i=0; i<rows_num; i++) {
         for (j=0; j<cols_num; j++) {
             if (i != j) {
-                current_value = abs(matrix_get_entry(matrix, i, j));
+                current_value = matrix_get_entry(matrix, i, j);
+                current_value = (current_value >= 0) ? current_value : -current_value;
                 if (current_value > max_element_get_value(max_element)) {
                     max_element_set_new_values(max_element, current_value, i, j);
                 }
