@@ -208,7 +208,7 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 /* JACOBI */
 Matrix *Jacobi(Matrix *A);
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
-S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
+void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
 Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
 void normalize_matrix_rows(Matrix *matrix);
 double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */

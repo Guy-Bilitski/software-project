@@ -1,7 +1,7 @@
 #include "spkmeans.h"
 
 
-int main (int argc, char **argv) {
+int main1 (int argc, char **argv) {
     const char *goal_strings[invalid - spk + 1] = { "spk", "wam", "ddg", "lnorm", "jacobi", "invalid" };
     int dim, n;
     char *input_filename;
