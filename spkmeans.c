@@ -99,6 +99,12 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 
 
 /* JACOBI */
+Matrix *Jacobi(Matrix *A) {
+    Matrix *V = create_identity_matrix();
+    int i;
+    for (i=0; i)
+}
+
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
     MaxElement *max_element = create_max_element(0., -1, -1);
     if (_is_matrix_diag(matrix))
@@ -259,6 +265,10 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
     } else {
         return matrix_get_entry(old_matrix, row_index, col_index); 
     }
+}
+
+int matrix_converge(Matrix *A, Matrix *A_tag) {
+    return off(A) - off(A_tag) <= epsilon;
 }
 
 

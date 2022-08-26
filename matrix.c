@@ -153,6 +153,18 @@ void matrix_set_row(Matrix *matrix, int row_index, Point *point) {
 }
 
 /* utilities */
+int check_if_matrix_is_diagonal(Matrix *matrix) {
+    int i, j;
+    for (i=0; i<matrix_get_rows_num(matrix); i++) {
+        for (j=0; j<matrix_get_cols_num(matrix); j++) {
+            if (i != j && matrix_get_entry(matrix, i, j) != 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 double matrix_get_row_sum(Matrix *matrix, int row_index) {
     int col_index, cols_num = matrix_get_cols_num(matrix);
     double sum;

@@ -102,6 +102,7 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets 
 void matrix_set_row(Matrix *matrix, int row_index, Point *point);  /* sets a point (row) in the matrix in <row_index> */
 
 /* utilities */
+int check_if_matrix_is_diagonal(Matrix *matrix);  /* goes through matrix non diagonal and check if one of them is not 0 */
 double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
 void free_matrix(Matrix *matrix); /* cleanup matrix object and sub-objects */
 void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* TODO: check if relevant */
