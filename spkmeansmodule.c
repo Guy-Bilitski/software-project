@@ -1,5 +1,9 @@
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
+#include "spkmeans.h"
 
+
+//TODO: Check if prototypes declaration is needed
 
 static PyObject* kmeans_capi(PyObject *self, PyObject *args){
     PyObject *data_points;
@@ -46,3 +50,5 @@ PyMODINIT_FUNC PyInit_mykmeanssp(void) {
     }
     return m;
 }
+
+
