@@ -135,8 +135,12 @@ void sort_eigenvectors_array(Eigenvector *array, size_t n);
 
 /* -------------------- S AND C PROTOTYPES -------------------- */
 
-double s_and_c_get_s(S_and_C s_and_c);
-double s_and_c_get_c(S_and_C s_and_c);
+/* S AND C API */
+S_and_C *create_S_and_C(double s, double c);
+
+/* getters */
+double s_and_c_get_s(S_and_C *s_and_c);
+double s_and_c_get_c(S_and_C *s_and_c);
 
 
 

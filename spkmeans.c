@@ -23,11 +23,11 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 /* JACOBI */
 Matrix *Jacobi(Matrix *A);
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
-S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
-Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
+S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
+Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
 void normalize_matrix_rows(Matrix *matrix);
 double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
-Matrix *transform_matrix(Matrix *matrix, S_and_C s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
+Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
 void normalize_matrix_rows(Matrix *matrix);
 int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);
 Matrix *getU(Matrix *V, Matrix *A, int k);
@@ -124,7 +124,7 @@ Matrix *Jacobi(Matrix *A) {
 
     int rotation_num = 0, need_to_stop = 0;
     Matrix *A_tag;
-    S_and_C s_and_c;
+    S_and_C *s_and_c;
     MaxElement *max_element;
 
     do {
@@ -172,9 +172,8 @@ MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
     return max_element;
 }
 
-S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
+S_and_C *get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
-    S_and_C result;
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
 
     theta = ( matrix_get_entry(A, j, j) - matrix_get_entry(A, i, i) ) / ( 2 * value );
@@ -183,14 +182,14 @@ S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element) {
     c = 1.0 / sqrt( t*t + 1 );
     s = t*c;
     
-    result.s = s;
-    result.c = c;
-    return result;
+    S_and_C *s_and_c = create_S_and_C(s, c);
+    return s_and_c;
 }
 
-Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement *max_element, int dim) {
+Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim) {
     Matrix *rotation_matrix = create_identity_matrix(dim);
-    int s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c), i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
+    double s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c);
+    int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
     matrix_set_entry(rotation_matrix, i, i, c);
     matrix_set_entry(rotation_matrix, j, j, c);
     matrix_set_entry(rotation_matrix, i, j, s);
@@ -226,7 +225,7 @@ double off(Matrix *matrix) {
     return sum;
 }
 
-Matrix *transform_matrix(Matrix *matrix, S_and_C s_and_c, MaxElement *max_element) {
+Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element) {
     int row_index, col_index, rows_num = matrix_get_rows_num(matrix), cols_num = matrix_get_cols_num(matrix), i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
     double matrix_entry, s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c);
     Matrix *transformed_matrix = create_matrix(rows_num, cols_num);
