@@ -1,11 +1,9 @@
-#include <stdio.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <string.h>
 #include <float.h>
 #include <math.h>
 #include <limits.h>
-#include <ctype.h>
+
 
 int initialize_centroids(int k, int dim, char *input_file, double**);
 int get_dimension(char *input_file);

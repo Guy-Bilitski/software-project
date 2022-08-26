@@ -1,5 +1,10 @@
 #ifndef spkmeansh
 #define spkmeansh
+#include "spkmeans.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
 
 /* ---------------- STRUCTS ---------------- */
 
@@ -49,6 +54,12 @@ typedef struct MaxElement
 } MaxElement;
 #endif
 
+#ifndef GOAL_IS_DEFINED
+#define GOAL_IS_DEFINED
+enum goal {
+    spk, wam, ddg, lnorm, jacobi, invalid
+  };
+#endif
 
 
 /* -------------------- POINT PROTOTYPES -------------------- */
@@ -158,5 +169,44 @@ void max_element_set_index2(MaxElement *max_element, int j);
 /* debugging */
 void print_max_element(MaxElement *max_element);
 
+
+
+/* -------------------- KMEANS-IO PROTOTYPES -------------------- */
+
+int get_dimension(char *input_file);
+int get_n(char *input_file);
+enum goal get_goal(char *goal);
+Matrix *input_file_to_matrix(char *input_file, int dim, int n);
+Matrix *achieve_goal(Matrix *data_points, enum goal goal);
+
+/* -------------------- KMEANS PROTOTYPES -------------------- */
+
+Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsilon);
+double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids);
+void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids);
+int find_closest_centroid(Point *vector, Matrix *centroids);
+
+
+
+/* -------------------- SPKMEANS PROTOTYPES -------------------- */
+/* spkmeans functions */
+double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
+Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
+Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix */
+void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all the diagonal entries */
+Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
+
+/* JACOBI */
+MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
+S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
+Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
+void normalize_matrix_rows(Matrix *matrix);
+double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
+void normalize_matrix_rows(Matrix *matrix);
+int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);
+Matrix *getU(Matrix *V, Matrix *A, int k);
+
+/* utilities */
+double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
 
 #endif

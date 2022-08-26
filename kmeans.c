@@ -1,15 +1,7 @@
 #include <float.h>
 #include <math.h>
 #include <ctype.h>
-#include <limits.h>
 #include "spkmeans.h"
-
-
-Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsilon);
-double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids);
-void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids);
-int find_closest_centroid(Point *vector, Matrix *centroids);
-
 
 
 Matrix * kmeans(Matrix *data_points, Matrix *centroids, int maxiter, double epsilon)
