@@ -309,6 +309,7 @@ Matrix *sub_matrices(Matrix *A, Matrix *B) {
 
 /* debugging function */
 void print_matrix(Matrix *matrix) {
+    space();
     int i, j;
     double val;
     for (i=0; i<matrix->rows; i++) {
@@ -318,6 +319,7 @@ void print_matrix(Matrix *matrix) {
         }
         printf("\n");
     }
+    space();
 }
 
 void print_matrix2(Matrix *matrix) {

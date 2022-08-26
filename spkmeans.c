@@ -21,11 +21,13 @@ void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all th
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 
 /* JACOBI */
+Matrix *Jacobi(Matrix *A);
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
 S_and_C get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element);
 Matrix *build_rotation_matrix(S_and_C s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
 void normalize_matrix_rows(Matrix *matrix);
 double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
+Matrix *transform_matrix(Matrix *matrix, S_and_C s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
 void normalize_matrix_rows(Matrix *matrix);
 int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);
 Matrix *getU(Matrix *V, Matrix *A, int k);
@@ -37,7 +39,10 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
 
 
 int main(int argc, char **argv) {
-    
+    Matrix *A = generate_symmetric_matrix(5);
+    print_matrix(A);
+    Matrix *V = Jacobi(A);
+    print_matrix(V);
 }
 
 
@@ -107,9 +112,35 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 
 /* JACOBI */
 Matrix *Jacobi(Matrix *A) {
-    Matrix *V = create_identity_matrix();
-    int i;
-    for (i=0; i)
+    int dim = matrix_get_rows_num(A);
+    Matrix *P, *V = create_identity_matrix(dim);
+    print_matrix(V);
+    if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
+        return V;
+    }
+
+    int rotation_num = 0, need_to_stop = 0;
+    Matrix *A_tag;
+    S_and_C s_and_c;
+    MaxElement *max_element;
+
+    do {
+        printf("hi");
+        max_element = matrix_get_non_diagonal_max_element(A);
+        s_and_c = get_s_and_c_for_rotation_matrix(A, max_element);
+        P = build_rotation_matrix(s_and_c, max_element, dim);
+        rotation_num ++;
+        A_tag = transform_matrix(A, s_and_c, max_element);
+        need_to_stop = is_jacobi_stop_point(A, A_tag, rotation_num);
+        V = multiply_matrices(V, P);
+        A = A_tag;
+    } while (need_to_stop);
+
+    return V;
+}
+
+int is_jacobi_stop_point(Matrix *A, Matrix *A_tag, int rotation_num) {
+    return rotation_num == 100 || matrix_converge(A, A_tag);
 }
 
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix){
