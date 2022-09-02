@@ -19,7 +19,7 @@ setup(
         Extension(
             name='mykmeanssp',
             sources=['spkmeansmodule.c'],
-            depends=['spkmeans.h', 'spkmeans.c', 'kmeans.c', 'eigenvector.c', 'kmeans_io.c', 'matrix.c', 'point.c', 's_and_c.c']
+            depends=['spkmeans.h', 'spkmeans.c', 'kmeans.c', 'eigenvector.c', 'kmeans_io.c', 'matrix.c', 'point.c', 's_and_c.c', 'yacobi_output.c']
         )
     ]
 )
