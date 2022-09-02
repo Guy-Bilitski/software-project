@@ -16,6 +16,7 @@
 #define MAX_NUMBER_OF_ROTATIONS 100
 
 int main (int argc, char **argv) {
+    /*
     const char *input_filename;
     char *goal;
     Matrix *data_points;
@@ -32,6 +33,16 @@ int main (int argc, char **argv) {
 
     achieve_goal(data_points, goal);
     return 0;
+    */
+    srand((int) time(NULL)); /* important for random */
+    Matrix *A = generate_matrix(5,5, false);
+    Matrix *V = generate_matrix(5,5, false);
+    YacobiOutput *yacobi_output = create_empty_yacobi_output();
+    set_yacobi_output_values(yacobi_output, A, V);
+    Eigenvector **arr = get_eigen_vectors_from_yacobi_output(yacobi_output);
+    print_eigen_vectors_array(arr, 5);
+    free(A); free(V); free_eigen_vectors_array(arr, 5);
+    
 }
 
 /* spkmeans functions */
@@ -100,9 +111,6 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
     free_matrix(X);
     return Lnorm;
 }
-
-
-
 
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
@@ -215,14 +223,15 @@ int get_k_from_yacobi_output(YacobiOutput *yacobi_output) {
 
 Eigenvector **get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output) { /* delete eigen vectors after all */
     Matrix *A = yacobi_output_get_A(yacobi_output), *V = yacobi_output_get_V(yacobi_output);
-    Point *point = create_empty_point();
     double eigen_value;
     int k, i, V_dim = matrix_get_rows_num(V);
     Eigenvector **eigen_vectors_array;
 
     for (i=0; i<V_dim; i++) {
+        Point *point = create_empty_point();
         eigen_value = matrix_get_entry(A, i, i);
         matrix_get_column_to_point(V, point, i);
+        
         eigen_vectors_array[i] = create_eigen_vector(point, eigen_value);
     }
     return eigen_vectors_array;

@@ -310,6 +310,7 @@ Matrix *sub_matrices(Matrix *A, Matrix *B) {
 
 /* debugging function */
 void print_matrix(Matrix *matrix) {
+    space();
     int i, j;
     double val;
     int cols_num = matrix->cols;
@@ -318,7 +319,7 @@ void print_matrix(Matrix *matrix) {
     for (i=0; i<rows_num; i++) {
         for (j=0; j<cols_num; j++) {
             val = matrix_get_entry(matrix, i, j);
-            printf("%.4f", val);
+            printf("%.4f ", val);
         }
         if (j < cols_num-1){
             printf(",");
@@ -326,6 +327,7 @@ void print_matrix(Matrix *matrix) {
             printf("\n");
         }
     }
+    space();
 }
 
 void print_matrix2(Matrix *matrix) {

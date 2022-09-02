@@ -161,6 +161,9 @@ double eigen_vector_get_eigen_value(Eigenvector *eigen_vector);
 Eigenvector *create_eigen_vector(Point *point, double eigen_value);
 int compare_eigenvectors(const void *p1, const void *p2);
 void sort_eigenvectors_array(Eigenvector *array, size_t n);
+void print_eigen_vectors_array(Eigenvector **eigen_vectors_array, int n);
+void free_eigen_vector(Eigenvector *eigen_vector);
+void free_eigen_vectors_array(Eigenvector **eigen_vectors_array, int n);
 
 
 
