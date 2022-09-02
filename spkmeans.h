@@ -1,6 +1,5 @@
 #ifndef spkmeansh
 #define spkmeansh
-#include "spkmeans.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,6 +63,16 @@ typedef struct JacobiOutput
     Matrix *A;
     int k;
 } JacobiOutput;
+#endif
+
+#ifndef YACOBI_OUTPUT_IS_DEFINED
+#define YACOBI_OUTPUT_IS_DEFINED
+typedef struct YacobiOutput
+{
+    Matrix *A;
+    Matrix *V;
+    int k;
+} YacobiOutput;
 #endif
 
 
@@ -185,6 +194,12 @@ void max_element_set_index2(MaxElement *max_element, int j);
 void print_max_element(MaxElement *max_element);
 
 
+/* -------------------- YACOBI OUTPUT PROTOTYPES -------------------- */
+
+YacobiOutput *create_empty_yacobi_output();
+void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V, int k);
+void free_yacobi_output(YacobiOutput *yacobi_output);
+
 
 /* -------------------- KMEANS-IO PROTOTYPES -------------------- */
 
@@ -211,12 +226,12 @@ void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all th
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 
 /* JACOBI */
-/*Matrix *Jacobi(Matrix *A);*/
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
+YacobiOutput *Jacobi(Matrix *A, int k, YacobiOutput *yacobi_output);
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
-Matrix *build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim); /* returns the rotation matrix p */
+void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, Matrix *identity_matrix); /* inserts the rotation matrix to a given identity matrix */
 void normalize_matrix_rows(Matrix *matrix);
-double off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
+double matrix_off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
 void normalize_matrix_rows(Matrix *matrix);
 int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);
@@ -231,6 +246,8 @@ Matrix *wam(Matrix* data_points);
 Matrix *ddg(Matrix* data_points);
 Matrix *lnorm(Matrix* data_points);
 JacobiOutput *jacobi(Matrix* matrix, int k);
+
+
 
 
 
