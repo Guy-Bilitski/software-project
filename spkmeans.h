@@ -239,6 +239,7 @@ Matrix *getU(Matrix *V, Matrix *A, int k);
 
 /* utilities */
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
+int matrix_converge(double A_off, Matrix *A);
 
 
 /* SPKMEANS API */
