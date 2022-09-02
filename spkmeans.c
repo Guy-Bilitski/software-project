@@ -111,7 +111,7 @@ YacobiOutput *Jacobi(Matrix *A, int k, YacobiOutput *yacobi_output) {
         return yacobi_output;
     }
 
-    int rotation_num = 0, need_to_stop = 0;
+    int rotation_num = 0;
     double recent_off;
     S_and_C *s_and_c = create_empty_S_and_C();
     MaxElement *max_element = create_empty_max_element();
@@ -136,7 +136,6 @@ YacobiOutput *Jacobi(Matrix *A, int k, YacobiOutput *yacobi_output) {
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
-    S_and_C *s_and_c;
 
     theta = ( matrix_get_entry(A, j, j) - matrix_get_entry(A, i, i) ) / ( 2 * value );
     sign = (theta >= 0) ? 1 : -1;
