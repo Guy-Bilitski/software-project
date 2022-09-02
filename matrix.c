@@ -441,26 +441,7 @@ int main9() {
     print_matrix2(m3);
     space();
 
-    // Point *p = (Point *)malloc(sizeof(Point));
-    // matrix_get_column_to_point(m1, p, 2);
-    // print_point(p);
-    // space();
-    // matrix_get_row_to_point(m1, p, 1);
-    // print_point(p);
-    // space();
-    // free(p);
-
-    // print_matrix(m2);
-    // space();
-    
-    // Matrix *product = multiply_matrices(m1, m2);
-
-    // print_matrix_rows(product);
-    // print_matrix_cols(product);
-    
-    // _clean_matrix(m1);
-    // _clean_matrix(m2);
-    // _clean_matrix(product);    
+  
 
     return 1;
 }

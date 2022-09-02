@@ -30,8 +30,8 @@ typedef struct Matrix {
 #ifndef EIGENVECTOR_IS_DEFINED
 #define EIGENVECTOR_IS_DEFINED
 typedef struct Eigenvector {
-    Point point;
-    double eigenvalue;
+    Point *point;
+    double eigen_value;
 } Eigenvector;
 #endif
 
@@ -79,6 +79,7 @@ typedef struct YacobiOutput
 /* -------------------- POINT PROTOTYPES -------------------- */
 
 /* Point API */
+Point *create_empty_point();
 Point *create_point(double *data, int dim, int offset);  /* creates a point from list */
 
 int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
@@ -156,7 +157,7 @@ void space();
 
 Eigenvector *create_empty_eigen_vector();
 Point *eigen_vector_get_point(Eigenvector *eigen_vector);
-Point *eigen_vector_get_eigen_value(Eigenvector *eigen_vector);
+double eigen_vector_get_eigen_value(Eigenvector *eigen_vector);
 Eigenvector *create_eigen_vector(Point *point, double eigen_value);
 int compare_eigenvectors(const void *p1, const void *p2);
 void sort_eigenvectors_array(Eigenvector *array, size_t n);
@@ -201,8 +202,8 @@ void print_max_element(MaxElement *max_element);
 /* -------------------- YACOBI OUTPUT PROTOTYPES -------------------- */
 
 YacobiOutput *create_empty_yacobi_output();
-Matrix *yacobi_output_get_A(YacobiOutput *yacobi_output)
-Matrix *yacobi_output_get_V(YacobiOutput *yacobi_output)
+Matrix *yacobi_output_get_A(YacobiOutput *yacobi_output);
+Matrix *yacobi_output_get_V(YacobiOutput *yacobi_output);
 void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V);
 void free_yacobi_output(YacobiOutput *yacobi_output);
 
@@ -233,15 +234,16 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 
 /* JACOBI */
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
-YacobiOutput *jacobi(Matrix *A, int k, YacobiOutput *yacobi_output);
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
 void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, Matrix *identity_matrix); /* inserts the rotation matrix to a given identity matrix */
 void normalize_matrix_rows(Matrix *matrix);
 double matrix_off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
 void normalize_matrix_rows(Matrix *matrix);
-int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n);
-Matrix *getU(Matrix *V, Matrix *A, int k);
+int get_k_from_sorted_eigenvectors_array(Eigenvector **eigen_vectors_array, int n);
+int get_k_from_yacobi_output(YacobiOutput *yacobi_output);
+Eigenvector **get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output);
+Matrix *getU(YacobiOutput *yacobi_output, int k);
 
 /* utilities */
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
@@ -251,10 +253,7 @@ double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, 
 Matrix *wam(Matrix* data_points);
 Matrix *ddg(Matrix* data_points);
 Matrix *lnorm(Matrix* data_points);
-JacobiOutput *jacobi(Matrix* matrix, int k);
-
-
-
+YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output);
 
 
 #endif

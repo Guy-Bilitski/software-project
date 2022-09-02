@@ -73,8 +73,9 @@ void achieve_goal(Matrix *data_points, char *goal) {
         free_matrix(Lnorm);
         return;
     }
-    else if (!strcmp(goal, "jacobi")){
-        JacobiOutput *Jout = jacobi(data_points, 0);
+    else if (!strcmp(goal, "jacobi")) {
+        YacobiOutput *Jout = create_empty_yacobi_output();
+        jacobi(data_points, Jout);
         print_matrix_diag(Jout->A);
         print_matrix(Jout->V);
         free_matrix(Jout->A);

@@ -4,7 +4,7 @@
 #define EIGENVECTOR_IS_DEFINED
 typedef struct Eigenvector {
     Point *point;
-    double eigenvalue;
+    double eigen_value;
 } Eigenvector;
 #endif
 
@@ -25,14 +25,14 @@ Point *eigen_vector_get_point(Eigenvector *eigen_vector) {
     return eigen_vector->point;
 }
 
-Point *eigen_vector_get_eigen_value(Eigenvector *eigen_vector) {
+double eigen_vector_get_eigen_value(Eigenvector *eigen_vector) {
     return eigen_vector->eigen_value;
 }
 
 int compare_eigenvectors(const void *p1, const void *p2)
 {
 const Eigenvector *v1 = p1, *v2 = p2;
-double diff = (v1->eigenvalue) - (v2->eigenvalue); /* if diff > 0 then v1 should be first, return -1 */
+double diff = (v1->eigen_value) - (v2->eigen_value); /* if diff > 0 then v1 should be first, return -1 */
 if (diff < 0) return 1;
 if (diff > 0) return -1;
 return 0;

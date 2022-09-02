@@ -107,7 +107,6 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
-    S_and_C *s_and_c;
 
     theta = ( matrix_get_entry(A, j, j) - matrix_get_entry(A, i, i) ) / ( 2 * value );
     sign = (theta >= 0) ? 1 : -1;
@@ -168,19 +167,19 @@ Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_eleme
 } 
 
 Matrix *getU(YacobiOutput *yacobi_output, int k) {
+    Eigenvector **eigen_vectors_array = get_eigen_vectors_from_yacobi_output(yacobi_output);
+    Matrix *U, *A = yacobi_output_get_A(yacobi_output);
     int i, j, n = matrix_get_cols_num(A);
     double entry;
-    Matrix *U;
     Point *p;
 
-
-    if (k == -1)
+    if (k == -1) {
         k = get_k_from_sorted_eigenvectors_array(eigen_vectors_array, n);
+    }
 
     U = create_matrix(n, k);
-
     for (j=0; j<k; j++){
-        p = &(eigen_vectors_array[j].point); /* the jth eigen vector, jth column */
+        p = eigen_vector_get_point(eigen_vectors_array[j]); /* the jth eigen vector, jth column */
         for (i=0; i<n; i++) {
             entry = point_get_entry(p, i);
             matrix_set_entry(U, i, j, entry);
@@ -208,21 +207,25 @@ int get_k_from_sorted_eigenvectors_array(Eigenvector **eigen_vectors_array, int 
 }
 
 int get_k_from_yacobi_output(YacobiOutput *yacobi_output) {
-    Matrix A = yacobi_output_get_A(yacobi_output);
-    Matrix V = yacobi_output_get_V(yacobi_output);
-    Point *point;
+    Matrix *A = yacobi_output_get_A(yacobi_output);
+    int n = matrix_get_cols_num(A);
+    Eigenvector **eigen_vectors_array = get_eigen_vectors_from_yacobi_output(yacobi_output);
+    return get_k_from_sorted_eigenvectors_array(eigen_vectors_array, n);
+}
+
+Eigenvector **get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output) { /* delete eigen vectors after all */
+    Matrix *A = yacobi_output_get_A(yacobi_output), *V = yacobi_output_get_V(yacobi_output);
+    Point *point = create_empty_point();
     double eigen_value;
     int k, i, V_dim = matrix_get_rows_num(V);
-    Eigenvector *eigen_vectors_array[V_dim];
+    Eigenvector **eigen_vectors_array;
 
     for (i=0; i<V_dim; i++) {
         eigen_value = matrix_get_entry(A, i, i);
-        point = matrix_get_column_to_point(A, i);
+        matrix_get_column_to_point(V, point, i);
         eigen_vectors_array[i] = create_eigen_vector(point, eigen_value);
     }
-
-    k = get_k_from_sorted_eigenvectors_array(eigen_vectors_array);
-    return k;
+    return eigen_vectors_array;
 }
 
 /* utilities */
@@ -283,11 +286,11 @@ Matrix *lnorm(Matrix* data_points){
     return Lnorm;
 }
 
-YacobiOutput *jacobi(Matrix *A, int k, YacobiOutput *yacobi_output) {
+YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
     int dim = matrix_get_rows_num(A);
     Matrix *V = create_identity_matrix(dim);
     if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
-        set_yacobi_output_values(yacobi_output, A, V, k);
+        set_yacobi_output_values(yacobi_output, A, V);
         return yacobi_output;
     }
 
@@ -307,7 +310,7 @@ YacobiOutput *jacobi(Matrix *A, int k, YacobiOutput *yacobi_output) {
             break;
         }
     }
-    set_yacobi_output_values(yacobi_output, A, V, k);
+    set_yacobi_output_values(yacobi_output, A, V);
     free(max_element);
     free(s_and_c);
     return yacobi_output;
