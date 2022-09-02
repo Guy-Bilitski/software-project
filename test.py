@@ -1,27 +1,37 @@
 import numpy as np
+from numpy import linalg as LA
+import mykmeanssp
 
-P = [[1.000000, 0.000000, 0.000000, 0.000000, 0.000000],
-[0.000000, 1.000000, 0.000000, 0.000000, 0.000000],
-[0.000000, 0.000000, 1.000000, 0.000000, 0.000000],
-[0.000000, 0.000000, 0.000000, 0.940206, -0.340607],
-[0.000000, 0.000000, 0.000000, 0.340607, 0.940206]]
+path = 'data/mytxt.txt'
+X = np.genfromtxt(fname=path, dtype=float, delimiter=',')
+print(X.shape)
+gaussian_RBF = lambda x1, x2: np.exp(-LA.norm(x1-x2)/2)
 
-A = [[0.009942, 0.404128, 0.063230, 0.052204, 0.080505],
-[0.404128, 0.474285, -0.508691, 0.659369, 0.038962],
-[0.063230, -0.508691, -0.227182, 0.000000, 0.409583],
-[0.052204, 0.659369, 0.000000, 2.406752, 0.697077],
-[0.080505, 0.038962, 0.409583, 0.697077, 0.386943]]
+def print_matrix(matrix):
+        for row in matrix:
+            line = []
+            for value in row:
+                line.append('%.4f,' % value)
+            if len(line) > 0:
+                line[-1] = line[-1][:-1]
+                print("".join(line))
+                
+def py_wam(X):
+    n = X.shape[0]
+    W = [[None for j in range(n)] for i in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if i==j:
+                W[i][j] = 0
+            else:
+                W[i][j] = gaussian_RBF(X[i],X[j])
+    print_matrix(W)
 
-A_tag = [[0.009942, 0.404128, 0.063230, 0.076503, 0.057910],
-[0.404128, 0.474285, -0.508691, 0.633214, -0.187953],
-[0.063230, -0.508691, -0.227182, 0.139507, 0.385093],
-[0.076503, 0.633214, 0.139507, 2.618892, 0.000000],
-[0.057910, -0.187953, 0.385093, 0.000000, 0.174802]]
 
-
-P = np.array(P)
-A = np.array(A)
-res = np.array(A_tag)
-
-print((np.transpose(P) @ A @ P ))
-# print(res - (np.transpose(P) @ A @ P))
+py_wam(X)
+# print()
+# print(mykmeanssp.wam(X.tolist()))
+# print()
+# print(mykmeanssp.ddg(X.tolist()))
+# print()
+# print(mykmeanssp.lnorm(X.tolist()))
