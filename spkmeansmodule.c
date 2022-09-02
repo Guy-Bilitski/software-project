@@ -36,6 +36,28 @@ PyObject *matrix_to_pylist(Matrix *matrix){
     return py_matrix;
 }
 
+PyObject *diagonal_matrix_to_pylist(Matrix *matrix){
+    assert(matrix->cols == matrix->rows);
+    int n;
+    PyObject *py_matrix;
+    int i;
+    double value;
+
+    n = matrix->cols;
+    py_matrix = PyList_New(n);
+
+    if (py_matrix == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
+
+    for (i=0; i<n; i++) {
+        value = matrix_get_entry(matrix, i, i);
+        PyList_SetItem(py_matrix, i, PyFloat_FromDouble(value));
+    }
+    return py_matrix;
+}
+
 
 Matrix *pylist_to_matrix(PyObject *pymatrix){
     int cols, rows;
@@ -66,15 +88,15 @@ Matrix *pylist_to_matrix(PyObject *pymatrix){
 
 
 static PyObject* wam_capi(PyObject *self, PyObject *args){
-    const char *input_filename;
+    PyObject *data_points_as_pylist;
     Matrix *W, *data_points;
     PyObject *output;
 
-    if (!(PyArg_ParseTuple(args, "s", &input_filename))){
+    if (!(PyArg_ParseTuple(args, "O", &input_filename))){
         printf("An Error Has Occurred\n");
         exit(1);
     }
-    data_points = input_file_to_matrix(input_filename);
+    data_points = pylist_to_matrix(data_points_as_pylist);
     W = wam(data_points);
     output = matrix_to_pylist(W);
     free_matrix(W);
@@ -132,12 +154,13 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args){
     sym_matrix = input_file_to_matrix(input_filename); /*TODO: assure sym matrix */
     Jout = jacobi(sym_matrix, k);
     V = matrix_to_pylist(Jout->V);
-    A = matrix_to_pylist(Jout->A);
+    A = diagonal_matrix_to_pylist(Jout->A);
+    /*k = get_k(Jout->A, Jout->V)*/
     free_matrix(Jout->V);
     free_matrix(Jout->A);
     free_matrix(sym_matrix);
     free(Jout);
-    return Py_BuildValue("OO", V, A);
+    return Py_BuildValue("OOi", V, A, k);
 }
 
 static PyObject* kmeans_capi(PyObject *self, PyObject *args){

@@ -17,8 +17,20 @@ def main():
         print(ex)
         return 1
     try:
-        input_data_frame = pd.read_csv(args.get(Env.input_file), header=None, dtype=float)
-        data_points = pd.DataFrame.to_numpy(input_data_frame, dtype=float)
+        data_points = np.genfromtxt(fname=args.get(Env.input_file), dtype=float, delimiter=',')
+        
+        goal = args.get(Env.goal)
+        if goal == 'spk':
+            mykmeanssp.wam(data_points)
+        elif goal == 'wam':
+            w = mykmeanssp.wam(data_points)
+            print(w)
+        elif goal == 'ddg':
+            pass
+        elif goal == 'lnorm':
+            pass
+        elif goal == 'jacobi':
+            pass
         
         kmeans_pp(data_points, args.get(Env.k))
     except Exception as ex:
