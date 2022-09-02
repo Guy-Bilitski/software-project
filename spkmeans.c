@@ -34,6 +34,40 @@ int main (int argc, char **argv) {
     return 0;
 }
 
+
+void achieve_goal(Matrix *data_points, char *goal) {
+    if (!strcmp(goal, "wam")){
+        Matrix *W = wam(data_points);
+        print_matrix(W);
+        free_matrix(W);
+        return;
+    }
+    else if (!strcmp(goal, "ddg")){
+        Matrix *D = ddg(data_points);
+        print_matrix(D);
+        free_matrix(D);
+        return;
+    }
+    else if (!strcmp(goal, "lnorm")){
+        Matrix *Lnorm = lnorm(data_points);
+        print_matrix(Lnorm);
+        free_matrix(Lnorm);
+        return;
+    }
+    else if (!strcmp(goal, "jacobi")){
+        YacobiOutput *Jout = jacobi(data_points, 0);
+        print_jacobi_output(Jout);
+        free_yacobi_output(Jout);
+        return;
+    }
+    else {
+        printf("Invalid Input!\n");
+        exit(1);
+    }
+}
+
+
+
 /* spkmeans functions */
 double gaussian_RBF(Point *p1, Point *p2) {
     double distance = euclidean_distance(p1, p2); /*TODO: CHECK*/
@@ -302,11 +336,11 @@ Matrix *lnorm(Matrix* data_points){
     return Lnorm;
 }
 
-JacobiOutput *jacobi(Matrix* matrix, int k){
-    JacobiOutput *X;
+YacobiOutput *jacobi(Matrix* matrix, int k){
+    YacobiOutput *X;
     int a;
     a = matrix_get_entry(matrix,k,1);
     printf("%d",a);
-    X = malloc(sizeof(JacobiOutput));
+    X = malloc(sizeof(YacobiOutput));
     return X;
 }

@@ -143,7 +143,7 @@ static PyObject* lnorm_capi(PyObject *self, PyObject *args){
 static PyObject* jacobi_capi(PyObject *self, PyObject *args){
     PyObject *data_points_as_pylist;
     int k;
-    JacobiOutput *Jout;
+    YacobiOutput *Jout;
     PyObject *V, *A;
     Matrix *sym_matrix;
 

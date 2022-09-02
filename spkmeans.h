@@ -55,16 +55,6 @@ typedef struct MaxElement
 #endif
 
 
-#ifndef JACOBI_OUTPUT_IS_DEFINED
-#define JACOBI_OUTPUT_IS_DEFINED
-typedef struct JacobiOutput
-{
-    Matrix *V;
-    Matrix *A;
-    int k;
-} JacobiOutput;
-#endif
-
 #ifndef YACOBI_OUTPUT_IS_DEFINED
 #define YACOBI_OUTPUT_IS_DEFINED
 typedef struct YacobiOutput
@@ -206,7 +196,6 @@ void free_yacobi_output(YacobiOutput *yacobi_output);
 int get_dimension(const char *input_file);
 int get_n(const char *input_file);
 Matrix *input_file_to_matrix(const char *input_file);
-void achieve_goal(Matrix *data_points, char *goal);
 
 /* -------------------- KMEANS PROTOTYPES -------------------- */
 
@@ -219,6 +208,7 @@ int find_closest_centroid(Point *vector, Matrix *centroids);
 
 /* -------------------- SPKMEANS PROTOTYPES -------------------- */
 /* spkmeans functions */
+void achieve_goal(Matrix *data_points, char *goal);
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
 Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
 Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix */
@@ -246,9 +236,15 @@ int matrix_converge(double A_off, Matrix *A);
 Matrix *wam(Matrix* data_points);
 Matrix *ddg(Matrix* data_points);
 Matrix *lnorm(Matrix* data_points);
-JacobiOutput *jacobi(Matrix* matrix, int k);
+YacobiOutput *jacobi(Matrix* matrix, int k);
 
 
+
+/* JACOBI */
+void print_jacobi_output(YacobiOutput *J);
+void free_yacobi_output(YacobiOutput *yacobi_output);
+void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V, int k);
+YacobiOutput *create_empty_yacobi_output();
 
 
 

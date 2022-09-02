@@ -27,3 +27,8 @@ void free_yacobi_output(YacobiOutput *yacobi_output) {
     free(yacobi_output->V);
     free(yacobi_output);
 }
+
+void print_jacobi_output(YacobiOutput *J) {
+    print_matrix_diag(J->A);
+    print_matrix(J->V);
+}

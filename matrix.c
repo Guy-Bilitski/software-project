@@ -319,12 +319,13 @@ void print_matrix(Matrix *matrix) {
         for (j=0; j<cols_num; j++) {
             val = matrix_get_entry(matrix, i, j);
             printf("%.4f", val);
+            if (j < cols_num-1){
+                printf(",");
+            } else {
+                printf("\n");
+            }
         }
-        if (j < cols_num-1){
-            printf(",");
-        } else {
-            printf("\n");
-        }
+
     }
 }
 
@@ -336,7 +337,7 @@ void print_matrix2(Matrix *matrix) {
         printf("[");
         for (j=0; j<matrix->cols; j++) {
             val = matrix_get_entry(matrix, i, j);
-            printf("%lf", val);
+            printf("%.4f,", val);
             if (j != matrix->cols - 1)
                 printf(", ");
         }
