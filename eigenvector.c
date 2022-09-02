@@ -3,12 +3,31 @@
 #ifndef EIGENVECTOR_IS_DEFINED
 #define EIGENVECTOR_IS_DEFINED
 typedef struct Eigenvector {
-    Point point;
+    Point *point;
     double eigenvalue;
 } Eigenvector;
 #endif
 
+Eigenvector *create_empty_eigen_vector() {
+    Eigenvector *eigen_vector = (Eigenvector *)malloc(sizeof(Eigenvector));
+    return eigen_vector;
+}
 
+
+Eigenvector *create_eigen_vector(Point *point, double eigen_value) {
+    Eigenvector *eigen_vector = create_empty_eigen_vector();
+    eigen_vector->point = point;
+    eigen_vector->eigen_value = eigen_value;
+    return eigen_vector;
+}
+
+Point *eigen_vector_get_point(Eigenvector *eigen_vector) {
+    return eigen_vector->point;
+}
+
+Point *eigen_vector_get_eigen_value(Eigenvector *eigen_vector) {
+    return eigen_vector->eigen_value;
+}
 
 int compare_eigenvectors(const void *p1, const void *p2)
 {

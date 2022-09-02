@@ -154,6 +154,10 @@ void space();
 
 /* -------------------- EIGENVECTOR PROTOTYPES -------------------- */
 
+Eigenvector *create_empty_eigen_vector();
+Point *eigen_vector_get_point(Eigenvector *eigen_vector);
+Point *eigen_vector_get_eigen_value(Eigenvector *eigen_vector);
+Eigenvector *create_eigen_vector(Point *point, double eigen_value);
 int compare_eigenvectors(const void *p1, const void *p2);
 void sort_eigenvectors_array(Eigenvector *array, size_t n);
 
@@ -197,7 +201,9 @@ void print_max_element(MaxElement *max_element);
 /* -------------------- YACOBI OUTPUT PROTOTYPES -------------------- */
 
 YacobiOutput *create_empty_yacobi_output();
-void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V, int k);
+Matrix *yacobi_output_get_A(YacobiOutput *yacobi_output)
+Matrix *yacobi_output_get_V(YacobiOutput *yacobi_output)
+void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V);
 void free_yacobi_output(YacobiOutput *yacobi_output);
 
 
@@ -227,7 +233,7 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 
 /* JACOBI */
 MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
-YacobiOutput *Jacobi(Matrix *A, int k, YacobiOutput *yacobi_output);
+YacobiOutput *jacobi(Matrix *A, int k, YacobiOutput *yacobi_output);
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
 void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, Matrix *identity_matrix); /* inserts the rotation matrix to a given identity matrix */
 void normalize_matrix_rows(Matrix *matrix);
