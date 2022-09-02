@@ -8,6 +8,7 @@
 #include "eigenvector.c"
 #include "point.c"
 #include "kmeans_io.c"
+#include "yacobi_output.c"
 
 
 #define EPSILON 0.00001
@@ -44,8 +45,10 @@ int main(int argc, char **argv) {
     matrix_set_entry(A, 4, 2, 0.7596530627838091);
     matrix_set_entry(A, 4, 3, 0.13884538443846695);
     matrix_set_entry(A, 4, 4, 0.3869426064309628);
+    print_matrix(A);
     YacobiOutput *yacobi_output = create_empty_yacobi_output();
     Jacobi(A, 3, yacobi_output);
+    print_matrix(yacobi_output->V);
 }
 
 

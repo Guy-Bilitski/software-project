@@ -1,6 +1,5 @@
 #ifndef spkmeansh
 #define spkmeansh
-#include "spkmeans.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
