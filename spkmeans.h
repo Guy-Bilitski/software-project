@@ -147,9 +147,9 @@ double eigen_vector_get_eigen_value(Eigenvector *eigen_vector);
 Eigenvector *create_eigen_vector(Point *point, double eigen_value);
 int compare_eigenvectors(const void *p1, const void *p2);
 void sort_eigenvectors_array(Eigenvector *array, size_t n);
-void print_eigen_vectors_array(Eigenvector **eigen_vectors_array, int n);
+void print_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
 void free_eigen_vector(Eigenvector *eigen_vector);
-void free_eigen_vectors_array(Eigenvector **eigen_vectors_array, int n);
+void free_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
 
 
 
@@ -229,7 +229,7 @@ void normalize_matrix_rows(Matrix *matrix);
 double matrix_off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
 void normalize_matrix_rows(Matrix *matrix);
-int get_k_from_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
+int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
 void get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output, Eigenvector *eigen_vectors_array);
 Matrix *getU(YacobiOutput *yacobi_output, int k);
 

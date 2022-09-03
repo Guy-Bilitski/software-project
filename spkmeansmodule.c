@@ -177,8 +177,6 @@ static PyObject* transform_data_points_capi(PyObject *self, PyObject *args){
     Jout = create_empty_yacobi_output();
     jacobi(laplacian, Jout);
     U = getU(Jout, k);
-    print_matrix(U); //TODO
-    printf("END U\n");
     normalize_matrix_rows(U);
     pylist_U = matrix_to_pylist(U);
     free_yacobi_output(Jout);

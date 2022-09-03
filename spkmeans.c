@@ -229,22 +229,22 @@ Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_eleme
 } 
 
 Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be computed by eigengap heuristic */
-    int n, i, j;
+    int eigenvectors_num, i, j, n;
     Eigenvector *eigen_vectors_array;
     Matrix *U;
     double entry;
     Point *point_j;
 
-    n = matrix_get_cols_num(yacobi_output->V);
-    eigen_vectors_array = (Eigenvector *)malloc(sizeof(Eigenvector)*n);
-    for (i=0; i<n; i++) 
+    eigenvectors_num = matrix_get_cols_num(yacobi_output->V);
+    eigen_vectors_array = (Eigenvector *)malloc(sizeof(Eigenvector)*eigenvectors_num);
+    for (i=0; i<eigenvectors_num; i++) 
         eigen_vectors_array[i].point = create_empty_point();
     get_eigen_vectors_from_yacobi_output(yacobi_output, eigen_vectors_array);
-    printf("pre k is %d\n", k);
+    sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) 
-        k = get_k_from_eigen_vectors_array(eigen_vectors_array, n);
-    printf("post k is %d\n", k);
+        k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
 
+    n = matrix_get_rows_num(yacobi_output->V);
     U = create_matrix(n, k);
     for (j=0; j<k; j++){
         point_j = eigen_vectors_array[j].point; /*the jth eigen vector, jth column*/
@@ -261,17 +261,16 @@ Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be com
 }
 
 
-int get_k_from_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n) {
+int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n) {
     int k, i;
     double maxgap, currentgap;
 
-    sort_eigenvectors_array(eigen_vectors_array, n);
-
     k = -1;
     maxgap = -1.;
-
-    for (i=0; i<n/2; i++){
+    for (i=0; i<n; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
+        printf("%.4f ",eigen_vectors_array[i].eigen_value);
         currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
+        assert(currentgap >=0);
         assert(currentgap >= 0);
         if (currentgap > maxgap){
             maxgap = currentgap;
