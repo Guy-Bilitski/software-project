@@ -45,6 +45,40 @@ int main (int argc, char **argv) {
     
 }
 
+
+void achieve_goal(Matrix *data_points, char *goal) {
+    if (!strcmp(goal, "wam")){
+        Matrix *W = wam(data_points);
+        print_matrix(W);
+        free_matrix(W);
+        return;
+    }
+    else if (!strcmp(goal, "ddg")){
+        Matrix *D = ddg(data_points);
+        print_matrix(D);
+        free_matrix(D);
+        return;
+    }
+    else if (!strcmp(goal, "lnorm")){
+        Matrix *Lnorm = lnorm(data_points);
+        print_matrix(Lnorm);
+        free_matrix(Lnorm);
+        return;
+    }
+    else if (!strcmp(goal, "jacobi")){
+        YacobiOutput *Jout = jacobi(data_points, 0);
+        print_jacobi_output(Jout);
+        free_yacobi_output(Jout);
+        return;
+    }
+    else {
+        printf("Invalid Input!\n");
+        exit(1);
+    }
+}
+
+
+
 /* spkmeans functions */
 double gaussian_RBF(Point *p1, Point *p2) {
     double distance = euclidean_distance(p1, p2); /*TODO: CHECK*/
@@ -111,6 +145,7 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
     free_matrix(X);
     return Lnorm;
 }
+
 
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
@@ -295,6 +330,7 @@ Matrix *lnorm(Matrix* data_points){
     return Lnorm;
 }
 
+
 YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
     int dim = matrix_get_rows_num(A);
     Matrix *V = create_identity_matrix(dim);
@@ -324,3 +360,4 @@ YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
     free(s_and_c);
     return yacobi_output;
 }
+

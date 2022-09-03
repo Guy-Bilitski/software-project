@@ -16,3 +16,7 @@ test.py
 run.sh
 mykmeanssp.cpython-37m-x86_64-linux-gnu.so
 test1.py
+build/lib.linux-x86_64-2.7/mykmeanssp.so
+build/temp.linux-x86_64-2.7/spkmeans.o
+mykmeanssp.so
+.gitignore

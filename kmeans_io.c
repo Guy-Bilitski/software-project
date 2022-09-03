@@ -54,43 +54,6 @@ int get_n(const char *input_file) {
 }
 
 
-void achieve_goal(Matrix *data_points, char *goal) {
-    if (!strcmp(goal, "wam")){
-        Matrix *W = wam(data_points);
-        print_matrix(W);
-        free_matrix(W);
-        return;
-    }
-    else if (!strcmp(goal, "ddg")){
-        Matrix *D = ddg(data_points);
-        print_matrix(D);
-        free_matrix(D);
-        return;
-    }
-    else if (!strcmp(goal, "lnorm")){
-        Matrix *Lnorm = lnorm(data_points);
-        print_matrix(Lnorm);
-        free_matrix(Lnorm);
-        return;
-    }
-    else if (!strcmp(goal, "jacobi")) {
-        YacobiOutput *Jout = create_empty_yacobi_output();
-        jacobi(data_points, Jout);
-        print_matrix_diag(Jout->A);
-        print_matrix(Jout->V);
-        free_matrix(Jout->A);
-        free_matrix(Jout->V);
-        free(Jout);
-        return;
-    }
-    else {
-        printf("Invalid Input!\n");
-        exit(1);
-    }
-}
-
-
-
 Matrix *input_file_to_matrix(const char *input_file) {
     FILE *ifp;
     int i,j;

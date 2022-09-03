@@ -55,16 +55,6 @@ typedef struct MaxElement
 #endif
 
 
-#ifndef JACOBI_OUTPUT_IS_DEFINED
-#define JACOBI_OUTPUT_IS_DEFINED
-typedef struct JacobiOutput
-{
-    Matrix *V;
-    Matrix *A;
-    int k;
-} JacobiOutput;
-#endif
-
 #ifndef YACOBI_OUTPUT_IS_DEFINED
 #define YACOBI_OUTPUT_IS_DEFINED
 typedef struct YacobiOutput
@@ -216,7 +206,6 @@ void free_yacobi_output(YacobiOutput *yacobi_output);
 int get_dimension(const char *input_file);
 int get_n(const char *input_file);
 Matrix *input_file_to_matrix(const char *input_file);
-void achieve_goal(Matrix *data_points, char *goal);
 
 /* -------------------- KMEANS PROTOTYPES -------------------- */
 
@@ -229,6 +218,7 @@ int find_closest_centroid(Point *vector, Matrix *centroids);
 
 /* -------------------- SPKMEANS PROTOTYPES -------------------- */
 /* spkmeans functions */
+void achieve_goal(Matrix *data_points, char *goal);
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
 Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
 Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix */
@@ -250,6 +240,7 @@ Matrix *getU(YacobiOutput *yacobi_output, int k);
 
 /* utilities */
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
+int matrix_converge(double A_off, Matrix *A);
 
 
 /* SPKMEANS API */
@@ -257,6 +248,15 @@ Matrix *wam(Matrix* data_points);
 Matrix *ddg(Matrix* data_points);
 Matrix *lnorm(Matrix* data_points);
 YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output);
+
+
+
+/* JACOBI */
+void print_jacobi_output(YacobiOutput *J);
+void free_yacobi_output(YacobiOutput *yacobi_output);
+void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V, int k);
+YacobiOutput *create_empty_yacobi_output();
+
 
 
 #endif

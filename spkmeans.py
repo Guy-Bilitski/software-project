@@ -17,10 +17,24 @@ def main():
         print(ex)
         return 1
     try:
-        input_data_frame = pd.read_csv(args.get(Env.input_file), header=None, dtype=float)
-        data_points = pd.DataFrame.to_numpy(input_data_frame, dtype=float)
+        data_points = np.genfromtxt(fname=args.get(Env.input_file), dtype=float, delimiter=',')
         
-        kmeans_pp(data_points, args.get(Env.k))
+        goal = args.get(Env.goal)
+        if goal == 'spk':
+            mykmeanssp.wam(data_points.tolist())
+        elif goal == 'wam':
+            W = mykmeanssp.wam(data_points.tolist())
+            print_matrix(W)
+        elif goal == 'ddg':
+            D = mykmeanssp.ddg(data_points.tolist())
+            print_matrix(D)
+        elif goal == 'lnorm':
+            L = mykmeanssp.lnorm(data_points.tolist())
+            print_matrix(L)
+        elif goal == 'jacobi':
+            pass
+        
+        #kmeans_pp(data_points, args.get(Env.k))
     except Exception as ex:
         print("An Error Has Occurred")
         return 1
@@ -52,6 +66,33 @@ def print_centroids(indices, centroids):
         if len(line) > 0:
             line[-1] = line[-1][:-1]
             print("".join(line))
+            
+            
+def print_matrix(matrix):
+        for row in matrix:
+            line = []
+            for value in row:
+                line.append('%.4f,' % value)
+            if len(line) > 0:
+                line[-1] = line[-1][:-1]
+                print("".join(line))
+
+def print_jacobi_output(matrix, eigenvalues):
+    line = []
+    for value in eigenvalues:
+        line.append(f'{value},')
+    if len(line) > 0:
+        line[-1] = line[-1][:-1]
+        print("".join(line))
+    
+    for row in matrix:
+        line = []
+        for value in row:
+            line.append('%.4f,' % value)
+        if len(line) > 0:
+            line[-1] = line[-1][:-1]
+            print("".join(line))
+
 
 
 def get_centriods(np_array, k):
@@ -72,8 +113,6 @@ def get_centriods(np_array, k):
     centroids = [c.tolist() for c in centroids]
     indices = [int(i) for i in indices]
     return (indices, centroids)
-
-
 
 def load_args():
     """ returns a dict with all args that mentioned in ENV class and inputted """
