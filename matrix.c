@@ -7,15 +7,6 @@
 #define true 1
 #define false 0
 
-#ifndef MATRIX_IS_DEFINED
-#define MATRIX_IS_DEFINED
-typedef struct Matrix {
-    int rows;
-    int cols;
-    int is_diag;
-    double *data;
-} Matrix;
-#endif
 
 /* TODO: Check callocs/mallocs on failure */
 
@@ -25,32 +16,25 @@ typedef struct Matrix {
 /* Matrix API */
 /* create */
 Matrix *create_matrix(int rows, int cols) {
-    int size_of_data;
+    int size_of_data, i;
     size_of_data = rows*cols;
     assert(rows>0 && cols>0);
 
     Matrix *matrix = (Matrix *)malloc(sizeof(Matrix));
     matrix->rows = rows;
     matrix->cols = cols;
-    matrix->is_diag = false;
+    matrix->is_not_diag = 0;
     matrix->data = (double *)calloc(sizeof(double), size_of_data);
+    for (i=0; i<size_of_data; i++)
+        (matrix->data)[i] = 0.;
     return matrix;
 }
 
-Matrix *create_diag_matrix(int n) {
-    assert(n>0);
-    Matrix *matrix = (Matrix *)malloc(sizeof(Matrix));
-    matrix->rows = n;
-    matrix->cols = n;
-    matrix->is_diag = true;
-    matrix->data = (double *)calloc(sizeof(double), n);
-    return matrix;
-}
 
 Matrix *create_identity_matrix(int n) {
     assert(n>0);
     int i;
-    Matrix *I = create_diag_matrix(n);
+    Matrix *I = create_matrix(n,n);
     for (i=0; i<n; i++)
         matrix_set_entry(I, i, i, 1.);
     return I;
@@ -72,20 +56,10 @@ double *matrix_get_data(Matrix *matrix) {
 double matrix_get_entry(Matrix *matrix, int row, int col){
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
     double *matrix_data = matrix_get_data(matrix);
-
-    if (_is_matrix_diag(matrix)){ /* if matrix is diagonal */
-        if (row != col){
-            return 0;
-        } else {
-            return matrix_data[col];
-        }
-        
-    } else { /* matrix is NOT diagonal */
-        return matrix_data[_get_matrix_index(matrix, row, col)];
-    }
+    return matrix_data[_get_matrix_index(matrix, row, col)];
 }
 
-void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index) { /* TODO: what about diag matrix? */
+void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index) {
     assert(matrix_get_rows_num(matrix) > row_index);
     int cols_num = matrix_get_cols_num(matrix);
     point->dim = cols_num;
@@ -106,12 +80,10 @@ void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_
     int i, j, cols_num = matrix_get_cols_num(matrix), rows_num = matrix_get_rows_num(matrix);
     double current_value;
     for (i=0; i<rows_num; i++) {
-        for (j=0; j<cols_num; j++) {
-            if (i != j) {
-                current_value = matrix_get_entry(matrix, i, j);
-                if (fabs(current_value) > fabs(max_element_get_value(max_element))) {
-                    max_element_set_new_values(max_element, current_value, i, j);
-                }
+        for (j=i+1; j<cols_num; j++) {
+            current_value = matrix_get_entry(matrix, i, j);
+            if (fabs(current_value) > fabs(max_element_get_value(max_element))) {
+                max_element_set_new_values(max_element, current_value, i, j);
             }
         }
     }
@@ -122,24 +94,18 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
     double *matrix_data = matrix_get_data(matrix);
     int matrix_index = _get_matrix_index(matrix, row, col);
-
-    if (_is_matrix_diag(matrix)) {
-        if (row != col && value != 0.) {
-            _diag_to_square_matrix(matrix);
-             matrix_data[matrix_index] = value;
-        } else if (row != col && value == 0){ /* nothing to change */
-            return;
-        } else {
-            matrix_data[row] = value;
-        }
-    } 
-    else { /* matrix is NOT diagonal */
-         matrix_data[matrix_index] = value;
+    double old_value;
+    old_value = matrix_data[matrix_index];
+    matrix_data[matrix_index] = value;
+    if (row != col){
+        if ((old_value == 0.) && (value != 0.))
+            (matrix->is_not_diag)++;
+        if ((old_value != 0.) && (value == 0.))
+            (matrix->is_not_diag)--;
     }
 }
 
 void matrix_set_row(Matrix *matrix, int row_index, Point *point) {
-    /* TODO: what if is diag? */
     /* sets a whole point in the matrix */
     int i, rows_num = matrix_get_rows_num(matrix);
     if (!_is_matrix_diag(matrix)) {
@@ -150,17 +116,6 @@ void matrix_set_row(Matrix *matrix, int row_index, Point *point) {
 }
 
 /* utilities */
-int check_if_matrix_is_diagonal(Matrix *matrix) {
-    int i, j;
-    for (i=0; i<matrix_get_rows_num(matrix); i++) {
-        for (j=0; j<matrix_get_cols_num(matrix); j++) {
-            if (i != j && matrix_get_entry(matrix, i, j) != 0) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
 
 double matrix_get_row_sum(Matrix *matrix, int row_index) {
     int col_index, cols_num = matrix_get_cols_num(matrix);
@@ -213,31 +168,17 @@ Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
 
 /* Matrix inner functions */
 int _is_matrix_diag(Matrix *matrix) {
-    return matrix->is_diag;
+    return (!(matrix->is_not_diag)) && (matrix->cols == matrix->rows);
 }
 
 int _get_matrix_index(Matrix *matrix, int row, int col) {
-    if (!_is_matrix_diag(matrix))
-        return row*(matrix->cols) + col;
-    else
-        return row;
+    return row*(matrix->cols) + col;
 }
 
-void _diag_to_square_matrix(Matrix *matrix) { 
-    /* Changing matrix->data from n sized array (diagonal matrix) to n*n sized array (square matrix) */
-    int i,n = matrix_get_rows_num(matrix);
-    double *old_data = matrix_get_data(matrix);
-    matrix->data = (double *)calloc(sizeof(double), n*n);  /* isn't it safer to create a new matrix? */
-    for (i=0; i<n; i++){
-        (matrix->data)[i*n + i] = old_data[i];
-    }
-    matrix->is_diag = 0;
-    free(old_data);
-}
 
 Matrix *_multiply_matrices_diag_with_diag(Matrix *m1, Matrix *m2) {
     int n = matrix_get_rows_num(m1);
-    Matrix *new_matrix = create_diag_matrix(n);
+    Matrix *new_matrix = create_matrix(n,n);
     int i;
     double entry_value;
 
@@ -310,7 +251,6 @@ Matrix *sub_matrices(Matrix *A, Matrix *B) {
 
 /* debugging function */
 void print_matrix(Matrix *matrix) {
-    space();
     int i, j;
     double val;
     int cols_num = matrix->cols;
@@ -328,7 +268,6 @@ void print_matrix(Matrix *matrix) {
         }
 
     }
-    space();
 }
 
 void print_matrix2(Matrix *matrix) {
@@ -400,7 +339,7 @@ Matrix *generate_matrix(int rows, int cols, int is_diag) {
     Matrix *m;
 
     if (is_diag) {
-        m = create_diag_matrix(rows);
+        m = create_matrix(rows, rows);
         for (i=0; i<rows; i++) {
             matrix_set_entry(m, i, i, RandomReal(0, 10));
         }

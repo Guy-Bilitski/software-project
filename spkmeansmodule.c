@@ -142,25 +142,50 @@ static PyObject* lnorm_capi(PyObject *self, PyObject *args){
 
 static PyObject* jacobi_capi(PyObject *self, PyObject *args){
     PyObject *data_points_as_pylist;
-    int k;
     YacobiOutput *Jout;
     PyObject *V, *A;
     Matrix *sym_matrix;
 
-    if (!(PyArg_ParseTuple(args, "Oi", &data_points_as_pylist, &k))){
+    if (!(PyArg_ParseTuple(args, "O", &data_points_as_pylist))){
         printf("An Error Has Occurred-module.c-151\n");
         exit(1);
     }
     sym_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
-    Jout = jacobi(sym_matrix, k);
+    Jout = create_empty_yacobi_output();
+    jacobi(sym_matrix, Jout);
     V = matrix_to_pylist(Jout->V);
     A = diagonal_matrix_to_pylist(Jout->A);
-    /*k = get_k(Jout->A, Jout->V)*/
-    free_matrix(Jout->V);
-    free_matrix(Jout->A);
+    free_yacobi_output(Jout);
     free_matrix(sym_matrix);
-    free(Jout);
-    return Py_BuildValue("OOi", V, A, k);
+    return Py_BuildValue("OO", V, A);
+}
+
+
+static PyObject* transform_data_points_capi(PyObject *self, PyObject *args){
+    PyObject *data_points_as_pylist;
+    int k;
+    YacobiOutput *Jout;
+    PyObject *pylist_U;
+    Matrix *data_points_matrix, *laplacian, *U;
+
+    if (!(PyArg_ParseTuple(args, "Oi", &data_points_as_pylist, &k))){
+        printf("An Error Has Occurred-module.c-152\n");
+        exit(1);
+    }
+    data_points_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
+    laplacian = lnorm(data_points_matrix);
+    Jout = create_empty_yacobi_output();
+    jacobi(laplacian, Jout);
+    U = getU(Jout, k);
+    print_matrix(U); //TODO
+    printf("END U\n");
+    normalize_matrix_rows(U);
+    pylist_U = matrix_to_pylist(U);
+    free_yacobi_output(Jout);
+    free_matrix(data_points_matrix);
+    free_matrix(laplacian);
+    free_matrix(U);
+    return Py_BuildValue("O", pylist_U);
 }
 
 static PyObject* kmeans_capi(PyObject *self, PyObject *args){
@@ -209,6 +234,12 @@ static PyMethodDef capiMethods[] = {
         PyDoc_STR("jacobi docs...")
     },
     {
+        "transform_data_points",
+        (PyCFunction) transform_data_points_capi,
+        METH_VARARGS,
+        PyDoc_STR("kmeans docs...")
+    },
+    {
         "kmeans",
         (PyCFunction) kmeans_capi,
         METH_VARARGS,
@@ -238,5 +269,3 @@ PyMODINIT_FUNC PyInit_mykmeanssp(void) {
     }
     return m;
 }
-
-

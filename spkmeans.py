@@ -1,8 +1,10 @@
 import sys
 import pandas as pd
 import numpy as np
+import sys
 import time
 import mykmeanssp
+#sys.settrace(mykmeanssp.transform_data_points)
 
 class Env:
     """ Class for global variables used in the system """
@@ -21,7 +23,8 @@ def main():
         
         goal = args.get(Env.goal)
         if goal == 'spk':
-            mykmeanssp.wam(data_points.tolist())
+            T = mykmeanssp.transform_data_points(data_points.tolist(), args.get(Env.k))
+            print_matrix(T)
         elif goal == 'wam':
             W = mykmeanssp.wam(data_points.tolist())
             print_matrix(W)
@@ -32,7 +35,8 @@ def main():
             L = mykmeanssp.lnorm(data_points.tolist())
             print_matrix(L)
         elif goal == 'jacobi':
-            pass
+            eigen_vectors, eigen_values = mykmeanssp.jacobi(data_points.tolist())
+            print_jacobi_output(eigen_vectors, eigen_values)
         
         #kmeans_pp(data_points, args.get(Env.k))
     except Exception as ex:
@@ -80,7 +84,7 @@ def print_matrix(matrix):
 def print_jacobi_output(matrix, eigenvalues):
     line = []
     for value in eigenvalues:
-        line.append(f'{value},')
+        line.append('%.4f,' % value)
     if len(line) > 0:
         line[-1] = line[-1][:-1]
         print("".join(line))

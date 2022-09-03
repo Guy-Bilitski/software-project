@@ -22,7 +22,7 @@ typedef struct Point {
 typedef struct Matrix {
     int rows;
     int cols;
-    int is_diag;
+    int is_not_diag;
     double *data;
 } Matrix;
 #endif
@@ -61,7 +61,6 @@ typedef struct YacobiOutput
 {
     Matrix *A;
     Matrix *V;
-    int k;
 } YacobiOutput;
 #endif
 
@@ -101,7 +100,6 @@ void print_point(Point *point);
 /* Matrix API */
 /* create */
 Matrix *create_matrix(int rows, int cols);
-Matrix *create_diag_matrix(int n);  /* creates a matrix with dimensions rows X columns all zeros */
 Matrix *create_identity_matrix(int n);
 
 /* getters */
@@ -118,7 +116,6 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets 
 void matrix_set_row(Matrix *matrix, int row_index, Point *point);  /* sets a point (row) in the matrix in <row_index> */
 
 /* utilities */
-int check_if_matrix_is_diagonal(Matrix *matrix);  /* goes through matrix non diagonal and check if one of them is not 0 */
 double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
 void free_matrix(Matrix *matrix); /* cleanup matrix object and sub-objects */
 void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* TODO: check if relevant */
@@ -129,7 +126,6 @@ Matrix *sub_matrices(Matrix *A, Matrix *B); /* sub A - B */
 /* Matrix inner functions */
 int _is_matrix_diag(Matrix *matrix);
 int _get_matrix_index(Matrix *matrix, int row, int col);
-void _diag_to_square_matrix(Matrix *matrix);
 Matrix *_multiply_matrices_diag_with_diag(Matrix *m1, Matrix *m2);
 Matrix *_multiply_matrices_diag_with_nondiag(Matrix *m1, Matrix *m2);
 Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2);
@@ -233,9 +229,8 @@ void normalize_matrix_rows(Matrix *matrix);
 double matrix_off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
 void normalize_matrix_rows(Matrix *matrix);
-int get_k_from_sorted_eigenvectors_array(Eigenvector **eigen_vectors_array, int n);
-int get_k_from_yacobi_output(YacobiOutput *yacobi_output);
-Eigenvector **get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output);
+int get_k_from_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
+void get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output, Eigenvector *eigen_vectors_array);
 Matrix *getU(YacobiOutput *yacobi_output, int k);
 
 /* utilities */
@@ -254,7 +249,7 @@ YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output);
 /* JACOBI */
 void print_jacobi_output(YacobiOutput *J);
 void free_yacobi_output(YacobiOutput *yacobi_output);
-void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V, int k);
+void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V);
 YacobiOutput *create_empty_yacobi_output();
 
 

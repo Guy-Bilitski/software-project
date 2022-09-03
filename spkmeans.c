@@ -16,7 +16,6 @@
 #define MAX_NUMBER_OF_ROTATIONS 100
 
 int main (int argc, char **argv) {
-    /*
     const char *input_filename;
     char *goal;
     Matrix *data_points;
@@ -33,20 +32,38 @@ int main (int argc, char **argv) {
 
     achieve_goal(data_points, goal);
     return 0;
-    */
-    srand((int) time(NULL)); /* important for random */
-    Matrix *A = generate_matrix(5,5, false);
-    Matrix *V = generate_matrix(5,5, false);
-    YacobiOutput *yacobi_output = create_empty_yacobi_output();
-    set_yacobi_output_values(yacobi_output, A, V);
-    Eigenvector **arr = get_eigen_vectors_from_yacobi_output(yacobi_output);
-    print_eigen_vectors_array(arr, 5);
-    free(A); free(V); free_eigen_vectors_array(arr, 5);
     
 }
 
 
+int main2 (int argc, char **argv){
+    /*
+    int k=0;
+    YacobiOutput *Jout;
+    Matrix *data_points_matrix, *laplacian, *U;
+
+    data_points_matrix = input_file_to_matrix("data/mytxt.txt");
+    laplacian = lnorm(data_points_matrix);
+    Jout = create_empty_yacobi_output();
+    jacobi(laplacian, Jout);
+    U = getU(Jout, k);
+    normalize_matrix_rows(U);
+    print_matrix(U);
+    free_yacobi_output(Jout);
+    free_matrix(data_points_matrix);
+    free_matrix(laplacian);
+    free_matrix(U);
+    return 1;
+    */
+   return 1;
+
+
+}
+
+
+
 void achieve_goal(Matrix *data_points, char *goal) {
+    YacobiOutput *Jout;
     if (!strcmp(goal, "wam")){
         Matrix *W = wam(data_points);
         print_matrix(W);
@@ -66,7 +83,8 @@ void achieve_goal(Matrix *data_points, char *goal) {
         return;
     }
     else if (!strcmp(goal, "jacobi")){
-        YacobiOutput *Jout = jacobi(data_points, 0);
+        Jout = create_empty_yacobi_output();
+        jacobi(data_points, Jout);
         print_jacobi_output(Jout);
         free_yacobi_output(Jout);
         return;
@@ -111,7 +129,7 @@ Matrix *create_weighted_matrix(Matrix *X) {
 Matrix *create_diagonal_degree_matrix(Matrix *matrix) {
     int i, rows_num = matrix_get_rows_num(matrix);
     double value;
-    Matrix *diagonal_degree_matrix = create_diag_matrix(rows_num);
+    Matrix *diagonal_degree_matrix = create_matrix(rows_num, rows_num);
     for (i=0; i<rows_num; i++) {
         value = matrix_get_row_sum(matrix, i);
         matrix_set_entry(diagonal_degree_matrix, i, i, value);
@@ -181,6 +199,7 @@ void normalize_matrix_rows(Matrix *matrix) {
         row_norm = euclidean_norm(row);
         divide_point_by_value(row, row_norm);
     }
+    free(row);
 }
 
 double matrix_off(Matrix *matrix) {
@@ -209,67 +228,68 @@ Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_eleme
     return transformed_matrix;
 } 
 
-Matrix *getU(YacobiOutput *yacobi_output, int k) {
-    Eigenvector **eigen_vectors_array = get_eigen_vectors_from_yacobi_output(yacobi_output);
-    Matrix *U, *A = yacobi_output_get_A(yacobi_output);
-    int i, j, n = matrix_get_cols_num(A);
+Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be computed by eigengap heuristic */
+    int n, i, j;
+    Eigenvector *eigen_vectors_array;
+    Matrix *U;
     double entry;
-    Point *p;
+    Point *point_j;
 
-    if (k == -1) {
-        k = get_k_from_sorted_eigenvectors_array(eigen_vectors_array, n);
-    }
+    n = matrix_get_cols_num(yacobi_output->V);
+    eigen_vectors_array = (Eigenvector *)malloc(sizeof(Eigenvector)*n);
+    for (i=0; i<n; i++) 
+        eigen_vectors_array[i].point = create_empty_point();
+    get_eigen_vectors_from_yacobi_output(yacobi_output, eigen_vectors_array);
+    printf("pre k is %d\n", k);
+    if (k == 0) 
+        k = get_k_from_eigen_vectors_array(eigen_vectors_array, n);
+    printf("post k is %d\n", k);
 
     U = create_matrix(n, k);
     for (j=0; j<k; j++){
-        p = eigen_vector_get_point(eigen_vectors_array[j]); /* the jth eigen vector, jth column */
+        point_j = eigen_vectors_array[j].point; /*the jth eigen vector, jth column*/
         for (i=0; i<n; i++) {
-            entry = point_get_entry(p, i);
+            entry = point_get_entry(point_j, i);
             matrix_set_entry(U, i, j, entry);
         }
     }
 
+    for (i=0; i<n; i++)
+        free(eigen_vectors_array[i].point);
+    free(eigen_vectors_array);
     return U;
 }
 
-int get_k_from_sorted_eigenvectors_array(Eigenvector **eigen_vectors_array, int n) {
-    double maxgap, currentgap;
+
+int get_k_from_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n) {
     int k, i;
+    double maxgap, currentgap;
+
+    sort_eigenvectors_array(eigen_vectors_array, n);
+
     k = -1;
     maxgap = -1.;
 
     for (i=0; i<n/2; i++){
-        currentgap = eigen_vector_get_eigen_value(eigen_vectors_array[i]) - eigen_vector_get_eigen_value(eigen_vectors_array[i+1]);
+        currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
         assert(currentgap >= 0);
         if (currentgap > maxgap){
             maxgap = currentgap;
-            k = i;
+            k = i+1;
         }
     }
     return k;
 }
 
-int get_k_from_yacobi_output(YacobiOutput *yacobi_output) {
-    Matrix *A = yacobi_output_get_A(yacobi_output);
-    int n = matrix_get_cols_num(A);
-    Eigenvector **eigen_vectors_array = get_eigen_vectors_from_yacobi_output(yacobi_output);
-    return get_k_from_sorted_eigenvectors_array(eigen_vectors_array, n);
-}
-
-Eigenvector **get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output) { /* delete eigen vectors after all */
+void get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output, Eigenvector *eigen_vectors_array) {
     Matrix *A = yacobi_output_get_A(yacobi_output), *V = yacobi_output_get_V(yacobi_output);
-    double eigen_value;
-    int k, i, V_dim = matrix_get_rows_num(V);
-    Eigenvector **eigen_vectors_array;
+    int i, n;
+    n = matrix_get_cols_num(V);
 
-    for (i=0; i<V_dim; i++) {
-        Point *point = create_empty_point();
-        eigen_value = matrix_get_entry(A, i, i);
-        matrix_get_column_to_point(V, point, i);
-        
-        eigen_vectors_array[i] = create_eigen_vector(point, eigen_value);
+    for (i=0; i<n; i++) {
+        matrix_get_column_to_point(V, eigen_vectors_array[i].point, i);
+        eigen_vectors_array[i].eigen_value = matrix_get_entry(A, i, i);
     }
-    return eigen_vectors_array;
 }
 
 /* utilities */
@@ -330,25 +350,36 @@ Matrix *lnorm(Matrix* data_points){
     return Lnorm;
 }
 
+Matrix *matrix_tr(Matrix *m){
+    Matrix *t = create_matrix(m->cols, m->rows);
+    int i,j;
+    for (i=0; i<t->rows; i++){
+        for (j=0; j<t->cols; j++){
+            matrix_set_entry(t, i, j, matrix_get_entry(m, j, i));
+        }
+    }
+    return t;
+}
 
 YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
     int dim = matrix_get_rows_num(A);
     Matrix *V = create_identity_matrix(dim);
-    if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
+    if(_is_matrix_diag(A)) {
         set_yacobi_output_values(yacobi_output, A, V);
         return yacobi_output;
     }
 
-    int rotation_num = 0, need_to_stop = 0;
+    int rotation_num = 0;
     double recent_off;
     S_and_C *s_and_c = create_empty_S_and_C();
     MaxElement *max_element = create_empty_max_element();
 
-    while (rotation_num <= MAX_NUMBER_OF_ROTATIONS) {
+    while (rotation_num < MAX_NUMBER_OF_ROTATIONS) {
         recent_off = matrix_off(A);
         matrix_get_non_diagonal_max_absolute_value(A, max_element);
         get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
-        Matrix *P = create_identity_matrix(dim); build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
+        Matrix *P = create_identity_matrix(dim);
+        build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
         A = transform_matrix(A, s_and_c, max_element);
         V = multiply_matrices(V, P); free_matrix(P);
         if (matrix_converge(recent_off, A)) {
@@ -360,4 +391,3 @@ YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
     free(s_and_c);
     return yacobi_output;
 }
-
