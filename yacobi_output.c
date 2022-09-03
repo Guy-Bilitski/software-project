@@ -6,7 +6,6 @@ typedef struct YacobiOutput
 {
     Matrix *A;
     Matrix *V;
-    int k;
 } YacobiOutput;
 #endif
 
@@ -16,10 +15,17 @@ YacobiOutput *create_empty_yacobi_output() {
     return yacobi_output;
 }
 
-void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V, int k) {
+Matrix *yacobi_output_get_A(YacobiOutput *yacobi_output) {
+    return yacobi_output->A;
+}
+
+Matrix *yacobi_output_get_V(YacobiOutput *yacobi_output) {
+    return yacobi_output->V;
+}
+
+void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V) {
     yacobi_output->A = A;
     yacobi_output->V = V;
-    yacobi_output->k = k;
 }
 
 void free_yacobi_output(YacobiOutput *yacobi_output) {

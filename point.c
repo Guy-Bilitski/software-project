@@ -20,8 +20,13 @@ typedef struct Point {
 
 
 /* Point API */
-Point *create_point(double *data, int dim, int offset) {
+Point *create_empty_point() {
     Point *new_point = (Point *)malloc(sizeof(Point));
+    return new_point;
+}
+
+Point *create_point(double *data, int dim, int offset) {
+    Point *new_point = create_empty_point();
     new_point->data = data;
     new_point->dim = dim;
     new_point->offset = offset;

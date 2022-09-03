@@ -16,6 +16,7 @@
 #define MAX_NUMBER_OF_ROTATIONS 100
 
 int main (int argc, char **argv) {
+    /*
     const char *input_filename;
     char *goal;
     Matrix *data_points;
@@ -32,6 +33,16 @@ int main (int argc, char **argv) {
 
     achieve_goal(data_points, goal);
     return 0;
+    */
+    srand((int) time(NULL)); /* important for random */
+    Matrix *A = generate_matrix(5,5, false);
+    Matrix *V = generate_matrix(5,5, false);
+    YacobiOutput *yacobi_output = create_empty_yacobi_output();
+    set_yacobi_output_values(yacobi_output, A, V);
+    Eigenvector **arr = get_eigen_vectors_from_yacobi_output(yacobi_output);
+    print_eigen_vectors_array(arr, 5);
+    free(A); free(V); free_eigen_vectors_array(arr, 5);
+    
 }
 
 
@@ -136,37 +147,6 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
 }
 
 
-/* JACOBI */
-YacobiOutput *Jacobi(Matrix *A, int k, YacobiOutput *yacobi_output) {
-    int dim = matrix_get_rows_num(A);
-    Matrix *V = create_identity_matrix(dim);
-    if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
-        set_yacobi_output_values(yacobi_output, A, V, k);
-        return yacobi_output;
-    }
-
-    int rotation_num = 0;
-    double recent_off;
-    S_and_C *s_and_c = create_empty_S_and_C();
-    MaxElement *max_element = create_empty_max_element();
-
-    while (rotation_num <= MAX_NUMBER_OF_ROTATIONS) {
-        recent_off = matrix_off(A);
-        matrix_get_non_diagonal_max_absolute_value(A, max_element);
-        get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
-        Matrix *P = create_identity_matrix(dim); build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
-        A = transform_matrix(A, s_and_c, max_element);
-        V = multiply_matrices(V, P); free_matrix(P);
-        if (matrix_converge(recent_off, A)) {
-            break;
-        }
-    }
-    set_yacobi_output_values(yacobi_output, A, V, k);
-    free(max_element);
-    free(s_and_c);
-    return yacobi_output;
-}
-
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
@@ -229,26 +209,20 @@ Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_eleme
     return transformed_matrix;
 } 
 
-Matrix *getU(Matrix *V, Matrix *A, int k) {
-    int i, j, n = A->cols;
+Matrix *getU(YacobiOutput *yacobi_output, int k) {
+    Eigenvector **eigen_vectors_array = get_eigen_vectors_from_yacobi_output(yacobi_output);
+    Matrix *U, *A = yacobi_output_get_A(yacobi_output);
+    int i, j, n = matrix_get_cols_num(A);
     double entry;
-    Eigenvector *eigen_vectors_array = (Eigenvector *)malloc(sizeof(Eigenvector)*n);
-    Matrix *U;
     Point *p;
-    for (i=0; i<n; i++){
-        p = &(eigen_vectors_array[i].point);
-        matrix_get_column_to_point(V, p, i);
-        eigen_vectors_array[i].eigenvalue = matrix_get_entry(A, i, i);
-    }
-    sort_eigenvectors_array(eigen_vectors_array, n);
 
-    if (k == -1)
+    if (k == -1) {
         k = get_k_from_sorted_eigenvectors_array(eigen_vectors_array, n);
+    }
 
     U = create_matrix(n, k);
-
     for (j=0; j<k; j++){
-        p = &(eigen_vectors_array[j].point); /* the jth eigen vector, jth column */
+        p = eigen_vector_get_point(eigen_vectors_array[j]); /* the jth eigen vector, jth column */
         for (i=0; i<n; i++) {
             entry = point_get_entry(p, i);
             matrix_set_entry(U, i, j, entry);
@@ -258,14 +232,14 @@ Matrix *getU(Matrix *V, Matrix *A, int k) {
     return U;
 }
 
-int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n) {
+int get_k_from_sorted_eigenvectors_array(Eigenvector **eigen_vectors_array, int n) {
     double maxgap, currentgap;
     int k, i;
     k = -1;
     maxgap = -1.;
 
     for (i=0; i<n/2; i++){
-        currentgap = eigen_vectors_array[i].eigenvalue - eigen_vectors_array[i+1].eigenvalue;
+        currentgap = eigen_vector_get_eigen_value(eigen_vectors_array[i]) - eigen_vector_get_eigen_value(eigen_vectors_array[i+1]);
         assert(currentgap >= 0);
         if (currentgap > maxgap){
             maxgap = currentgap;
@@ -273,7 +247,29 @@ int get_k_from_sorted_eigenvectors_array(Eigenvector *eigen_vectors_array, int n
         }
     }
     return k;
-    
+}
+
+int get_k_from_yacobi_output(YacobiOutput *yacobi_output) {
+    Matrix *A = yacobi_output_get_A(yacobi_output);
+    int n = matrix_get_cols_num(A);
+    Eigenvector **eigen_vectors_array = get_eigen_vectors_from_yacobi_output(yacobi_output);
+    return get_k_from_sorted_eigenvectors_array(eigen_vectors_array, n);
+}
+
+Eigenvector **get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output) { /* delete eigen vectors after all */
+    Matrix *A = yacobi_output_get_A(yacobi_output), *V = yacobi_output_get_V(yacobi_output);
+    double eigen_value;
+    int k, i, V_dim = matrix_get_rows_num(V);
+    Eigenvector **eigen_vectors_array;
+
+    for (i=0; i<V_dim; i++) {
+        Point *point = create_empty_point();
+        eigen_value = matrix_get_entry(A, i, i);
+        matrix_get_column_to_point(V, point, i);
+        
+        eigen_vectors_array[i] = create_eigen_vector(point, eigen_value);
+    }
+    return eigen_vectors_array;
 }
 
 /* utilities */
@@ -309,8 +305,6 @@ int matrix_converge(double A_off, Matrix *A) {
 
 
 
-
-
 /* SPKMEANS API */
 
 Matrix *wam(Matrix* data_points){
@@ -336,11 +330,34 @@ Matrix *lnorm(Matrix* data_points){
     return Lnorm;
 }
 
-YacobiOutput *jacobi(Matrix* matrix, int k){
-    YacobiOutput *X;
-    int a;
-    a = matrix_get_entry(matrix,k,1);
-    printf("%d",a);
-    X = malloc(sizeof(YacobiOutput));
-    return X;
+
+YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
+    int dim = matrix_get_rows_num(A);
+    Matrix *V = create_identity_matrix(dim);
+    if(check_if_matrix_is_diagonal(A)) { /* edge case when is already diagonal */
+        set_yacobi_output_values(yacobi_output, A, V);
+        return yacobi_output;
+    }
+
+    int rotation_num = 0, need_to_stop = 0;
+    double recent_off;
+    S_and_C *s_and_c = create_empty_S_and_C();
+    MaxElement *max_element = create_empty_max_element();
+
+    while (rotation_num <= MAX_NUMBER_OF_ROTATIONS) {
+        recent_off = matrix_off(A);
+        matrix_get_non_diagonal_max_absolute_value(A, max_element);
+        get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
+        Matrix *P = create_identity_matrix(dim); build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
+        A = transform_matrix(A, s_and_c, max_element);
+        V = multiply_matrices(V, P); free_matrix(P);
+        if (matrix_converge(recent_off, A)) {
+            break;
+        }
+    }
+    set_yacobi_output_values(yacobi_output, A, V);
+    free(max_element);
+    free(s_and_c);
+    return yacobi_output;
 }
+

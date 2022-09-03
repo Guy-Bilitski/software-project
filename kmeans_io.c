@@ -54,7 +54,6 @@ int get_n(const char *input_file) {
 }
 
 
-
 Matrix *input_file_to_matrix(const char *input_file) {
     FILE *ifp;
     int i,j;
