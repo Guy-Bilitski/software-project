@@ -81,11 +81,9 @@ double *point_get_data(Point *point);  /* returs the point data */
 void divide_point_by_value(Point *p, double value);
 
 /* setters */
-void point_set_entry(Point *point, int index, double value);  /* sets value in index <index> */
 
 double inner_product(Point *row_point, Point *column_point);  /* returns row X column scalar */
 double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
-double sum_point_values(Point *point); /* returns the sum of the points values */
 double euclidean_norm(Point *p);
 
 /* debugging functions */

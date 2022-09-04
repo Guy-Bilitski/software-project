@@ -17,8 +17,6 @@ typedef struct Point {
 #endif
 
 
-
-
 /* Point API */
 Point *create_empty_point() {
     Point *new_point = (Point *)malloc(sizeof(Point));
@@ -58,13 +56,6 @@ double *point_get_data(Point *point) {
     return point->data;
 }
 
-void point_set_entry(Point *point, int index, double value) {
-    assert(index >= 0 && index < point->dim);
-    int real_index = _convert_point_index(point, index);
-    double *data = point_get_data(point);
-    data[real_index] = value;
-}
-
 double inner_product(Point *row_point, Point *column_point) {
     int i, points_dim = point_get_dim(row_point);
     double sum = 0;
@@ -92,15 +83,6 @@ double euclidean_distance(Point *p1, Point *p2) {
     return sqrt(sum);
 }
 
-double sum_point_values(Point *point) {
-    int i;
-    double sum = 0;
-    for (i=0; i<point_get_dim(point); i++) {
-        sum += point_get_entry(point, i);
-    }
-    return sum;
-}
-
 void divide_point_by_value(Point *p, double value) {
     int i, n, index;
     n = point_get_dim(p); 
@@ -118,23 +100,4 @@ void print_point(Point *point) {
     for (i=0; i<(point->dim); i++) {
         printf("%f ", point_get_entry(point, i));
     }
-}
-
-
-int main55() {
-    int i;
-    int dim = 9;
-    double *data = (double *)calloc(sizeof(double), dim);
-    for (i=0; i<dim; i++) {
-        data[i] = i*2;
-    }
-    Point *p = create_point(data, dim/3, 3);
-    print_point(p);
-    printf("\n");
-    printf("\n");
-    divide_point_by_value(p, 2);
-    print_point(p);
-    printf("\n");
-    printf("\n");
-    return 1;
 }
