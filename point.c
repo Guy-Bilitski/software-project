@@ -36,6 +36,7 @@ int _convert_point_index(Point *point, int index) {
     return point_offset*index;
 }
 
+/* Getters */
 double point_get_entry(Point *point, int index) {
     assert(index >= 0 && index < point->dim);
     int real_index = _convert_point_index(point, index);
@@ -56,6 +57,7 @@ double *point_get_data(Point *point) {
     return point->data;
 }
 
+/* Utils */
 double inner_product(Point *row_point, Point *column_point) {
     int i, points_dim = point_get_dim(row_point);
     double sum = 0;
