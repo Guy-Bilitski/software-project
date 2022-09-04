@@ -35,33 +35,6 @@ int main (int argc, char **argv) {
     
 }
 
-
-int main2 (int argc, char **argv){
-    /*
-    int k=0;
-    YacobiOutput *Jout;
-    Matrix *data_points_matrix, *laplacian, *U;
-
-    data_points_matrix = input_file_to_matrix("data/mytxt.txt");
-    laplacian = lnorm(data_points_matrix);
-    Jout = create_empty_yacobi_output();
-    jacobi(laplacian, Jout);
-    U = getU(Jout, k);
-    normalize_matrix_rows(U);
-    print_matrix(U);
-    free_yacobi_output(Jout);
-    free_matrix(data_points_matrix);
-    free_matrix(laplacian);
-    free_matrix(U);
-    return 1;
-    */
-   return 1;
-
-
-}
-
-
-
 void achieve_goal(Matrix *data_points, char *goal) {
     YacobiOutput *Jout;
     if (!strcmp(goal, "wam")){
@@ -94,7 +67,6 @@ void achieve_goal(Matrix *data_points, char *goal) {
         exit(1);
     }
 }
-
 
 
 /* spkmeans functions */
@@ -260,7 +232,6 @@ Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be com
     return U;
 }
 
-
 int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n) {
     int k, i;
     double maxgap, currentgap;
@@ -380,7 +351,7 @@ YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
         Matrix *P = create_identity_matrix(dim);
         build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
         A = transform_matrix(A, s_and_c, max_element);
-        V = multiply_matrices(V, P); free_matrix(P);
+        V = multiply_matrices(V, P); free_matrix(P); /* TODO: here we lose the matrix reference */
         if (matrix_converge(recent_off, A)) {
             break;
         }

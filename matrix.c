@@ -14,7 +14,6 @@
 
 
 /* Matrix API */
-/* create */
 Matrix *create_matrix(int rows, int cols) {
     int size_of_data, i;
     size_of_data = rows*cols;
@@ -29,7 +28,6 @@ Matrix *create_matrix(int rows, int cols) {
         (matrix->data)[i] = 0.;
     return matrix;
 }
-
 
 Matrix *create_identity_matrix(int n) {
     assert(n>0);
@@ -105,18 +103,7 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     }
 }
 
-void matrix_set_row(Matrix *matrix, int row_index, Point *point) {
-    /* sets a whole point in the matrix */
-    int i, rows_num = matrix_get_rows_num(matrix);
-    if (!_is_matrix_diag(matrix)) {
-        for (i=0; i<rows_num; i++) {
-            matrix_set_entry(matrix, row_index, i, point_get_entry(point, i));
-        }
-    }
-}
-
 /* utilities */
-
 double matrix_get_row_sum(Matrix *matrix, int row_index) {
     int col_index, cols_num = matrix_get_cols_num(matrix);
     double sum;

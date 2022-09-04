@@ -80,8 +80,7 @@ int point_get_offset(Point *point);  /* returs the point offset */
 double *point_get_data(Point *point);  /* returs the point data */
 void divide_point_by_value(Point *p, double value);
 
-/* setters */
-
+/* Utils */
 double inner_product(Point *row_point, Point *column_point);  /* returns row X column scalar */
 double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
 double euclidean_norm(Point *p);
@@ -89,14 +88,9 @@ double euclidean_norm(Point *p);
 /* debugging functions */
 void print_point(Point *point);
 
-
-
-
-
 /* -------------------- MATRIX PROTOTYPES -------------------- */
 
 /* Matrix API */
-/* create */
 Matrix *create_matrix(int rows, int cols);
 Matrix *create_identity_matrix(int n);
 
@@ -111,7 +105,6 @@ void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_
 
 /* setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
-void matrix_set_row(Matrix *matrix, int row_index, Point *point);  /* sets a point (row) in the matrix in <row_index> */
 
 /* utilities */
 double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
