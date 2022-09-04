@@ -236,7 +236,6 @@ Matrix *lnorm(Matrix* data_points);
 YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output);
 
 
-
 /* JACOBI */
 void print_jacobi_output(YacobiOutput *J);
 void free_yacobi_output(YacobiOutput *yacobi_output);

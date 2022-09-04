@@ -21,6 +21,15 @@ Eigenvector *create_eigen_vector(Point *point, double eigen_value) {
     return eigen_vector;
 }
 
+Eigenvector *create_eigen_vectors_array(int eigenvectors_num) {
+    int i;
+    Eigenvector *eigen_vectors_array;
+    eigen_vectors_array = (Eigenvector *)malloc(sizeof(Eigenvector)*eigenvectors_num);
+    for (i=0; i<eigenvectors_num; i++) 
+        eigen_vectors_array[i].point = create_empty_point();
+    return eigen_vectors_array;
+}
+
 Point *eigen_vector_get_point(Eigenvector *eigen_vector) {
     return eigen_vector->point;
 }
@@ -29,8 +38,7 @@ double eigen_vector_get_eigen_value(Eigenvector *eigen_vector) {
     return eigen_vector->eigen_value;
 }
 
-int compare_eigenvectors(const void *p1, const void *p2)
-{
+int compare_eigenvectors(const void *p1, const void *p2) {
 const Eigenvector *v1 = p1, *v2 = p2;
 double diff = (v1->eigen_value) - (v2->eigen_value); /* if diff > 0 then v1 should be first, return -1 */
 if (diff < 0) return 1;

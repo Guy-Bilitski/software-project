@@ -15,7 +15,26 @@
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
 
+int main() {
+    int j, i, n;
+    YacobiOutput *yacobi_output = create_empty_yacobi_output();
+    Eigenvector *eigen_vectors_array;
+    Matrix *X;
+    char path[] = "testfiles/jacobi_0.txt";
+    for (j=0; j<10; j++) {
+        path[17] = j + '0';
+        X = input_file_to_matrix(path);
+        jacobi(X, yacobi_output);
+        n = matrix_get_cols_num(yacobi_output->V);
+        eigen_vectors_array = create_eigen_vectors_array(n);
+        get_eigen_vectors_from_yacobi_output(yacobi_output, eigen_vectors_array);
+        sort_eigenvectors_array(eigen_vectors_array, n);
+        printf("%d \n", get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, n));
+    }
+  
+}
 
+/*
 int main (int argc, char **argv) {
     const char *input_filename;
     char *goal;
@@ -34,7 +53,7 @@ int main (int argc, char **argv) {
     achieve_goal(data_points, goal);
     return 0;
     
-}
+}*/
 
 void achieve_goal(Matrix *data_points, char *goal) {
     YacobiOutput *Jout;
@@ -209,9 +228,7 @@ Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be com
     Point *point_j;
 
     eigenvectors_num = matrix_get_cols_num(yacobi_output->V);
-    eigen_vectors_array = (Eigenvector *)malloc(sizeof(Eigenvector)*eigenvectors_num);
-    for (i=0; i<eigenvectors_num; i++) 
-        eigen_vectors_array[i].point = create_empty_point();
+    eigen_vectors_array = create_eigen_vectors_array(eigenvectors_num);
     get_eigen_vectors_from_yacobi_output(yacobi_output, eigen_vectors_array);
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) 
@@ -239,11 +256,11 @@ int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int 
 
     k = -1;
     maxgap = -1.;
-    for (i=0; i<n; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
-        printf("%.4f ",eigen_vectors_array[i].eigen_value);
+    print_eigen_vectors_array(eigen_vectors_array, n);
+    for (i=0; i<n-1; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
         currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
-        assert(currentgap >=0);
         assert(currentgap >= 0);
+        printf("current gap: %f ", currentgap);
         if (currentgap > maxgap){
             maxgap = currentgap;
             k = i+1;
