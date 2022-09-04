@@ -94,7 +94,7 @@ void print_point(Point *point);
 Matrix *create_matrix(int rows, int cols);
 Matrix *create_identity_matrix(int n);
 
-/* getters */
+/* Getters */
 int matrix_get_rows_num(Matrix *matrix);
 int matrix_get_cols_num(Matrix *matrix);
 double *matrix_get_data(Matrix *matrix);
@@ -103,16 +103,18 @@ void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index); /* in
 void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);  /* inserts a column into a given point */
 void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element);  /* returns the max element of the matrix */
 
-/* setters */
+/* Setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
 
-/* utilities */
+/* Utils */
 double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
-void free_matrix(Matrix *matrix); /* cleanup matrix object and sub-objects */
 void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* TODO: check if relevant */
 void reset_matrix_entries_to_zero(Matrix *matrix);  /* resets all metrix entries to zero */
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
 Matrix *sub_matrices(Matrix *A, Matrix *B); /* sub A - B */
+
+/* cleanup */
+void free_matrix(Matrix *matrix); /* cleanup matrix object and sub-objects */
 
 /* Matrix inner functions */
 int _is_matrix_diag(Matrix *matrix);
@@ -126,8 +128,6 @@ void print_matrix(Matrix *matrix);
 void print_matrix_diag(Matrix *matrix);
 Matrix *generate_symmetric_matrix(int n);
 void space();
-
-
 
 
 /* -------------------- EIGENVECTOR PROTOTYPES -------------------- */

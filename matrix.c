@@ -38,7 +38,7 @@ Matrix *create_identity_matrix(int n) {
     return I;
 }
 
-/* getters */
+/* Getters */
 int matrix_get_rows_num(Matrix *matrix) {
     return matrix->rows;
 }
@@ -87,7 +87,7 @@ void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_
     }
 }
 
-/* setters */
+/* Setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
     double *matrix_data = matrix_get_data(matrix);
@@ -103,7 +103,7 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     }
 }
 
-/* utilities */
+/* Utils */
 double matrix_get_row_sum(Matrix *matrix, int row_index) {
     int col_index, cols_num = matrix_get_cols_num(matrix);
     double sum;
@@ -112,11 +112,6 @@ double matrix_get_row_sum(Matrix *matrix, int row_index) {
         sum += matrix_get_entry(matrix, row_index, col_index);
     }
     return sum;
-}
-
-void free_matrix(Matrix *matrix) {
-    free(matrix_get_data(matrix));
-    free(matrix);
 }
 
 void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point){
@@ -151,6 +146,31 @@ Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
     
     else
         return _multiply_matrices_diag_with_nondiag(m1, m2);
+}
+
+Matrix *sub_matrices(Matrix *A, Matrix *B) {
+    assert(matrix_get_cols_num(A) == matrix_get_cols_num(B));
+    assert(matrix_get_rows_num(A) == matrix_get_rows_num(B));
+    int i,j;
+    int cols = matrix_get_cols_num(A);
+    int rows = matrix_get_rows_num(A);
+    double value;
+    Matrix *result = create_matrix(rows, cols);
+
+    
+    for (i=0; i<rows; i++){
+        for (j=0; j<cols; j++) {
+            value = matrix_get_entry(A, i, j)-matrix_get_entry(B, i, j);
+            matrix_set_entry(result, i, j, value);
+        }
+    }
+    return result;
+}
+
+/* cleanup */
+void free_matrix(Matrix *matrix) {
+    free(matrix_get_data(matrix));
+    free(matrix);
 }
 
 /* Matrix inner functions */
@@ -216,24 +236,7 @@ Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2) {
     return new_matrix;
 }
 
-Matrix *sub_matrices(Matrix *A, Matrix *B) {
-    assert(matrix_get_cols_num(A) == matrix_get_cols_num(B));
-    assert(matrix_get_rows_num(A) == matrix_get_rows_num(B));
-    int i,j;
-    int cols = matrix_get_cols_num(A);
-    int rows = matrix_get_rows_num(A);
-    double value;
-    Matrix *result = create_matrix(rows, cols);
 
-    
-    for (i=0; i<rows; i++){
-        for (j=0; j<cols; j++) {
-            value = matrix_get_entry(A, i, j)-matrix_get_entry(B, i, j);
-            matrix_set_entry(result, i, j, value);
-        }
-    }
-    return result;
-}
 
 
 /* debugging function */
