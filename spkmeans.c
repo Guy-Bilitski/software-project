@@ -15,6 +15,7 @@
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
 
+
 int main (int argc, char **argv) {
     const char *input_filename;
     char *goal;
