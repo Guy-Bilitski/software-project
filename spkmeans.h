@@ -70,9 +70,7 @@ typedef struct YacobiOutput
 Point *create_empty_point();
 Point *create_point(double *data, int dim, int offset);  /* creates a point from list */
 
-int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
-
-/* getters */
+/* Getters */
 double point_get_entry(Point *point, int entry);  /* returns the value in index <index> of point */
 int point_get_dim(Point *point);  /* returs the point dimension */
 int point_get_offset(Point *point);  /* returs the point offset */
@@ -83,6 +81,9 @@ void divide_point_by_value(Point *p, double value);
 double inner_product(Point *row_point, Point *column_point);  /* returns row X column scalar */
 double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
 double euclidean_norm(Point *p);
+
+/* Matrix inner functions */
+int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
 
 /* debugging functions */
 void print_point(Point *point);
@@ -155,11 +156,11 @@ void print_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
 /* S AND C API */
 S_and_C *create_empty_S_and_C();
 
-/* getters */
+/* Getters */
 double s_and_c_get_s(S_and_C *s_and_c);
 double s_and_c_get_c(S_and_C *s_and_c);
 
-/* setters */
+/* Setters */
 void S_and_C_set_values(S_and_C *s_and_c, double s, double c);
 
 /* -------------------- MAX ELEMENT PROTOTYPES -------------------- */
