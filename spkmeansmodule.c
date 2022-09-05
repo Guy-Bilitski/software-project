@@ -172,6 +172,7 @@ static PyObject* transform_data_points_capi(PyObject *self, PyObject *args){
         printf("An Error Has Occurred-module.c-152\n");
         exit(1);
     }
+    
     data_points_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
     laplacian = lnorm(data_points_matrix);
     Jout = create_empty_yacobi_output();
@@ -200,7 +201,6 @@ static PyObject* kmeans_capi(PyObject *self, PyObject *args){
     final_centroids = kmeans(data_points, init_centroids);
     output = matrix_to_pylist(final_centroids);
     free_matrix(data_points);
-    free_matrix(init_centroids);
     free_matrix(final_centroids);
     return Py_BuildValue("O", output);
 }

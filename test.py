@@ -1,10 +1,10 @@
 import numpy as np
 from numpy import linalg as LA
 import mykmeanssp
+import pandas as pd
 
 path = 'data/mytxt.txt'
 X = np.genfromtxt(fname=path, dtype=float, delimiter=',')
-print(X.shape)
 gaussian_RBF = lambda x1, x2: np.exp(-LA.norm(x1-x2)/2)
 
 def print_matrix(matrix):
@@ -15,7 +15,8 @@ def print_matrix(matrix):
             if len(line) > 0:
                 line[-1] = line[-1][:-1]
                 print("".join(line))
-                
+
+
 def py_wam(X):
     n = X.shape[0]
     W = [[None for j in range(n)] for i in range(n)]
@@ -28,10 +29,37 @@ def py_wam(X):
     print_matrix(W)
 
 
-py_wam(X)
+# py_wam(X)
 # print()
 # print(mykmeanssp.wam(X.tolist()))
 # print()
 # print(mykmeanssp.ddg(X.tolist()))
 # print()
 # print(mykmeanssp.lnorm(X.tolist()))
+
+
+
+def get_centriods(np_array, k):
+    np.random.seed(0)
+    n = np_array.shape[0]
+    indices = [np.random.choice(n)]
+    centroids = [np_array[indices[0], :]] # initializing the first centroid
+    weighted_p = np.zeros(n, dtype=float)
+    for _ in range(k - 1):
+        for j in range(n):
+            x = np_array[j,:]
+            weighted_p[j] = (min(np.linalg.norm(x - c) for c in centroids))**2
+        distance_sum = sum(weighted_p)
+        np.divide(weighted_p, distance_sum, out=weighted_p)
+        new_cent_index = np.random.choice(n, p=weighted_p)
+        centroids.append(np.squeeze(np_array[new_cent_index, :]))
+        indices.append(new_cent_index)
+    centroids = [c.tolist() for c in centroids]
+    indices = [int(i) for i in indices]
+    return (indices, centroids)
+
+path = 'data/input_1.txt'
+data = np.genfromtxt(fname=path, dtype=float, delimiter=',')
+print_matrix(get_centriods(data,3)[1])
+
+

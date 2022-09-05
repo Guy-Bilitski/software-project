@@ -198,7 +198,7 @@ Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_eleme
         }
     }
     return transformed_matrix;
-} 
+}
 
 Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be computed by eigengap heuristic */
     int eigenvectors_num, i, j, n;
@@ -215,6 +215,7 @@ Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be com
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) 
         k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
+        printf("C:\tk=%d\n",k);
 
     n = matrix_get_rows_num(yacobi_output->V);
     U = create_matrix(n, k);
@@ -238,10 +239,8 @@ int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int 
 
     k = -1;
     maxgap = -1.;
-    for (i=0; i<n; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
-        printf("%.4f ",eigen_vectors_array[i].eigen_value);
+    for (i=0; i<n-1; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
         currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
-        assert(currentgap >=0);
         assert(currentgap >= 0);
         if (currentgap > maxgap){
             maxgap = currentgap;
@@ -331,7 +330,23 @@ Matrix *matrix_tr(Matrix *m){
     return t;
 }
 
-YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
+Matrix *trans(Matrix *X){
+    int n,m, i, j;
+    Matrix *T;
+    double val;
+    n = X->rows;
+    m = X->cols;
+    T = create_matrix(m,n);
+    for (i=0; i<n; i++){
+        for (j=0; j<m; j++){
+            val = matrix_get_entry(X, i, j);
+            matrix_set_entry(T, j, i, val);
+        }
+    }
+    return T;
+}
+
+YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) { /*DELME*/
     int dim = matrix_get_rows_num(A);
     Matrix *V = create_identity_matrix(dim);
     if(_is_matrix_diag(A)) {
@@ -343,6 +358,7 @@ YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
     double recent_off;
     S_and_C *s_and_c = create_empty_S_and_C();
     MaxElement *max_element = create_empty_max_element();
+    
 
     while (rotation_num < MAX_NUMBER_OF_ROTATIONS) {
         recent_off = matrix_off(A);
@@ -351,6 +367,10 @@ YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) {
         Matrix *P = create_identity_matrix(dim);
         build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
         A = transform_matrix(A, s_and_c, max_element);
+        //A = multiply_matrices(multiply_matrices(T,A),P);
+        // space();
+        // print_matrix(A);
+        // space();
         V = multiply_matrices(V, P); free_matrix(P); /* TODO: here we lose the matrix reference */
         if (matrix_converge(recent_off, A)) {
             break;

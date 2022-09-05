@@ -1,20 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "spkmeans.h"
+#include <limits.h>
 
-#ifndef MAX_ELEMENT_IS_DEFINED
-#define MAX_ELEMENT_IS_DEFINED
-typedef struct MaxElement
-{
-    int i;
-    int j;
-    double value;
-} MaxElement;
-#endif
 
 
 MaxElement *create_empty_max_element() {
     MaxElement *max_element = (MaxElement *)malloc(sizeof(MaxElement));
+    // max_element->i = -1;
+    // max_element->j = -1;
+    // max_element->value = DBL_MIN;
     return max_element;
 }
 

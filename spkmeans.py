@@ -24,7 +24,10 @@ def main():
         goal = args.get(Env.goal)
         if goal == 'spk':
             T = mykmeanssp.transform_data_points(data_points.tolist(), args.get(Env.k))
-            print_matrix(T)
+            T = np.array(T)            
+            indices, initial_centroids = kmeans_pp(T, args.get(Env.k))
+            data_points_as_pylists = [c.tolist() for c in data_points]
+            final_centroids = mykmeanssp.kmeans(data_points_as_pylists, initial_centroids)
         elif goal == 'wam':
             W = mykmeanssp.wam(data_points.tolist())
             print_matrix(W)
@@ -35,7 +38,9 @@ def main():
             L = mykmeanssp.lnorm(data_points.tolist())
             print_matrix(L)
         elif goal == 'jacobi':
-            eigen_vectors, eigen_values = mykmeanssp.jacobi(data_points.tolist())
+            L = mykmeanssp.lnorm(data_points.tolist())
+            eigen_vectors, eigen_values = mykmeanssp.jacobi(L)
+            np.savetxt("data/T.txt", eigen_vectors, fmt='%1.3f', delimiter=",")
             print_jacobi_output(eigen_vectors, eigen_values)
         
         #kmeans_pp(data_points, args.get(Env.k))
@@ -49,9 +54,7 @@ def main():
 def kmeans_pp(data_points, k):
     try:
         indices, initial_centroids = get_centriods(data_points, k)
-        data_points_as_pylists = [c.tolist() for c in data_points[:,1:]]
-        final_centroids = mykmeanssp.fit(data_points_as_pylists, initial_centroids)
-        print_centroids(indices, final_centroids)
+        return (indices, initial_centroids)
     except Exception as ex:
         raise Exception("An Error Has Occurred")
 
@@ -102,17 +105,17 @@ def print_jacobi_output(matrix, eigenvalues):
 def get_centriods(np_array, k):
     np.random.seed(0)
     n = np_array.shape[0]
-    indices = [np.random.choice(np_array[:,0])]
-    centroids = [np.squeeze(np_array[:,1:][np_array[:,0]== indices[0]])] # initializing the first centroid
+    indices = [np.random.choice(n)]
+    centroids = [np_array[indices[0], :]] # initializing the first centroid
     weighted_p = np.zeros(n, dtype=float)
     for _ in range(k - 1):
         for j in range(n):
-            x = np_array[j,1:]
+            x = np_array[j,:]
             weighted_p[j] = (min(np.linalg.norm(x - c) for c in centroids))**2
         distance_sum = sum(weighted_p)
         np.divide(weighted_p, distance_sum, out=weighted_p)
-        new_cent_index = np.random.choice(np_array[:,0], p=weighted_p)
-        centroids.append(np.squeeze(np_array[:,1:][np_array[:,0] == new_cent_index]))
+        new_cent_index = np.random.choice(n, p=weighted_p)
+        centroids.append(np.squeeze(np_array[new_cent_index, :]))
         indices.append(new_cent_index)
     centroids = [c.tolist() for c in centroids]
     indices = [int(i) for i in indices]

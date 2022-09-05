@@ -33,6 +33,7 @@ Matrix * kmeans(Matrix *data_points, Matrix *centroids)
         }
         reset_matrix_entries_to_zero(new_centroids);
     }
+    free_matrix(new_centroids);
     return centroids;
 }
 
