@@ -95,6 +95,12 @@ void divide_point_by_value(Point *p, double value) {
     }
 }
 
+/* cleanup */
+void free_point(Point *point) {
+    free(point_get_data);
+    free(point);
+}
+
 
 /* debugging function */
 void print_point(Point *point) {

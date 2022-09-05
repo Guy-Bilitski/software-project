@@ -98,7 +98,7 @@ double gaussian_RBF(Point *p1, Point *p2) {
 Matrix *create_weighted_matrix(Matrix *X) {
     int i, j, rows_num = matrix_get_rows_num(X);
     double value;
-    Point *p1 = (Point *)malloc(sizeof(Point)), *p2 = (Point *)malloc(sizeof(Point));
+    Point *p1 = create_empty_point(), *p2 = create_empty_point();
     Matrix *matrix = create_matrix(rows_num, rows_num);
     for (i=0; i<rows_num; i++) {
         for (j=0; j<rows_num; j++) {
@@ -113,8 +113,8 @@ Matrix *create_weighted_matrix(Matrix *X) {
             }
         }
     }
-    free(p1);
-    free(p2);
+    free_point(p1);
+    free_point(p2);
     return matrix;
 }
 

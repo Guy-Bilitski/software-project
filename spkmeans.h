@@ -85,6 +85,9 @@ double inner_product(Point *row_point, Point *column_point);  /* returns row X c
 double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
 double euclidean_norm(Point *p);
 
+/* cleanup */
+void free_point(Point *point);
+
 /* debugging functions */
 void print_point(Point *point);
 
