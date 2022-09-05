@@ -10,3 +10,5 @@ def data(samples=10, features=5, centers=3):
     #a = np.random.rand(n, m)
     X, y = make_blobs(n_samples=samples, centers=centers, n_features=features, random_state=0)
     np.savetxt("data/mytxt.txt", X, fmt='%1.3f', delimiter=",")
+
+data(15,7)

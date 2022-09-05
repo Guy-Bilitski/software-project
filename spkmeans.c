@@ -19,18 +19,20 @@ int main() {
     int j, i, n;
     YacobiOutput *yacobi_output = create_empty_yacobi_output();
     Eigenvector *eigen_vectors_array;
-    Matrix *X;
-    char path[] = "testfiles/jacobi_0.txt";
-    for (j=0; j<10; j++) {
-        path[17] = j + '0';
-        X = input_file_to_matrix(path);
-        jacobi(X, yacobi_output);
-        n = matrix_get_cols_num(yacobi_output->V);
-        eigen_vectors_array = create_eigen_vectors_array(n);
-        get_eigen_vectors_from_yacobi_output(yacobi_output, eigen_vectors_array);
-        sort_eigenvectors_array(eigen_vectors_array, n);
-        printf("%d \n", get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, n));
-    }
+    Matrix *X, *W, *L;
+    char path[] = "data/mytxt.txt";
+    X = input_file_to_matrix(path);
+    W = create_weighted_matrix(X);
+    free_matrix(X);
+    L = lnorm(W);
+    free_matrix(L);
+    jacobi(L, yacobi_output);
+    n = matrix_get_cols_num(yacobi_output->V);
+    eigen_vectors_array = create_eigen_vectors_array(n);
+    get_eigen_vectors_from_yacobi_output(yacobi_output, eigen_vectors_array);
+    sort_eigenvectors_array(eigen_vectors_array, n);
+    printf("%d \n", get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, n));
+    
   
 }
 
@@ -113,8 +115,8 @@ Matrix *create_weighted_matrix(Matrix *X) {
             }
         }
     }
-    free_point(p1);
-    free_point(p2);
+    free(p1);
+    free(p2);
     return matrix;
 }
 
@@ -260,7 +262,7 @@ int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int 
     for (i=0; i<n-1; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
         currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
         assert(currentgap >= 0);
-        printf("current gap: %f ", currentgap);
+        /* printf("current gap: %f ", currentgap);*/
         if (currentgap > maxgap){
             maxgap = currentgap;
             k = i+1;
