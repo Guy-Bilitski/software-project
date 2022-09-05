@@ -64,16 +64,13 @@ typedef struct YacobiOutput
 } YacobiOutput;
 #endif
 
-
 /* -------------------- POINT PROTOTYPES -------------------- */
 
 /* Point API */
 Point *create_empty_point();
 Point *create_point(double *data, int dim, int offset);  /* creates a point from list */
 
-int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
-
-/* getters */
+/* Getters */
 double point_get_entry(Point *point, int entry);  /* returns the value in index <index> of point */
 int point_get_dim(Point *point);  /* returs the point dimension */
 int point_get_offset(Point *point);  /* returs the point offset */
@@ -84,6 +81,9 @@ void divide_point_by_value(Point *p, double value);
 double inner_product(Point *row_point, Point *column_point);  /* returns row X column scalar */
 double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
 double euclidean_norm(Point *p);
+
+/* Matrix inner functions */
+int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
 
 /* debugging functions */
 void print_point(Point *point);
@@ -113,7 +113,7 @@ void reset_matrix_entries_to_zero(Matrix *matrix);  /* resets all metrix entries
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
 Matrix *sub_matrices(Matrix *A, Matrix *B); /* sub A - B */
 
-/* cleanup */
+/* Cleanup */
 void free_matrix(Matrix *matrix); /* cleanup matrix object and sub-objects */
 
 /* Matrix inner functions */
@@ -129,34 +129,39 @@ void print_matrix_diag(Matrix *matrix);
 Matrix *generate_symmetric_matrix(int n);
 void space();
 
-
 /* -------------------- EIGENVECTOR PROTOTYPES -------------------- */
 
+/* EIGENVECTOR API */
 Eigenvector *create_empty_eigen_vector();
+Eigenvector *create_eigen_vector(Point *point, double eigen_value);
+Eigenvector *create_eigen_vectors_array(int eigenvectors_num)ף
+
+/* Getters */
 Point *eigen_vector_get_point(Eigenvector *eigen_vector);
 double eigen_vector_get_eigen_value(Eigenvector *eigen_vector);
-Eigenvector *create_eigen_vector(Point *point, double eigen_value);
+
+/* Utils */
 int compare_eigenvectors(const void *p1, const void *p2);
 void sort_eigenvectors_array(Eigenvector *array, size_t n);
-void print_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
+
+/* Cleanup */
 void free_eigen_vector(Eigenvector *eigen_vector);
 void free_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
 
-
+/* debugging functions */
+void print_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
 
 /* -------------------- S AND C PROTOTYPES -------------------- */
 
 /* S AND C API */
 S_and_C *create_empty_S_and_C();
 
-/* getters */
+/* Getters */
 double s_and_c_get_s(S_and_C *s_and_c);
 double s_and_c_get_c(S_and_C *s_and_c);
 
-/* setters */
+/* Setters */
 void S_and_C_set_values(S_and_C *s_and_c, double s, double c);
-
-
 
 /* -------------------- MAX ELEMENT PROTOTYPES -------------------- */
 
@@ -164,12 +169,12 @@ void S_and_C_set_values(S_and_C *s_and_c, double s, double c);
 MaxElement *create_empty_max_element();
 MaxElement *create_max_element(double value, int i, int j);
 
-/* getters */
+/* Getters */
 double max_element_get_value(MaxElement *max_element);
 int max_element_get_index1(MaxElement *max_element);
 int max_element_get_index2(MaxElement *max_element);
 
-/* setters */
+/* Setters */
 void max_element_set_new_values(MaxElement *max_element, double value, int i, int j);
 void max_element_set_value(MaxElement *max_element, double value);
 void max_element_set_index1(MaxElement *max_element, int i);
@@ -178,32 +183,38 @@ void max_element_set_index2(MaxElement *max_element, int j);
 /* debugging */
 void print_max_element(MaxElement *max_element);
 
-
 /* -------------------- YACOBI OUTPUT PROTOTYPES -------------------- */
 
+/* Yacobi Output API */
 YacobiOutput *create_empty_yacobi_output();
+
+/* Getters */
 Matrix *yacobi_output_get_A(YacobiOutput *yacobi_output);
 Matrix *yacobi_output_get_V(YacobiOutput *yacobi_output);
-void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V);
-void free_yacobi_output(YacobiOutput *yacobi_output);
 
+/* Setters */
+void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V);
+
+/* Cleanup */
+void free_yacobi_output(YacobiOutput *yacobi_output);
 
 /* -------------------- KMEANS-IO PROTOTYPES -------------------- */
 
+/* Kmeans_io API */
 int get_dimension(const char *input_file);
 int get_n(const char *input_file);
 Matrix *input_file_to_matrix(const char *input_file);
 
 /* -------------------- KMEANS PROTOTYPES -------------------- */
 
+/* Kmeans API */
 Matrix * kmeans(Matrix *data_points, Matrix *centroids);
 double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids);
 void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids);
 int find_closest_centroid(Point *vector, Matrix *centroids);
 
-
-
 /* -------------------- SPKMEANS PROTOTYPES -------------------- */
+
 /* spkmeans functions */
 void achieve_goal(Matrix *data_points, char *goal);
 double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjacency matrix*/
@@ -234,7 +245,6 @@ Matrix *wam(Matrix* data_points);
 Matrix *ddg(Matrix* data_points);
 Matrix *lnorm(Matrix* data_points);
 YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output);
-
 
 
 /* JACOBI */

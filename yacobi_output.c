@@ -25,6 +25,7 @@ Matrix *yacobi_output_get_V(YacobiOutput *yacobi_output) {
     return yacobi_output->V;
 }
 
+/* Setters */
 void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V) {
     yacobi_output->A = A;
     yacobi_output->V = V;

@@ -95,7 +95,6 @@ void divide_point_by_value(Point *p, double value) {
     }
 }
 
-
 /* debugging function */
 void print_point(Point *point) {
     int i;
