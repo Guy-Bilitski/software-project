@@ -182,10 +182,9 @@ void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, M
 }
 
 void normalize_matrix_rows(Matrix *matrix) {
-    Point *row = (Point *)malloc(sizeof(Point));
-    int num_of_rows;
+    Point *row = create_empty_point();
+    int num_of_rows, i;
     double row_norm;
-    int i;
     num_of_rows = matrix_get_rows_num(matrix);
 
     for (i=0; i<num_of_rows; i++) {
@@ -367,9 +366,9 @@ Matrix *trans(Matrix *X){
     return T;
 }
 
-YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) { /*DELME*/
+YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) { /*DELME*/ /* TODO: validate memory leak */
     int dim = matrix_get_rows_num(A);
-    Matrix *V = create_identity_matrix(dim);
+    Matrix *tmp, *V = create_identity_matrix(dim);
     if(_is_matrix_diag(A)) {
         set_yacobi_output_values(yacobi_output, A, V);
         return yacobi_output;
@@ -387,12 +386,8 @@ YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) { /*DELME*/
         get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
         Matrix *P = create_identity_matrix(dim);
         build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
-        A = transform_matrix(A, s_and_c, max_element);
-        //A = multiply_matrices(multiply_matrices(T,A),P);
-        // space();
-        // print_matrix(A);
-        // space();
-        V = multiply_matrices(V, P); free_matrix(P); /* TODO: here we lose the matrix reference */
+        tmp = transform_matrix(A, s_and_c, max_element); free_matrix(A); A=tmp; /* A=A' */
+        tmp = multiply_matrices(V, P); free_matrix(V); V=tmp; free_matrix(P);  /* V=VP */
         if (matrix_converge(recent_off, A)) {
             break;
         }

@@ -134,7 +134,7 @@ void space();
 /* EIGENVECTOR API */
 Eigenvector *create_empty_eigen_vector();
 Eigenvector *create_eigen_vector(Point *point, double eigen_value);
-Eigenvector *create_eigen_vectors_array(int eigenvectors_num)ף
+Eigenvector *create_eigen_vectors_array(int eigenvectors_num);
 
 /* Getters */
 Point *eigen_vector_get_point(Eigenvector *eigen_vector);

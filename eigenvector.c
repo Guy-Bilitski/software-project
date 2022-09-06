@@ -62,8 +62,10 @@ void free_eigen_vector(Eigenvector *eigen_vector) {
 
 void free_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n) {
     int i;
+    Eigenvector *eigen_vector;
     for (i=0; i<n; i++) {
-        free(eigen_vectors_array[i]);
+        eigen_vector = &eigen_vectors_array[i];
+        free(eigen_vector);
     }
     free(eigen_vectors_array);
 }
