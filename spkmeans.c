@@ -235,8 +235,9 @@ Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be com
     if (k == 0) {
         k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
         printf("C: k=%d \n",k);
+        printf(" got here first ");
     }
-        
+    printf(" got here ");
     n = matrix_get_rows_num(V);
     U = create_matrix(n, k);
     for (j=0; j<k; j++){
