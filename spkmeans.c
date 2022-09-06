@@ -14,7 +14,7 @@
 
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
-
+/*
 int main() {
     int j, i, n;
     YacobiOutput *yacobi_output = create_empty_yacobi_output();
@@ -34,9 +34,9 @@ int main() {
     printf("%d \n", get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, n));
     
   
-}
+}*/
 
-/*
+
 int main (int argc, char **argv) {
     const char *input_filename;
     char *goal;
@@ -55,7 +55,7 @@ int main (int argc, char **argv) {
     achieve_goal(data_points, goal);
     return 0;
     
-}*/
+}
 
 void achieve_goal(Matrix *data_points, char *goal) {
     YacobiOutput *Jout;
@@ -224,19 +224,20 @@ Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_eleme
 Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be computed by eigengap heuristic */
     int eigenvectors_num, i, j, n;
     Eigenvector *eigen_vectors_array;
-    Matrix *U;
+    Matrix *U, *V = yacobi_output_get_V(yacobi_output);
     double entry;
     Point *point_j;
 
-    eigenvectors_num = matrix_get_cols_num(yacobi_output->V);
+    eigenvectors_num = matrix_get_cols_num(V);
     eigen_vectors_array = create_eigen_vectors_array(eigenvectors_num);
     get_eigen_vectors_from_yacobi_output(yacobi_output, eigen_vectors_array);
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
-    if (k == 0) 
+    if (k == 0) {
         k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
-        printf("C:\tk=%d\n",k);
-
-    n = matrix_get_rows_num(yacobi_output->V);
+        printf("C: k=%d \n",k);
+    }
+        
+    n = matrix_get_rows_num(V);
     U = create_matrix(n, k);
     for (j=0; j<k; j++){
         point_j = eigen_vectors_array[j].point; /*the jth eigen vector, jth column*/
@@ -246,8 +247,9 @@ Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be com
         }
     }
 
-    for (i=0; i<n; i++)
+    for (i=0; i<n; i++) {
         free(eigen_vectors_array[i].point);
+    }
     free(eigen_vectors_array);
     return U;
 }
