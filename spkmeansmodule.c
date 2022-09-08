@@ -10,8 +10,8 @@ PyObject *matrix_to_pylist(Matrix *matrix){
     int i, j;
     double value;
 
-    cols = matrix->cols;
-    rows = matrix->rows;
+    cols = matrix_get_cols_num(matrix);
+    rows = matrix_get_rows_num(matrix);
     py_matrix = PyList_New(rows);
 
     if (py_matrix == NULL){
@@ -155,6 +155,11 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args){
     jacobi(sym_matrix, Jout);
     V = matrix_to_pylist(Jout->V);
     A = diagonal_matrix_to_pylist(Jout->A);
+    space();
+    print_matrix(Jout->A);
+    space();
+    print_matrix(Jout->V);
+    space();
     free_yacobi_output(Jout);
     free_matrix(sym_matrix);
     return Py_BuildValue("OO", V, A);

@@ -14,26 +14,20 @@
 
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
+
 /*
 int main() {
-    int j, i, n;
+    
+    Matrix *X;
     YacobiOutput *yacobi_output = create_empty_yacobi_output();
     Eigenvector *eigen_vectors_array;
-    Matrix *X, *W, *L;
-    char path[] = "data/mytxt.txt";
+    char path[] = "testfiles/jacobi_0.txt";
     X = input_file_to_matrix(path);
-    W = create_weighted_matrix(X);
-    free_matrix(X);
-    L = lnorm(W);
-    free_matrix(L);
-    jacobi(L, yacobi_output);
-    n = matrix_get_cols_num(yacobi_output->V);
-    eigen_vectors_array = create_eigen_vectors_array(n);
-    get_eigen_vectors_from_yacobi_output(yacobi_output, eigen_vectors_array);
-    sort_eigenvectors_array(eigen_vectors_array, n);
-    printf("%d \n", get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, n));
+    jacobi(X, yacobi_output);
+    print_matrix(yacobi_output->V);
+    space();
+    print_matrix(yacobi_output->A);   
     
-  
 }*/
 
 
@@ -234,7 +228,7 @@ Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be com
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) {
         k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
-        printf("C: k=%d \n",k);
+        printf("C: k=%d \n",k); 
         printf(" got here first ");
     }
     printf(" got here ");
@@ -371,7 +365,7 @@ Matrix *trans(Matrix *X){
 
 YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) { /*DELME*/ /* TODO: validate memory leak */
     int dim = matrix_get_rows_num(A);
-    Matrix *tmp, *V = create_identity_matrix(dim);
+    Matrix *V = create_identity_matrix(dim);
     if(_is_matrix_diag(A)) {
         set_yacobi_output_values(yacobi_output, A, V);
         return yacobi_output;
@@ -389,8 +383,8 @@ YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) { /*DELME*/ /* TODO
         get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
         Matrix *P = create_identity_matrix(dim);
         build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
-        tmp = transform_matrix(A, s_and_c, max_element); free_matrix(A); A=tmp; /* A=A' */
-        tmp = multiply_matrices(V, P); free_matrix(V); V=tmp; free_matrix(P);  /* V=VP */
+        A = transform_matrix(A, s_and_c, max_element);
+        V = multiply_matrices(V, P);  free_matrix(P); 
         if (matrix_converge(recent_off, A)) {
             break;
         }

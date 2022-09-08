@@ -42,6 +42,8 @@ def main():
             eigen_vectors, eigen_values = mykmeanssp.jacobi(L)
             np.savetxt("data/T.txt", eigen_vectors, fmt='%1.3f', delimiter=",")
             print_jacobi_output(eigen_vectors, eigen_values)
+        else:
+            print("Invalid input") #TODO: validate output
         
         #kmeans_pp(data_points, args.get(Env.k))
     except Exception as ex:
