@@ -142,7 +142,7 @@ static PyObject* lnorm_capi(PyObject *self, PyObject *args){
 
 static PyObject* jacobi_capi(PyObject *self, PyObject *args){
     PyObject *data_points_as_pylist;
-    YacobiOutput *Jout;
+    JacobiOutput *Jout;
     PyObject *V, *A;
     Matrix *sym_matrix;
 
@@ -151,7 +151,7 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args){
         exit(1);
     }
     sym_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
-    Jout = create_empty_yacobi_output();
+    Jout = create_empty_jacobi_output();
     jacobi(sym_matrix, Jout);
     V = matrix_to_pylist(Jout->V);
     A = diagonal_matrix_to_pylist(Jout->A);
@@ -160,7 +160,7 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args){
     space();
     print_matrix(Jout->V);
     space();
-    free_yacobi_output(Jout);
+    free_jacobi_output(Jout);
     free_matrix(sym_matrix);
     return Py_BuildValue("OO", V, A);
 }
@@ -169,7 +169,7 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args){
 static PyObject* transform_data_points_capi(PyObject *self, PyObject *args){
     PyObject *data_points_as_pylist;
     int k;
-    YacobiOutput *Jout;
+    JacobiOutput *Jout;
     PyObject *pylist_U;
     Matrix *data_points_matrix, *laplacian, *U;
 
@@ -180,13 +180,13 @@ static PyObject* transform_data_points_capi(PyObject *self, PyObject *args){
     
     data_points_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
     laplacian = lnorm(data_points_matrix);
-    Jout = create_empty_yacobi_output();
+    Jout = create_empty_jacobi_output();
     jacobi(laplacian, Jout);
     printf("performing getU ...");
     U = getU(Jout, k);
     normalize_matrix_rows(U);
     pylist_U = matrix_to_pylist(U);
-    free_yacobi_output(Jout);
+    free_jacobi_output(Jout);
     free_matrix(data_points_matrix);
     free_matrix(laplacian);
     free_matrix(U);

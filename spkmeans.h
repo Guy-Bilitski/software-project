@@ -55,13 +55,13 @@ typedef struct MaxElement
 #endif
 
 
-#ifndef YACOBI_OUTPUT_IS_DEFINED
-#define YACOBI_OUTPUT_IS_DEFINED
-typedef struct YacobiOutput
+#ifndef JACOBI_OUTPUT_IS_DEFINED
+#define JACOBI_OUTPUT_IS_DEFINED
+typedef struct JacobiOutput
 {
     Matrix *A;
     Matrix *V;
-} YacobiOutput;
+} JacobiOutput;
 #endif
 
 /* -------------------- POINT PROTOTYPES -------------------- */
@@ -72,17 +72,17 @@ Point *create_point(double *data, int dim, int offset);  /* creates a point from
 
 /* Getters */
 double point_get_entry(Point *point, int entry);  /* returns the value in index <index> of point */
-int point_get_dim(Point *point);  /* returs the point dimension */
-int point_get_offset(Point *point);  /* returs the point offset */
-double *point_get_data(Point *point);  /* returs the point data */
-void divide_point_by_value(Point *p, double value);
+int point_get_dim(Point *point);  
+int point_get_offset(Point *point);  
+double *point_get_data(Point *point);  
 
 /* Utils */
 double inner_product(Point *row_point, Point *column_point);  /* returns row X column scalar */
 double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
 double euclidean_norm(Point *p);
+void divide_point_by_value(Point *p, double value);
 
-/* Matrix inner functions */
+/* Point inner functions */
 int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
 
 /* debugging functions */
@@ -125,7 +125,12 @@ Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2);
 
 /* debugging functions */
 void print_matrix(Matrix *matrix);
+void print_matrix2(Matrix *matrix);
 void print_matrix_diag(Matrix *matrix);
+void print_matrix_rows(Matrix *matrix);
+void print_matrix_cols(Matrix *matrix);
+double RandomReal(double low, double high);
+Matrix *generate_matrix(int rows, int cols, int is_diag);
 Matrix *generate_symmetric_matrix(int n);
 void space();
 
@@ -146,7 +151,6 @@ void sort_eigenvectors_array(Eigenvector *array, size_t n);
 
 /* Cleanup */
 void free_eigen_vector(Eigenvector *eigen_vector);
-void free_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
 
 /* debugging functions */
 void print_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
@@ -162,6 +166,9 @@ double s_and_c_get_c(S_and_C *s_and_c);
 
 /* Setters */
 void S_and_C_set_values(S_and_C *s_and_c, double s, double c);
+
+/* debugging functions */
+void print_s_and_c(S_and_C *s_and_c);
 
 /* -------------------- MAX ELEMENT PROTOTYPES -------------------- */
 
@@ -183,20 +190,23 @@ void max_element_set_index2(MaxElement *max_element, int j);
 /* debugging */
 void print_max_element(MaxElement *max_element);
 
-/* -------------------- YACOBI OUTPUT PROTOTYPES -------------------- */
+/* -------------------- JACOBI OUTPUT PROTOTYPES -------------------- */
 
-/* Yacobi Output API */
-YacobiOutput *create_empty_yacobi_output();
+/* Jacobi Output API */
+JacobiOutput *create_empty_jacobi_output();
 
 /* Getters */
-Matrix *yacobi_output_get_A(YacobiOutput *yacobi_output);
-Matrix *yacobi_output_get_V(YacobiOutput *yacobi_output);
+Matrix *jacobi_output_get_A(JacobiOutput *jacobi_output);
+Matrix *jacobi_output_get_V(JacobiOutput *jacobi_output);
 
 /* Setters */
-void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V);
+void set_jacobi_output_values(JacobiOutput *jacobi_output, Matrix *A, Matrix *V);
 
 /* Cleanup */
-void free_yacobi_output(YacobiOutput *yacobi_output);
+void free_jacobi_output(JacobiOutput *jacobi_output);
+
+/* debugging */
+void print_jacobi_output(JacobiOutput *J);
 
 /* -------------------- KMEANS-IO PROTOTYPES -------------------- */
 
@@ -222,37 +232,21 @@ Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
 Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix */
 void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all the diagonal entries */
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
-
-/* JACOBI */
-MaxElement *get_off_diagonal_absolute_max(Matrix *matrix);
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
 void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, Matrix *identity_matrix); /* inserts the rotation matrix to a given identity matrix */
 void normalize_matrix_rows(Matrix *matrix);
 double matrix_off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
-void normalize_matrix_rows(Matrix *matrix);
 int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
-void get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output, Eigenvector *eigen_vectors_array);
-Matrix *getU(YacobiOutput *yacobi_output, int k);
-
-/* utilities */
+void get_eigen_vectors_from_jacobi_output(JacobiOutput *jacobi_output, Eigenvector *eigen_vectors_array);
+Matrix *getU(JacobiOutput *jacobi_output, int k);
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
 int matrix_converge(double A_off, Matrix *A);
-
 
 /* SPKMEANS API */
 Matrix *wam(Matrix* data_points);
 Matrix *ddg(Matrix* data_points);
 Matrix *lnorm(Matrix* data_points);
-YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output);
-
-
-/* JACOBI */
-void print_jacobi_output(YacobiOutput *J);
-void free_yacobi_output(YacobiOutput *yacobi_output);
-void set_yacobi_output_values(YacobiOutput *yacobi_output, Matrix *A, Matrix *V);
-YacobiOutput *create_empty_yacobi_output();
-
-
+JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output);
 
 #endif

@@ -31,11 +31,6 @@ Point *create_point(double *data, int dim, int offset) {
     return new_point;
 }
 
-int _convert_point_index(Point *point, int index) {
-    int point_offset = point_get_offset(point);
-    return point_offset*index;
-}
-
 /* Getters */
 double point_get_entry(Point *point, int index) {
     assert(index >= 0 && index < point->dim);
@@ -93,6 +88,12 @@ void divide_point_by_value(Point *p, double value) {
         index = _convert_point_index(p, i);
         (p->data)[index] /= value;
     }
+}
+
+/* Point inner functions */
+int _convert_point_index(Point *point, int index) {
+    int point_offset = point_get_offset(point);
+    return point_offset*index;
 }
 
 /* debugging function */

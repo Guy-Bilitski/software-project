@@ -9,8 +9,7 @@
 #include "point.c"
 #include "kmeans_io.c"
 #include "kmeans.c"
-#include "yacobi_output.c"
-
+#include "jacobi_output.c"
 
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
@@ -19,17 +18,16 @@
 int main() {
     
     Matrix *X;
-    YacobiOutput *yacobi_output = create_empty_yacobi_output();
+    JacobiOutput *jacobi_output = create_empty_jacobi_output();
     Eigenvector *eigen_vectors_array;
     char path[] = "testfiles/jacobi_0.txt";
     X = input_file_to_matrix(path);
-    jacobi(X, yacobi_output);
-    print_matrix(yacobi_output->V);
+    jacobi(X, jacobi_output);
+    print_matrix(jacobi_output->V);
     space();
-    print_matrix(yacobi_output->A);   
+    print_matrix(jacobi_output->A);   
     
-}*/
-
+} */
 
 int main (int argc, char **argv) {
     const char *input_filename;
@@ -51,8 +49,9 @@ int main (int argc, char **argv) {
     
 }
 
+/* spkmeans functions */
 void achieve_goal(Matrix *data_points, char *goal) {
-    YacobiOutput *Jout;
+    JacobiOutput *Jout;
     if (!strcmp(goal, "wam")){
         Matrix *W = wam(data_points);
         print_matrix(W);
@@ -72,10 +71,10 @@ void achieve_goal(Matrix *data_points, char *goal) {
         return;
     }
     else if (!strcmp(goal, "jacobi")){
-        Jout = create_empty_yacobi_output();
+        Jout = create_empty_jacobi_output();
         jacobi(data_points, Jout);
         print_jacobi_output(Jout);
-        free_yacobi_output(Jout);
+        free_jacobi_output(Jout);
         return;
     }
     else {
@@ -84,8 +83,6 @@ void achieve_goal(Matrix *data_points, char *goal) {
     }
 }
 
-
-/* spkmeans functions */
 double gaussian_RBF(Point *p1, Point *p2) {
     double distance = euclidean_distance(p1, p2); /*TODO: CHECK*/
     return exp(-(distance / 2));
@@ -152,7 +149,6 @@ Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
     return Lnorm;
 }
 
-
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c) {
     double t, theta, s, c, sign, value = max_element_get_value(max_element);
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
@@ -215,16 +211,45 @@ Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_eleme
     return transformed_matrix;
 }
 
-Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be computed by eigengap heuristic */
+int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n) {
+    int k, i;
+    double maxgap, currentgap;
+
+    k = -1;
+    maxgap = -1.;
+    for (i=0; i<n-1; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
+        currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
+        assert(currentgap >= 0);
+        /* printf("current gap: %f ", currentgap);*/
+        if (currentgap > maxgap){
+            maxgap = currentgap;
+            k = i+1;
+        }
+    }
+    return k;
+}
+
+void get_eigen_vectors_from_jacobi_output(JacobiOutput *jacobi_output, Eigenvector *eigen_vectors_array) {
+    Matrix *A = jacobi_output_get_A(jacobi_output), *V = jacobi_output_get_V(jacobi_output);
+    int i, n;
+    n = matrix_get_cols_num(V);
+
+    for (i=0; i<n; i++) {
+        matrix_get_column_to_point(V, eigen_vectors_array[i].point, i);
+        eigen_vectors_array[i].eigen_value = matrix_get_entry(A, i, i);
+    }
+}
+
+Matrix *getU(JacobiOutput *jacobi_output, int k) { /* k == 0 if needed to be computed by eigengap heuristic */
     int eigenvectors_num, i, j, n;
     Eigenvector *eigen_vectors_array;
-    Matrix *U, *V = yacobi_output_get_V(yacobi_output);
+    Matrix *U, *V = jacobi_output_get_V(jacobi_output);
     double entry;
     Point *point_j;
 
     eigenvectors_num = matrix_get_cols_num(V);
     eigen_vectors_array = create_eigen_vectors_array(eigenvectors_num);
-    get_eigen_vectors_from_yacobi_output(yacobi_output, eigen_vectors_array);
+    get_eigen_vectors_from_jacobi_output(jacobi_output, eigen_vectors_array);
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) {
         k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
@@ -249,36 +274,6 @@ Matrix *getU(YacobiOutput *yacobi_output, int k) { /* k == 0 if needed to be com
     return U;
 }
 
-int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n) {
-    int k, i;
-    double maxgap, currentgap;
-
-    k = -1;
-    maxgap = -1.;
-    for (i=0; i<n-1; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
-        currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
-        assert(currentgap >= 0);
-        /* printf("current gap: %f ", currentgap);*/
-        if (currentgap > maxgap){
-            maxgap = currentgap;
-            k = i+1;
-        }
-    }
-    return k;
-}
-
-void get_eigen_vectors_from_yacobi_output(YacobiOutput *yacobi_output, Eigenvector *eigen_vectors_array) {
-    Matrix *A = yacobi_output_get_A(yacobi_output), *V = yacobi_output_get_V(yacobi_output);
-    int i, n;
-    n = matrix_get_cols_num(V);
-
-    for (i=0; i<n; i++) {
-        matrix_get_column_to_point(V, eigen_vectors_array[i].point, i);
-        eigen_vectors_array[i].eigen_value = matrix_get_entry(A, i, i);
-    }
-}
-
-/* utilities */
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index) {
      if (col_index == i) {
         if (row_index == i) {
@@ -309,15 +304,12 @@ int matrix_converge(double A_off, Matrix *A) {
     return A_off - matrix_off(A) <= EPSILON;
 }
 
-
-
 /* SPKMEANS API */
-
-Matrix *wam(Matrix* data_points){
+Matrix *wam(Matrix* data_points) {
     return create_weighted_matrix(data_points);
 }
 
-Matrix *ddg(Matrix* data_points){
+Matrix *ddg(Matrix* data_points) {
     Matrix *W, *D;
     W = create_weighted_matrix(data_points);
     D = create_diagonal_degree_matrix(W);
@@ -325,7 +317,7 @@ Matrix *ddg(Matrix* data_points){
     return D;
 }
 
-Matrix *lnorm(Matrix* data_points){
+Matrix *lnorm(Matrix* data_points) {
     Matrix *W, *D, *Lnorm;
     W = create_weighted_matrix(data_points);
     D = create_diagonal_degree_matrix(W);
@@ -336,39 +328,12 @@ Matrix *lnorm(Matrix* data_points){
     return Lnorm;
 }
 
-Matrix *matrix_tr(Matrix *m){
-    Matrix *t = create_matrix(m->cols, m->rows);
-    int i,j;
-    for (i=0; i<t->rows; i++){
-        for (j=0; j<t->cols; j++){
-            matrix_set_entry(t, i, j, matrix_get_entry(m, j, i));
-        }
-    }
-    return t;
-}
-
-Matrix *trans(Matrix *X){
-    int n,m, i, j;
-    Matrix *T;
-    double val;
-    n = X->rows;
-    m = X->cols;
-    T = create_matrix(m,n);
-    for (i=0; i<n; i++){
-        for (j=0; j<m; j++){
-            val = matrix_get_entry(X, i, j);
-            matrix_set_entry(T, j, i, val);
-        }
-    }
-    return T;
-}
-
-YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) { /*DELME*/ /* TODO: validate memory leak */
+JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /*DELME*/ /* TODO: validate memory leak */
     int dim = matrix_get_rows_num(A);
     Matrix *V = create_identity_matrix(dim);
     if(_is_matrix_diag(A)) {
-        set_yacobi_output_values(yacobi_output, A, V);
-        return yacobi_output;
+        set_jacobi_output_values(jacobi_output, A, V);
+        return jacobi_output;
     }
 
     int rotation_num = 0;
@@ -389,8 +354,8 @@ YacobiOutput *jacobi(Matrix *A, YacobiOutput *yacobi_output) { /*DELME*/ /* TODO
             break;
         }
     }
-    set_yacobi_output_values(yacobi_output, A, V);
+    set_jacobi_output_values(jacobi_output, A, V);
     free(max_element);
     free(s_and_c);
-    return yacobi_output;
+    return jacobi_output;
 }

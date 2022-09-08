@@ -4,8 +4,7 @@
 #include "spkmeans.h"
 
 
-Matrix * kmeans(Matrix *data_points, Matrix *centroids)
-{
+Matrix * kmeans(Matrix *data_points, Matrix *centroids) {
     Matrix *new_centroids, *temp;
     int dim, k;
     int maxiter, iter;
@@ -37,9 +36,6 @@ Matrix * kmeans(Matrix *data_points, Matrix *centroids)
     return centroids;
 }
 
-
-
-
 double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids) {
     int k;
     int r;
@@ -67,7 +63,6 @@ double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroi
     free(new_centroid);
     return max_distance;
 }
-
 
 void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids) {
     int r, c;
@@ -97,7 +92,6 @@ void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centr
     free(current_vector);
     free(num_of_points_in_cluster);
 }
-
 
 int find_closest_centroid(Point *vector, Matrix *centroids) {
     int k;
