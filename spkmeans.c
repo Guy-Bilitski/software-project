@@ -14,21 +14,6 @@
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
 
-/*
-int main() {
-    
-    Matrix *X;
-    JacobiOutput *jacobi_output = create_empty_jacobi_output();
-    Eigenvector *eigen_vectors_array;
-    char path[] = "testfiles/jacobi_0.txt";
-    X = input_file_to_matrix(path);
-    jacobi(X, jacobi_output);
-    print_matrix(jacobi_output->V);
-    space();
-    print_matrix(jacobi_output->A);   
-    
-} */
-
 int main (int argc, char **argv) {
     const char *input_filename;
     char *goal;

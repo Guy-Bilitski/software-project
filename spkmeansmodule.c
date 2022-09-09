@@ -155,11 +155,6 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args){
     jacobi(sym_matrix, Jout);
     V = matrix_to_pylist(Jout->V);
     A = diagonal_matrix_to_pylist(Jout->A);
-    space();
-    print_matrix(Jout->A);
-    space();
-    print_matrix(Jout->V);
-    space();
     free_jacobi_output(Jout);
     free_matrix(sym_matrix);
     return Py_BuildValue("OO", V, A);

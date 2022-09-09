@@ -37,10 +37,9 @@ def main():
         elif goal == 'lnorm':
             L = mykmeanssp.lnorm(data_points.tolist())
             print_matrix(L)
-        elif goal == 'jacobi':
-            L = mykmeanssp.lnorm(data_points.tolist())
-            eigen_vectors, eigen_values = mykmeanssp.jacobi(L)
-            np.savetxt("data/T.txt", eigen_vectors, fmt='%1.3f', delimiter=",")
+        elif goal == 'jacobi': # Sage - I removed lnorm here as the ouput correct using the input withput performing lnorm
+            eigen_vectors, eigen_values = mykmeanssp.jacobi(data_points.tolist())
+            np.savetxt("data/T.txt", eigen_vectors, fmt='%1.3f', delimiter=",") #TODO: delete
             print_jacobi_output(eigen_vectors, eigen_values)
         else:
             print("Invalid input") #TODO: validate output
