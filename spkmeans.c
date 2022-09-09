@@ -14,6 +14,23 @@
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
 
+int main() {
+    JacobiOutput *jacobi_output = create_empty_jacobi_output();
+    char *path = "./testfiles/spk_1.txt";
+    Matrix *X = input_file_to_matrix(path);
+    Matrix *L = lnorm(X);
+    jacobi(L, jacobi_output);
+    Matrix *U = getU(jacobi_output, 0);
+    print_matrix(U);
+
+    free_matrix(X);
+    free_matrix(L);
+    free_matrix(U);
+    free_jacobi_output(jacobi_output);
+    return 1;
+}
+
+/*
 int main (int argc, char **argv) {
     const char *input_filename;
     char *goal;
@@ -32,7 +49,7 @@ int main (int argc, char **argv) {
     achieve_goal(data_points, goal);
     return 0;
     
-}
+}*/
 
 /* spkmeans functions */
 void achieve_goal(Matrix *data_points, char *goal) {
@@ -202,10 +219,9 @@ int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int 
 
     k = -1;
     maxgap = -1.;
-    for (i=0; i<n-1; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
+    for (i=0; i<n/2; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
         currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
         assert(currentgap >= 0);
-        /* printf("current gap: %f ", currentgap);*/
         if (currentgap > maxgap){
             maxgap = currentgap;
             k = i+1;
@@ -236,12 +252,11 @@ Matrix *getU(JacobiOutput *jacobi_output, int k) { /* k == 0 if needed to be com
     eigen_vectors_array = create_eigen_vectors_array(eigenvectors_num);
     get_eigen_vectors_from_jacobi_output(jacobi_output, eigen_vectors_array);
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
+    print_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) {
         k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
         printf("C: k=%d \n",k); 
-        printf(" got here first ");
     }
-    printf(" got here ");
     n = matrix_get_rows_num(V);
     U = create_matrix(n, k);
     for (j=0; j<k; j++){
