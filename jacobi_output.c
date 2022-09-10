@@ -42,4 +42,5 @@ void free_jacobi_output(JacobiOutput *jacobi_output) {
 void print_jacobi_output(JacobiOutput *J) {
     print_matrix_diag(J->A);
     print_matrix(J->V);
+    printf("\n");
 }

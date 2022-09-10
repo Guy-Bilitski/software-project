@@ -59,7 +59,7 @@ PyObject *diagonal_matrix_to_pylist(Matrix *matrix){
 }
 
 
-Matrix *pylist_to_matrix(PyObject *pymatrix){
+Matrix *pylist_to_matrix(PyObject *pymatrix) {
     int cols, rows;
     Matrix *matrix;
     int i, j;
@@ -140,7 +140,7 @@ static PyObject* lnorm_capi(PyObject *self, PyObject *args){
 }
 
 
-static PyObject* jacobi_capi(PyObject *self, PyObject *args){
+static PyObject* jacobi_capi(PyObject *self, PyObject *args) {
     PyObject *data_points_as_pylist;
     JacobiOutput *Jout;
     PyObject *V, *A;
@@ -161,7 +161,7 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args){
 }
 
 
-static PyObject* transform_data_points_capi(PyObject *self, PyObject *args){
+static PyObject* transform_data_points_capi(PyObject *self, PyObject *args) {
     PyObject *data_points_as_pylist;
     int k;
     JacobiOutput *Jout;
@@ -172,7 +172,6 @@ static PyObject* transform_data_points_capi(PyObject *self, PyObject *args){
         printf("An Error Has Occurred-module.c-152\n");
         exit(1);
     }
-    
     data_points_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
     laplacian = lnorm(data_points_matrix);
     Jout = create_empty_jacobi_output();

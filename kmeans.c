@@ -4,7 +4,7 @@
 #include "spkmeans.h"
 
 
-Matrix * kmeans(Matrix *data_points, Matrix *centroids) {
+Matrix *kmeans(Matrix *data_points, Matrix *centroids) {
     Matrix *new_centroids, *temp;
     int dim, k;
     int maxiter, iter;

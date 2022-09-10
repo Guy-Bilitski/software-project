@@ -14,23 +14,8 @@
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
 
-int main() {
-    JacobiOutput *jacobi_output = create_empty_jacobi_output();
-    char *path = "./testfiles/spk_1.txt";
-    Matrix *X = input_file_to_matrix(path);
-    Matrix *L = lnorm(X);
-    jacobi(L, jacobi_output);
-    Matrix *U = getU(jacobi_output, 0);
-    print_matrix(U);
 
-    free_matrix(X);
-    free_matrix(L);
-    free_matrix(U);
-    free_jacobi_output(jacobi_output);
-    return 1;
-}
 
-/*
 int main (int argc, char **argv) {
     const char *input_filename;
     char *goal;
@@ -49,7 +34,7 @@ int main (int argc, char **argv) {
     achieve_goal(data_points, goal);
     return 0;
     
-}*/
+}
 
 /* spkmeans functions */
 void achieve_goal(Matrix *data_points, char *goal) {
@@ -252,10 +237,8 @@ Matrix *getU(JacobiOutput *jacobi_output, int k) { /* k == 0 if needed to be com
     eigen_vectors_array = create_eigen_vectors_array(eigenvectors_num);
     get_eigen_vectors_from_jacobi_output(jacobi_output, eigen_vectors_array);
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
-    print_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) {
-        k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
-        printf("C: k=%d \n",k); 
+        k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num); 
     }
     n = matrix_get_rows_num(V);
     U = create_matrix(n, k);
@@ -330,7 +313,7 @@ Matrix *lnorm(Matrix* data_points) {
 
 JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /*DELME*/ /* TODO: validate memory leak */
     int dim = matrix_get_rows_num(A);
-    Matrix *V = create_identity_matrix(dim);
+    Matrix *A_tmp, *V_tmp, *V = create_identity_matrix(dim);
     if(_is_matrix_diag(A)) {
         set_jacobi_output_values(jacobi_output, A, V);
         return jacobi_output;
@@ -341,15 +324,14 @@ JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /*DELME*/ /* TODO
     S_and_C *s_and_c = create_empty_S_and_C();
     MaxElement *max_element = create_empty_max_element();
     
-
     while (rotation_num < MAX_NUMBER_OF_ROTATIONS) {
         recent_off = matrix_off(A);
         matrix_get_non_diagonal_max_absolute_value(A, max_element);
         get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
         Matrix *P = create_identity_matrix(dim);
         build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
-        A = transform_matrix(A, s_and_c, max_element);
-        V = multiply_matrices(V, P);  free_matrix(P); 
+        A_tmp = transform_matrix(A, s_and_c, max_element); free_matrix(A); A=A_tmp;
+        V_tmp = multiply_matrices(V, P); free(V); V = V_tmp; free_matrix(P); 
         if (matrix_converge(recent_off, A)) {
             break;
         }
