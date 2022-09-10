@@ -24,12 +24,10 @@ def main():
         goal = args.get(Env.goal)
         if goal == 'spk':
             T = mykmeanssp.transform_data_points(data_points.tolist(), args.get(Env.k))
-            print(T)
-            T = np.array(T)          
-            
-            #indices, initial_centroids = kmeans_pp(T, args.get(Env.k))
-            #data_points_as_pylists = [c.tolist() for c in data_points]
-            #final_centroids = mykmeanssp.kmeans(data_points_as_pylists, initial_centroids) # segmentation fault is here
+            T = np.array(T)
+            indices, initial_centroids = kmeans_pp(T, args.get(Env.k))
+            data_points_as_pylists = [c.tolist() for c in data_points]
+            final_centroids = mykmeanssp.kmeans(data_points_as_pylists, initial_centroids) # segmentation fault is here
         elif goal == 'wam':
             W = mykmeanssp.wam(data_points.tolist())
             print_matrix(W)

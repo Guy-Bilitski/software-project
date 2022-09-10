@@ -63,10 +63,10 @@ void free_eigen_vector(Eigenvector *eigen_vector) {
 void print_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n) {
     int i,j;
     int m = eigen_vectors_array[0].point->dim;
-    for (j=0; j<n; j++) {
-        for (i=0; i<m; i++){
-            /* printf("%.4f, ", point_get_entry(eigen_vectors_array[i].point, j)); */
-            printf("%.4f, ", eigen_vectors_array[i].eigen_value);
+    for (i=0; i<n; i++) {
+        printf("eigen vector number %d: eigen value: %f \n", i, eigen_vectors_array[i].eigen_value);
+        for (j=0; j<m; j++){
+            printf("%.4f, ", point_get_entry(eigen_vectors_array[i].point, j));
         }
         printf("\n");
             

@@ -15,7 +15,7 @@
 #define MAX_NUMBER_OF_ROTATIONS 100
 
 
-
+/*
 int main (int argc, char **argv) {
     const char *input_filename;
     char *goal;
@@ -34,7 +34,7 @@ int main (int argc, char **argv) {
     achieve_goal(data_points, goal);
     return 0;
     
-}
+}*/
 
 /* spkmeans functions */
 void achieve_goal(Matrix *data_points, char *goal) {
@@ -158,7 +158,7 @@ void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, M
     matrix_set_entry(identity_matrix, j, i, -s);
 }
 
-void normalize_matrix_rows(Matrix *matrix) {
+void normalize_matrix_rows(Matrix *matrix) { /* TODO: what if the row is 0? */
     Point *row = create_empty_point();
     int num_of_rows, i;
     double row_norm;
@@ -166,9 +166,10 @@ void normalize_matrix_rows(Matrix *matrix) {
 
     for (i=0; i<num_of_rows; i++) {
         matrix_get_row_to_point(matrix, row, i);
-        printf("***"); print_point(row); /* TODO: delete */
         row_norm = euclidean_norm(row);
-        divide_point_by_value(row, row_norm);
+        if (row_norm != 0) {
+            divide_point_by_value(row, row_norm);
+        }
     }
     free(row);
 }
@@ -238,6 +239,7 @@ Matrix *getU(JacobiOutput *jacobi_output, int k) { /* k == 0 if needed to be com
     eigen_vectors_array = create_eigen_vectors_array(eigenvectors_num);
     get_eigen_vectors_from_jacobi_output(jacobi_output, eigen_vectors_array);
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
+    print_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) {
         k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num); 
     }
@@ -245,11 +247,16 @@ Matrix *getU(JacobiOutput *jacobi_output, int k) { /* k == 0 if needed to be com
     U = create_matrix(n, k);
     for (j=0; j<k; j++){
         point_j = eigen_vectors_array[j].point; /*the jth eigen vector, jth column*/
+        printf("!!!!!!! \n"); /* TODO: delete */
+        print_point(point_j);
         for (i=0; i<n; i++) {
             entry = point_get_entry(point_j, i);
             matrix_set_entry(U, i, j, entry);
         }
     }
+
+    printf("****** \n"); /* TODO: delete */
+    print_matrix(U);
 
     for (i=0; i<n; i++) {
         free(eigen_vectors_array[i].point);

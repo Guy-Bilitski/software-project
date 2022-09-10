@@ -289,7 +289,7 @@ void print_matrix_diag(Matrix *matrix) {
 
 void print_matrix_rows(Matrix *matrix) {
     int i;
-    Point *point = (Point *)malloc(sizeof(Point));
+    Point *point = create_empty_point();
     for (i=0; i<matrix_get_rows_num(matrix); i++) {
         matrix_get_row_to_point(matrix, point, i);
         print_point(point);
@@ -300,7 +300,7 @@ void print_matrix_rows(Matrix *matrix) {
 
 void print_matrix_cols(Matrix *matrix) {
     int i;
-    Point *point = (Point *)malloc(sizeof(Point));
+    Point *point = create_empty_point();
     for (i=0; i<matrix_get_cols_num(matrix); i++) {
         matrix_get_column_to_point(matrix, point, i);
         print_point(point);

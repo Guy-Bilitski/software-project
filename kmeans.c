@@ -71,7 +71,7 @@ void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centr
     int dim = matrix_get_cols_num(data_points);
     int n = matrix_get_rows_num(data_points);
     int k = matrix_get_rows_num(centroids);
-    Point *current_vector = (Point *)malloc(sizeof(Point));
+    Point *current_vector = create_empty_point();
     int *num_of_points_in_cluster = (int *)calloc(k, sizeof(int));
 
     
@@ -84,7 +84,7 @@ void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centr
 
     for (r=0; r<k; r++){
         assert(num_of_points_in_cluster[r] > 0);
-        for (c=0; c<dim; c++){
+        for (c=0; c<dim; c++) {
             entry_value = matrix_get_entry(new_centroids, r, c) / num_of_points_in_cluster[r];
             matrix_set_entry(new_centroids, r, c, entry_value);
         }
@@ -101,7 +101,7 @@ int find_closest_centroid(Point *vector, Matrix *centroids) {
     double min_distance = DBL_MAX;
     int min_index = -1;
     double current_distance;
-    Point *current_centroid = (Point *)malloc(sizeof(Point));
+    Point *current_centroid = create_empty_point();
 
     for (centroid_idx = 0; centroid_idx < k; centroid_idx++) {
         matrix_get_row_to_point(centroids, current_centroid, centroid_idx);
