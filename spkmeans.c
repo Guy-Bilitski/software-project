@@ -239,7 +239,6 @@ Matrix *getU(JacobiOutput *jacobi_output, int k) { /* k == 0 if needed to be com
     eigen_vectors_array = create_eigen_vectors_array(eigenvectors_num);
     get_eigen_vectors_from_jacobi_output(jacobi_output, eigen_vectors_array);
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
-    print_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) {
         k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num); 
     }
@@ -247,16 +246,11 @@ Matrix *getU(JacobiOutput *jacobi_output, int k) { /* k == 0 if needed to be com
     U = create_matrix(n, k);
     for (j=0; j<k; j++){
         point_j = eigen_vectors_array[j].point; /*the jth eigen vector, jth column*/
-        printf("!!!!!!! \n"); /* TODO: delete */
-        print_point(point_j);
         for (i=0; i<n; i++) {
             entry = point_get_entry(point_j, i);
             matrix_set_entry(U, i, j, entry);
         }
     }
-
-    printf("****** \n"); /* TODO: delete */
-    print_matrix(U);
 
     for (i=0; i<n; i++) {
         free(eigen_vectors_array[i].point);

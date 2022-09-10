@@ -5,7 +5,6 @@
 
 
 Matrix *kmeans(Matrix *data_points, Matrix *centroids) {
-    printf("!!!!!!1");
     Matrix *new_centroids, *temp;
     int dim, k;
     int maxiter, iter;
@@ -76,7 +75,6 @@ void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centr
     int *num_of_points_in_cluster = (int *)calloc(k, sizeof(int));
 
     for (r=0; r<n; r++) {
-        printf("!!!!3");
         matrix_get_row_to_point(data_points, current_vector, r);
         closet_centroid_index = find_closest_centroid(current_vector, centroids);
         matrix_add_point_to_row(new_centroids, closet_centroid_index, current_vector);

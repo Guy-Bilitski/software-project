@@ -28,6 +28,7 @@ def main():
             indices, initial_centroids = kmeans_pp(T, args.get(Env.k))
             data_points_as_pylists = [c.tolist() for c in data_points]
             final_centroids = mykmeanssp.kmeans(data_points_as_pylists, initial_centroids) # segmentation fault is here
+            print(final_centroids)
         elif goal == 'wam':
             W = mykmeanssp.wam(data_points.tolist())
             print_matrix(W)

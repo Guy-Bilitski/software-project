@@ -198,7 +198,6 @@ static PyObject* kmeans_capi(PyObject *self, PyObject *args){
     final_centroids = kmeans(data_points, init_centroids);
     output = matrix_to_pylist(final_centroids);
     free_matrix(data_points);
-    free_matrix(init_centroids);
     free_matrix(final_centroids);
     return Py_BuildValue("O", output);
 }
