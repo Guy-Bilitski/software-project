@@ -5,6 +5,7 @@
 
 
 Matrix *kmeans(Matrix *data_points, Matrix *centroids) {
+    printf("!!!!!!1");
     Matrix *new_centroids, *temp;
     int dim, k;
     int maxiter, iter;
@@ -45,8 +46,8 @@ double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroi
 
     k = matrix_get_rows_num(new_centroids);
 
-    Point *old_centroid = (Point *)malloc(sizeof(Point));
-    Point *new_centroid = (Point *)malloc(sizeof(Point));
+    Point *old_centroid = create_empty_point();
+    Point *new_centroid = create_empty_point();
 
 
     for (r=0; r < k; r++) {
@@ -74,8 +75,8 @@ void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centr
     Point *current_vector = create_empty_point();
     int *num_of_points_in_cluster = (int *)calloc(k, sizeof(int));
 
-    
     for (r=0; r<n; r++) {
+        printf("!!!!3");
         matrix_get_row_to_point(data_points, current_vector, r);
         closet_centroid_index = find_closest_centroid(current_vector, centroids);
         matrix_add_point_to_row(new_centroids, closet_centroid_index, current_vector);
