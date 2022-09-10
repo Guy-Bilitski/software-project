@@ -156,7 +156,6 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args) {
     V = matrix_to_pylist(Jout->V);
     A = diagonal_matrix_to_pylist(Jout->A);
     free_jacobi_output(Jout);
-    free_matrix(sym_matrix);
     return Py_BuildValue("OO", V, A);
 }
 
@@ -178,10 +177,10 @@ static PyObject* transform_data_points_capi(PyObject *self, PyObject *args) {
     jacobi(laplacian, Jout);
     U = getU(Jout, k);
     normalize_matrix_rows(U);
+    print_matrix(U);
     pylist_U = matrix_to_pylist(U);
     free_jacobi_output(Jout);
     free_matrix(data_points_matrix);
-    free_matrix(laplacian);
     free_matrix(U);
     return Py_BuildValue("O", pylist_U);
 }

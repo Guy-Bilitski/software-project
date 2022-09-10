@@ -86,7 +86,7 @@ void divide_point_by_value(Point *p, double value) {
 
     for (i=0; i<n; i++) {
         index = _convert_point_index(p, i);
-        (p->data)[index] /= value;
+        point_get_data(p)[index] /= value;
     }
 }
 

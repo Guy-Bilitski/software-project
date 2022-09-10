@@ -166,6 +166,7 @@ void normalize_matrix_rows(Matrix *matrix) {
 
     for (i=0; i<num_of_rows; i++) {
         matrix_get_row_to_point(matrix, row, i);
+        printf("***"); print_point(row); /* TODO: delete */
         row_norm = euclidean_norm(row);
         divide_point_by_value(row, row_norm);
     }
@@ -311,7 +312,7 @@ Matrix *lnorm(Matrix* data_points) {
     return Lnorm;
 }
 
-JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /*DELME*/ /* TODO: validate memory leak */
+JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /* notice that jacobi function frees Matrix A! */
     int dim = matrix_get_rows_num(A);
     Matrix *A_tmp, *V_tmp, *V = create_identity_matrix(dim);
     if(_is_matrix_diag(A)) {

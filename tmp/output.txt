@@ -1,0 +1,1 @@
+/usr/local/bin/python3: line 6: 10711 Aborted                 (core dumped) /usr/local/lib/python3.7.1/bin/python3.7 "$@"
