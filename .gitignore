@@ -20,3 +20,10 @@ build/lib.linux-x86_64-2.7/mykmeanssp.so
 build/temp.linux-x86_64-2.7/spkmeans.o
 mykmeanssp.so
 .gitignore
+myoutput.txt
+data/init_centroids_1.txt
+data/input_1.txt
+data/input_2.txt
+data/input_3.txt
+data/T.txt
+data/Tpy.txt
