@@ -3,6 +3,7 @@ import sys
 np.set_printoptions(threshold=sys.maxsize)
 from math import sqrt
 import mykmeanssp
+from data import generate_data as mygd
 
 def max_elem(A: np.array):
     d = {}
@@ -84,6 +85,9 @@ def load_initial_A_for_jacobi(path='testfiles/spk_2.txt'):
     data_points = np.genfromtxt(fname=path, dtype=float, delimiter=',')
     A = mykmeanssp.lnorm(data_points.tolist())
     return np.array(A)
+
+
+
 
 A = load_initial_A_for_jacobi()
 A,V = jacobi(A)

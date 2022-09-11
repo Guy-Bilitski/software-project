@@ -233,7 +233,7 @@ Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix *
 void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all the diagonal entries */
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
 void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
-void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, Matrix *identity_matrix); /* inserts the rotation matrix to a given identity matrix */
+void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, Matrix *identity_matrix); /* inserts the rotation matrix to a given identity matrix */
 void normalize_matrix_rows(Matrix *matrix);
 double matrix_off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */

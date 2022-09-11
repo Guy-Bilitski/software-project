@@ -33,11 +33,12 @@ Point *create_point(double *data, int dim, int offset) {
 
 /* Getters */
 double point_get_entry(Point *point, int index) {
+    double *data;
+    int real_index;
     assert(index >= 0 && index < point->dim);
-    int real_index = _convert_point_index(point, index);
-    double *data = point_get_data(point);
+    real_index = _convert_point_index(point, index);
+    data = point_get_data(point);
     return data[real_index];
-    
 }
 
 int point_get_dim(Point *point) {

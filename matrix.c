@@ -14,10 +14,12 @@
 /* Matrix API */
 Matrix *create_matrix(int rows, int cols) {
     int size_of_data, i;
+    Matrix *matrix;
+
     size_of_data = rows*cols;
     assert(rows>0 && cols>0);
 
-    Matrix *matrix = (Matrix *)malloc(sizeof(Matrix));
+    matrix = (Matrix *)malloc(sizeof(Matrix));
     matrix->rows = rows;
     matrix->cols = cols;
     matrix->is_not_diag = 0;
@@ -28,9 +30,11 @@ Matrix *create_matrix(int rows, int cols) {
 }
 
 Matrix *create_identity_matrix(int n) {
-    assert(n>0);
     int i;
-    Matrix *I = create_matrix(n,n);
+    Matrix *I;
+
+    assert(n>0);
+    I = create_matrix(n,n);
     for (i=0; i<n; i++)
         matrix_set_entry(I, i, i, 1.);
     return I;
@@ -50,14 +54,18 @@ double *matrix_get_data(Matrix *matrix) {
 }
 
 double matrix_get_entry(Matrix *matrix, int row, int col){
+    double *matrix_data;
     assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
-    double *matrix_data = matrix_get_data(matrix);
+    
+    matrix_data = matrix_get_data(matrix);
     return matrix_data[_get_matrix_index(matrix, row, col)];
 }
 
 void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index) {
+    int cols_num;
     assert(matrix_get_rows_num(matrix) > row_index);
-    int cols_num = matrix_get_cols_num(matrix);
+    
+    cols_num = matrix_get_cols_num(matrix);
     point->dim = cols_num;
     point->offset = 1;
     point->data = matrix_get_data(matrix) + row_index*cols_num;
@@ -72,11 +80,13 @@ void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index) 
 }
 
 void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element) {
-    max_element_set_new_values(max_element, matrix_get_entry(matrix, 0, 1), 0, 1);
-    int i, j, cols_num = matrix_get_cols_num(matrix), rows_num = matrix_get_rows_num(matrix);
+    int i, j, n;
     double current_value;
-    for (i=0; i<rows_num; i++) {
-        for (j=i+1; j<cols_num; j++) {
+    max_element_set_new_values(max_element, matrix_get_entry(matrix, 0, 1), 0, 1);
+    n = matrix_get_cols_num(matrix);
+    
+    for (i=0; i<n; i++) {
+        for (j=i+1; j<n; j++) {
             current_value = matrix_get_entry(matrix, i, j);
             if (fabs(current_value) > fabs(max_element_get_value(max_element))) {
                 max_element_set_new_values(max_element, current_value, i, j);
@@ -87,12 +97,16 @@ void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_
 
 /* Setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
-    assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
-    double *matrix_data = matrix_get_data(matrix);
-    int matrix_index = _get_matrix_index(matrix, row, col);
+    int matrix_index;
+    double *matrix_data;
     double old_value;
+    assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
+
+    matrix_data = matrix_get_data(matrix);
+    matrix_index = _get_matrix_index(matrix, row, col);
     old_value = matrix_data[matrix_index];
     matrix_data[matrix_index] = value;
+
     if (row != col){
         if ((old_value == 0.) && (value != 0.))
             (matrix->is_not_diag)++;
@@ -147,13 +161,14 @@ Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
 }
 
 Matrix *sub_matrices(Matrix *A, Matrix *B) {
-    assert(matrix_get_cols_num(A) == matrix_get_cols_num(B));
-    assert(matrix_get_rows_num(A) == matrix_get_rows_num(B));
     int i,j;
     int cols = matrix_get_cols_num(A);
     int rows = matrix_get_rows_num(A);
     double value;
-    Matrix *result = create_matrix(rows, cols);
+    Matrix *result;
+    assert(matrix_get_cols_num(A) == matrix_get_cols_num(B));
+    assert(matrix_get_rows_num(A) == matrix_get_rows_num(B));
+    result = create_matrix(rows, cols);
 
     
     for (i=0; i<rows; i++){
@@ -274,10 +289,11 @@ void print_matrix2(Matrix *matrix) {
 }
 
 void print_matrix_diag(Matrix *matrix) {
-    assert(matrix_get_cols_num(matrix) == matrix_get_cols_num(matrix));
     int i;
     double val;
-    int n = matrix->cols;
+    int n;
+    assert(matrix_get_cols_num(matrix) == matrix_get_cols_num(matrix));
+    n = matrix->cols;
 
     for (i=0; i<n; i++) {
         val = matrix_get_entry(matrix, i, i);

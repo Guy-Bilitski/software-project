@@ -15,7 +15,6 @@
 #define MAX_NUMBER_OF_ROTATIONS 100
 
 
-/*
 int main (int argc, char **argv) {
     const char *input_filename;
     char *goal;
@@ -34,7 +33,7 @@ int main (int argc, char **argv) {
     achieve_goal(data_points, goal);
     return 0;
     
-}*/
+}
 
 /* spkmeans functions */
 void achieve_goal(Matrix *data_points, char *goal) {
@@ -76,10 +75,13 @@ double gaussian_RBF(Point *p1, Point *p2) {
 }
 
 Matrix *create_weighted_matrix(Matrix *X) {
-    int i, j, rows_num = matrix_get_rows_num(X);
+    int i, j, rows_num;
     double value;
-    Point *p1 = create_empty_point(), *p2 = create_empty_point();
-    Matrix *matrix = create_matrix(rows_num, rows_num);
+    Point *p1, *p2;
+    Matrix *matrix;
+    rows_num = matrix_get_rows_num(X);
+    matrix = create_matrix(rows_num, rows_num);
+    p1 = create_empty_point(); p2 = create_empty_point();
     for (i=0; i<rows_num; i++) {
         for (j=0; j<rows_num; j++) {
             if (i == j) {
@@ -149,7 +151,7 @@ void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C
     S_and_C_set_values(s_and_c, s, c);
 }
 
-void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, int dim, Matrix *identity_matrix) {
+void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, Matrix *identity_matrix) {
     double s = s_and_c_get_s(s_and_c), c = s_and_c_get_c(s_and_c);
     int i = max_element_get_index1(max_element), j = max_element_get_index2(max_element);
     matrix_set_entry(identity_matrix, i, i, c);
@@ -240,7 +242,12 @@ Matrix *getU(JacobiOutput *jacobi_output, int k) { /* k == 0 if needed to be com
     get_eigen_vectors_from_jacobi_output(jacobi_output, eigen_vectors_array);
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) {
-        k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num); 
+        k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
+        /*
+        print_matrix_diag(jacobi_output->A);
+        printf("cols: %d, rows: %d\n", jacobi_output->A->cols, jacobi_output->A->rows);
+        printf("K is %d\n",k);
+        */
     }
     n = matrix_get_rows_num(V);
     U = create_matrix(n, k);
@@ -314,24 +321,31 @@ Matrix *lnorm(Matrix* data_points) {
 }
 
 JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /* notice that jacobi function frees Matrix A! */
-    int dim = matrix_get_rows_num(A);
-    Matrix *A_tmp, *V_tmp, *V = create_identity_matrix(dim);
+    int dim;
+    int rotation_num;
+    double recent_off;
+    Matrix *A_tmp, *V_tmp, *V;
+    S_and_C *s_and_c;
+    MaxElement *max_element;
+    Matrix *P;
+
+    dim = matrix_get_rows_num(A);
+    V = create_identity_matrix(dim);
     if(_is_matrix_diag(A)) {
         set_jacobi_output_values(jacobi_output, A, V);
         return jacobi_output;
     }
 
-    int rotation_num = 0;
-    double recent_off;
-    S_and_C *s_and_c = create_empty_S_and_C();
-    MaxElement *max_element = create_empty_max_element();
+    rotation_num = 0;
+    s_and_c = create_empty_S_and_C();
+    max_element = create_empty_max_element();
     
     while (rotation_num < MAX_NUMBER_OF_ROTATIONS) {
         recent_off = matrix_off(A);
         matrix_get_non_diagonal_max_absolute_value(A, max_element);
         get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
-        Matrix *P = create_identity_matrix(dim);
-        build_rotation_matrix(s_and_c, max_element, dim, P); rotation_num ++;
+        P = create_identity_matrix(dim);
+        build_rotation_matrix(s_and_c, max_element, P); rotation_num ++;
         A_tmp = transform_matrix(A, s_and_c, max_element); free_matrix(A); A=A_tmp;
         V_tmp = multiply_matrices(V, P); free(V); V = V_tmp; free_matrix(P); 
         if (matrix_converge(recent_off, A)) {

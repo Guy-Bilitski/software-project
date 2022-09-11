@@ -10,7 +10,7 @@ Matrix *kmeans(Matrix *data_points, Matrix *centroids) {
     int maxiter, iter;
     double max_distance, epsilon;
 
-    //Setting variables
+    /*Setting variables*/
     dim = matrix_get_cols_num(centroids);
     k = matrix_get_rows_num(centroids);
     maxiter = 300;
@@ -43,10 +43,12 @@ double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroi
     double max_distance = DBL_MIN;
     double current_distance;
 
+    Point *old_centroid, *new_centroid;
+
     k = matrix_get_rows_num(new_centroids);
 
-    Point *old_centroid = create_empty_point();
-    Point *new_centroid = create_empty_point();
+    old_centroid = create_empty_point();
+    new_centroid = create_empty_point();
 
 
     for (r=0; r < k; r++) {
@@ -95,12 +97,16 @@ void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centr
 int find_closest_centroid(Point *vector, Matrix *centroids) {
     int k;
     int centroid_idx;
-    k = matrix_get_rows_num(centroids);
 
-    double min_distance = DBL_MAX;
-    int min_index = -1;
+    double min_distance;
+    int min_index;
     double current_distance;
-    Point *current_centroid = create_empty_point();
+    Point *current_centroid;
+
+    min_distance = DBL_MAX;
+    min_index = -1;
+    current_centroid = create_empty_point();
+    k = matrix_get_rows_num(centroids);
 
     for (centroid_idx = 0; centroid_idx < k; centroid_idx++) {
         matrix_get_row_to_point(centroids, current_centroid, centroid_idx);

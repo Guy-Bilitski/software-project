@@ -1,4 +1,5 @@
 #include "spkmeans.h"
+#include "ctype.h"
 
 
 int get_dimension(const char *input_file) {
@@ -44,7 +45,7 @@ int get_n(const char *input_file) {
         if (fscanf(ifp, "%lf%c", &temp,&delimiter) < 2){
             break;
         }
-        if (delimiter == '\n') {
+        if (isspace(delimiter)) {
             n += 1;
         }
     }
@@ -61,10 +62,11 @@ Matrix *input_file_to_matrix(const char *input_file) {
     double element;
     int elements_count = 0;
     int dim, n;
+    Matrix *data_points;
 
     dim = get_dimension(input_file);
     n = get_n(input_file);
-    Matrix *data_points = create_matrix(n, dim);
+    data_points = create_matrix(n, dim);
 
     ifp = fopen(input_file, "r");
     if (ifp == NULL) {

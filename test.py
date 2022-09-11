@@ -5,7 +5,6 @@ import mykmeanssp
 import pandas as pd
 
 path = 'data/mytxt.txt'
-gd.data()
 X = np.genfromtxt(fname=path, dtype=float, delimiter=',')
 gaussian_RBF = lambda x1, x2: np.exp(-LA.norm(x1-x2)/2)
 
