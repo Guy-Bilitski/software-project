@@ -31,7 +31,6 @@ int main (int argc, char **argv) {
     data_points = input_file_to_matrix(input_filename);
 
     achieve_goal(data_points, goal);
-    free_matrix(data_points);
     return 0;
     
 }
@@ -43,19 +42,21 @@ void achieve_goal(Matrix *data_points, char *goal) {
         Matrix *W = wam(data_points);
         print_matrix(W);
         free_matrix(W);
-        
+        free_matrix(data_points);
         return;
     }
     else if (!strcmp(goal, "ddg")){
         Matrix *D = ddg(data_points);
         print_matrix(D);
         free_matrix(D);
+        free_matrix(data_points);
         return;
     }
     else if (!strcmp(goal, "lnorm")){
         Matrix *Lnorm = lnorm(data_points);
         print_matrix(Lnorm);
         free_matrix(Lnorm);
+        free_matrix(data_points);
         return;
     }
     else if (!strcmp(goal, "jacobi")){
@@ -72,7 +73,7 @@ void achieve_goal(Matrix *data_points, char *goal) {
 }
 
 double gaussian_RBF(Point *p1, Point *p2) {
-    double distance = euclidean_distance(p1, p2); /*TODO: CHECK*/
+    double distance = euclidean_distance(p1, p2);
     return exp(-(distance / 2));
 }
 
@@ -162,7 +163,7 @@ void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, Matrix *id
     matrix_set_entry(identity_matrix, j, i, -s);
 }
 
-void normalize_matrix_rows(Matrix *matrix) { /* TODO: what if the row is 0? */
+void normalize_matrix_rows(Matrix *matrix) {
     Point *row = create_empty_point();
     int num_of_rows, i;
     double row_norm;
@@ -210,7 +211,7 @@ int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int 
 
     k = -1;
     maxgap = -1.;
-    for (i=0; i<n/2; i++){ /* MIGHT BE AN ERROR, as it downs't work with n/2! */
+    for (i=0; i<n/2; i++){
         currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
         assert(currentgap >= 0);
         if (currentgap > maxgap){
@@ -245,11 +246,6 @@ Matrix *getU(JacobiOutput *jacobi_output, int k) { /* k == 0 if needed to be com
     sort_eigenvectors_array(eigen_vectors_array, eigenvectors_num);
     if (k == 0) {
         k = get_k_from_sorted_eigen_vectors_array(eigen_vectors_array, eigenvectors_num);
-        /*
-        print_matrix_diag(jacobi_output->A);
-        printf("cols: %d, rows: %d\n", jacobi_output->A->cols, jacobi_output->A->rows);
-        printf("K is %d\n",k);
-        */
     }
     n = matrix_get_rows_num(V);
     U = create_matrix(n, k);
@@ -322,7 +318,7 @@ Matrix *lnorm(Matrix* data_points) {
     return Lnorm;
 }
 
-JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /* notice that jacobi function frees Matrix A! */
+JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /* note that jacobi function frees Matrix A! */
     int dim;
     int rotation_num;
     double recent_off;
@@ -349,7 +345,7 @@ JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /* notice that ja
         P = create_identity_matrix(dim);
         build_rotation_matrix(s_and_c, max_element, P); rotation_num ++;
         A_tmp = transform_matrix(A, s_and_c, max_element); free_matrix(A); A=A_tmp;
-        V_tmp = multiply_matrices(V, P); free(V); V = V_tmp; free_matrix(P); 
+        V_tmp = multiply_matrices(V, P); free_matrix(V); V = V_tmp; free_matrix(P);
         if (matrix_converge(recent_off, A)) {
             break;
         }

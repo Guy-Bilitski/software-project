@@ -3,14 +3,6 @@
 #include "spkmeans.h"
 #include <limits.h>
 
-#ifndef MAX_ELEMENT_IS_DEFINED
-#define MAX_ELEMENT_IS_DEFINED
-typedef struct MaxElement {
-    int i;
-    int j;
-    double value;
-} MaxElement;
-#endif
 
 /* MAX_ELEMENT API */
 MaxElement *create_empty_max_element() {

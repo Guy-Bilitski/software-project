@@ -33,8 +33,8 @@ void set_jacobi_output_values(JacobiOutput *jacobi_output, Matrix *A, Matrix *V)
 
 /* cleanup */
 void free_jacobi_output(JacobiOutput *jacobi_output) {
-    free(jacobi_output->A);
-    free(jacobi_output->V);
+    free_matrix(jacobi_output->A);
+    free_matrix(jacobi_output->V);
     free(jacobi_output);
 }
 
