@@ -10,8 +10,8 @@ PyObject *matrix_to_pylist(Matrix *matrix){
     int i, j;
     double value;
 
-    cols = matrix->cols;
-    rows = matrix->rows;
+    cols = matrix_get_cols_num(matrix);
+    rows = matrix_get_rows_num(matrix);
     py_matrix = PyList_New(rows);
 
     if (py_matrix == NULL){
@@ -59,7 +59,7 @@ PyObject *diagonal_matrix_to_pylist(Matrix *matrix){
 }
 
 
-Matrix *pylist_to_matrix(PyObject *pymatrix){
+Matrix *pylist_to_matrix(PyObject *pymatrix) {
     int cols, rows;
     Matrix *matrix;
     int i, j;
@@ -140,9 +140,9 @@ static PyObject* lnorm_capi(PyObject *self, PyObject *args){
 }
 
 
-static PyObject* jacobi_capi(PyObject *self, PyObject *args){
+static PyObject* jacobi_capi(PyObject *self, PyObject *args) {
     PyObject *data_points_as_pylist;
-    YacobiOutput *Jout;
+    JacobiOutput *Jout;
     PyObject *V, *A;
     Matrix *sym_matrix;
 
@@ -151,20 +151,19 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args){
         exit(1);
     }
     sym_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
-    Jout = create_empty_yacobi_output();
+    Jout = create_empty_jacobi_output();
     jacobi(sym_matrix, Jout);
     V = matrix_to_pylist(Jout->V);
     A = diagonal_matrix_to_pylist(Jout->A);
-    free_yacobi_output(Jout);
-    free_matrix(sym_matrix);
+    free_jacobi_output(Jout);
     return Py_BuildValue("OO", V, A);
 }
 
 
-static PyObject* transform_data_points_capi(PyObject *self, PyObject *args){
+static PyObject* transform_data_points_capi(PyObject *self, PyObject *args) {
     PyObject *data_points_as_pylist;
     int k;
-    YacobiOutput *Jout;
+    JacobiOutput *Jout;
     PyObject *pylist_U;
     Matrix *data_points_matrix, *laplacian, *U;
 
@@ -172,17 +171,15 @@ static PyObject* transform_data_points_capi(PyObject *self, PyObject *args){
         printf("An Error Has Occurred-module.c-152\n");
         exit(1);
     }
-    
     data_points_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
     laplacian = lnorm(data_points_matrix);
-    Jout = create_empty_yacobi_output();
+    Jout = create_empty_jacobi_output();
     jacobi(laplacian, Jout);
     U = getU(Jout, k);
     normalize_matrix_rows(U);
     pylist_U = matrix_to_pylist(U);
-    free_yacobi_output(Jout);
+    free_jacobi_output(Jout);
     free_matrix(data_points_matrix);
-    free_matrix(laplacian);
     free_matrix(U);
     return Py_BuildValue("O", pylist_U);
 }

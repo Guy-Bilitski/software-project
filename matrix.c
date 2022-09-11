@@ -11,8 +11,6 @@
 /* TODO: Check callocs/mallocs on failure */
 
 
-
-
 /* Matrix API */
 Matrix *create_matrix(int rows, int cols) {
     int size_of_data, i;
@@ -182,7 +180,6 @@ int _get_matrix_index(Matrix *matrix, int row, int col) {
     return row*(matrix->cols) + col;
 }
 
-
 Matrix *_multiply_matrices_diag_with_diag(Matrix *m1, Matrix *m2) {
     int n = matrix_get_rows_num(m1);
     Matrix *new_matrix = create_matrix(n,n);
@@ -235,9 +232,6 @@ Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2) {
     free(col_point);
     return new_matrix;
 }
-
-
-
 
 /* debugging function */
 void print_matrix(Matrix *matrix) {
@@ -293,10 +287,9 @@ void print_matrix_diag(Matrix *matrix) {
     printf("\n");
 }
 
-
 void print_matrix_rows(Matrix *matrix) {
     int i;
-    Point *point = (Point *)malloc(sizeof(Point));
+    Point *point = create_empty_point();
     for (i=0; i<matrix_get_rows_num(matrix); i++) {
         matrix_get_row_to_point(matrix, point, i);
         print_point(point);
@@ -307,7 +300,7 @@ void print_matrix_rows(Matrix *matrix) {
 
 void print_matrix_cols(Matrix *matrix) {
     int i;
-    Point *point = (Point *)malloc(sizeof(Point));
+    Point *point = create_empty_point();
     for (i=0; i<matrix_get_cols_num(matrix); i++) {
         matrix_get_column_to_point(matrix, point, i);
         print_point(point);
@@ -316,13 +309,12 @@ void print_matrix_cols(Matrix *matrix) {
     free(point);
 }
 
-double RandomReal(double low, double high) {
+double RandomReal(double low, double high) /* TODO: delete */ {
   double d;
 
   d = (double) rand() / ((double) RAND_MAX + 1);
   return (low + d * (high - low));
 }
-
 
 Matrix *generate_matrix(int rows, int cols, int is_diag) {
     int i,j;
@@ -361,23 +353,3 @@ void space() {
     printf("\n");
     printf("\n");
 }
-
-
-int main9() {
-    srand((int) time(NULL)); /* important for random */
-    Matrix *m1 = generate_matrix(5, 5, true);
-    Matrix *m2 = generate_matrix(5, 5, true);
-    Matrix *m3 = multiply_matrices(m1, m2);
-    print_matrix2(m1);
-    print_matrix2(m2);
-    print_matrix2(m3);
-    space();
-
-  
-
-    return 1;
-}
-/*
-gcc matrix.c
-a.out
-*/

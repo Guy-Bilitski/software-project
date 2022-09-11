@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 from math import sqrt
 import mykmeanssp
 
@@ -69,7 +71,7 @@ def eigen_gap_h(A,V):
     evals = evals[::-1]
     maxi = -1
     k = -1
-    for i in range(n-1):
+    for i in range(int(n/2)):
         if evals[i][0] - evals[i+1][0] > maxi:
             maxi = evals[i][0] - evals[i+1][0]
             k = i
@@ -85,10 +87,13 @@ def load_initial_A_for_jacobi(path='testfiles/spk_2.txt'):
 
 A = load_initial_A_for_jacobi()
 A,V = jacobi(A)
-print(A.shape)
-k=eigen_gap_h(A,V)
-print(f'PYTHON:\tk={k}')
-
-
+n = A.shape[0]
+evals = sorted([(A[i,i], i) for i in range(n)])
+#evals = [(A[i,i], i) for i in range(n)]
+evals = evals[::-1]
+print(evals)
+#print(A.shape)
+#k=eigen_gap_h(A,V)
+#print(f'PYTHON:\tk={k}')
 
 #np.savetxt("data/Tpy.txt", V, fmt='%1.3f', delimiter=",")
