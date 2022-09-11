@@ -31,6 +31,7 @@ int main (int argc, char **argv) {
     data_points = input_file_to_matrix(input_filename);
 
     achieve_goal(data_points, goal);
+    free_matrix(data_points);
     return 0;
     
 }
@@ -42,6 +43,7 @@ void achieve_goal(Matrix *data_points, char *goal) {
         Matrix *W = wam(data_points);
         print_matrix(W);
         free_matrix(W);
+        
         return;
     }
     else if (!strcmp(goal, "ddg")){
