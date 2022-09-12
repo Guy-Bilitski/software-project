@@ -12,9 +12,7 @@ MaxElement *create_empty_max_element() {
 
 MaxElement *create_max_element(double value, int i, int j) {
     MaxElement *max_element = create_empty_max_element();
-    max_element->value = value;
-    max_element->i = i;
-    max_element->j = j;
+    max_element_set_new_values(max_element, value, i, j);
     return max_element;
 }
 

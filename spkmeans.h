@@ -167,54 +167,58 @@ void free_eigen_vector(Eigenvector *eigen_vector);  /* frees Eigen vector struct
 void print_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
 
 /* -------------------- S AND C PROTOTYPES -------------------- */
+/* S_AND_C struct represents the values of s and c when building a rotation matrix */
 
 /* S AND C API */
-S_and_C *create_empty_S_and_C();
+S_and_C *create_empty_S_and_C();  /* creates an empty s_and_c in the memory  */
 
 /* Getters */
-double s_and_c_get_s(S_and_C *s_and_c);
-double s_and_c_get_c(S_and_C *s_and_c);
+double s_and_c_get_s(S_and_C *s_and_c);  /* returns s_and_c value of s */
+double s_and_c_get_c(S_and_C *s_and_c);  /* returns s_and_c value of c */
 
 /* Setters */
-void S_and_C_set_values(S_and_C *s_and_c, double s, double c);
+void S_and_C_set_values(S_and_C *s_and_c, double s, double c);  /* sets s,c values to s_and_c struct */
 
 /* debugging functions */
 void print_s_and_c(S_and_C *s_and_c);
 
 /* -------------------- MAX ELEMENT PROTOTYPES -------------------- */
+/* MaxElement struct represents a value with <i,j> coordinated (e.g of a matrix) */
 
 /* MaxElemnt API */
-MaxElement *create_empty_max_element();
-MaxElement *create_max_element(double value, int i, int j);
+MaxElement *create_empty_max_element();  /* creates an empty max_element in the memory  */
+MaxElement *create_max_element(double value, int i, int j);  /* creates max element with given values */
 
 /* Getters */
-double max_element_get_value(MaxElement *max_element);
-int max_element_get_index1(MaxElement *max_element);
-int max_element_get_index2(MaxElement *max_element);
+double max_element_get_value(MaxElement *max_element);  /* returns max_element value */
+int max_element_get_index1(MaxElement *max_element);  /* returns max_element first index */
+int max_element_get_index2(MaxElement *max_element);  /* returns max_element second index */
 
 /* Setters */
-void max_element_set_new_values(MaxElement *max_element, double value, int i, int j);
-void max_element_set_value(MaxElement *max_element, double value);
-void max_element_set_index1(MaxElement *max_element, int i);
-void max_element_set_index2(MaxElement *max_element, int j);
+void max_element_set_new_values(MaxElement *max_element, double value, int i, int j);  /* sets max_element values */
+void max_element_set_value(MaxElement *max_element, double value);  /* sets max_element value */
+void max_element_set_index1(MaxElement *max_element, int i);  /* sets max_element first index */
+void max_element_set_index2(MaxElement *max_element, int j);  /* sets max_element second index */
 
 /* debugging */
 void print_max_element(MaxElement *max_element);
 
 /* -------------------- JACOBI OUTPUT PROTOTYPES -------------------- */
+/* JacobiOutput struct represents the output of jacobi process containing */
+/* eigen vectors matrix V and diagonal eigen values matrix A */
 
 /* Jacobi Output API */
-JacobiOutput *create_empty_jacobi_output();
+JacobiOutput *create_empty_jacobi_output();  /* creates an empty jacobi_output in the memory  */
 
 /* Getters */
-Matrix *jacobi_output_get_A(JacobiOutput *jacobi_output);
-Matrix *jacobi_output_get_V(JacobiOutput *jacobi_output);
+Matrix *jacobi_output_get_A(JacobiOutput *jacobi_output);  /* returns matrix A of Jacobi Output */
+Matrix *jacobi_output_get_V(JacobiOutput *jacobi_output);  /* returns matrix V of Jacobi Output */
 
 /* Setters */
-void set_jacobi_output_values(JacobiOutput *jacobi_output, Matrix *A, Matrix *V);
+void set_jacobi_output_values(JacobiOutput *jacobi_output, Matrix *A, Matrix *V);  /* sets A,V matrices to Jacoib Output */
 
 /* Cleanup */
-void free_jacobi_output(JacobiOutput *jacobi_output);
+void free_jacobi_output(JacobiOutput *jacobi_output);  /* free Jacobi Output struct and A, V matrices */
 
 /* debugging */
 void print_jacobi_output(JacobiOutput *J);
@@ -222,17 +226,17 @@ void print_jacobi_output(JacobiOutput *J);
 /* -------------------- KMEANS-IO PROTOTYPES -------------------- */
 
 /* Kmeans_io API */
-int get_dimension(const char *input_file);
-int get_n(const char *input_file);
-Matrix *input_file_to_matrix(const char *input_file);
+int get_dimension(const char *input_file);  /* returns the dimension of points given in input_file */
+int get_n(const char *input_file);  /* returns the number of data points given in input_file */
+Matrix *input_file_to_matrix(const char *input_file);  /* returns data points from input_file as a matrix */
 
 /* -------------------- KMEANS PROTOTYPES -------------------- */
 
 /* Kmeans API */
-Matrix * kmeans(Matrix *data_points, Matrix *centroids);
-double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids);
-void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids);
-int find_closest_centroid(Point *vector, Matrix *centroids);
+Matrix * kmeans(Matrix *data_points, Matrix *centroids);  /* performs kmeans algorithm on data_points matrix using the given centroids */
+double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids);  /* returns the maximum distance between given centroids calculated one by one */
+void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids);  /* performs kmeans algorithm single iteration (centroids improvement) */
+int find_closest_centroid(Point *vector, Matrix *centroids);  /* returns the index of the closet centroid to a given vector */
 
 /* -------------------- SPKMEANS PROTOTYPES -------------------- */
 
