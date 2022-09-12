@@ -1,0 +1,14 @@
+REQUIRED EFFICIENCY FOR: py: jacobi: is:
+
+8 seconds.
+Good luck next time!
+
+
+
+REQUIRED EFFICIENCY FOR: py: spk: is:
+
+130 seconds.
+Good luck next time!
+
+
+

@@ -15,7 +15,6 @@
 Matrix *create_matrix(int rows, int cols) {
     int size_of_data, i;
     Matrix *matrix;
-
     size_of_data = rows*cols;
     assert(rows>0 && cols>0);
 
@@ -66,33 +65,14 @@ void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index) {
     assert(matrix_get_rows_num(matrix) > row_index);
     
     cols_num = matrix_get_cols_num(matrix);
-    point->dim = cols_num;
-    point->offset = 1;
-    point->data = matrix_get_data(matrix) + row_index*cols_num;
+    point_set_values(point, cols_num, 1, matrix_get_data(matrix) + row_index*cols_num);
 }
 
 void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index) {
     int cols_num = matrix_get_cols_num(matrix);
     assert(cols_num > column_index);
-    point->dim = matrix_get_rows_num(matrix);
-    point->data = matrix_get_data(matrix) + column_index;
-    point->offset = cols_num;
-}
 
-void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element) {
-    int i, j, n;
-    double current_value;
-    max_element_set_new_values(max_element, matrix_get_entry(matrix, 0, 1), 0, 1);
-    n = matrix_get_cols_num(matrix);
-    
-    for (i=0; i<n; i++) {
-        for (j=i+1; j<n; j++) {
-            current_value = matrix_get_entry(matrix, i, j);
-            if (fabs(current_value) > fabs(max_element_get_value(max_element))) {
-                max_element_set_new_values(max_element, current_value, i, j);
-            }
-        }
-    }
+    point_set_values(point, matrix_get_rows_num(matrix), cols_num, matrix_get_data(matrix) + column_index);
 }
 
 /* Setters */
@@ -116,6 +96,22 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
 }
 
 /* Utils */
+void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element) {
+    int i, j, n;
+    double current_value;
+    max_element_set_new_values(max_element, matrix_get_entry(matrix, 0, 1), 0, 1);
+    n = matrix_get_cols_num(matrix);
+    
+    for (i=0; i<n; i++) {
+        for (j=i+1; j<n; j++) {
+            current_value = matrix_get_entry(matrix, i, j);
+            if (fabs(current_value) > fabs(max_element_get_value(max_element))) {
+                max_element_set_new_values(max_element, current_value, i, j);
+            }
+        }
+    }
+}
+
 double matrix_get_row_sum(Matrix *matrix, int row_index) {
     int col_index, cols_num = matrix_get_cols_num(matrix);
     double sum;

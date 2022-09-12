@@ -65,56 +65,66 @@ typedef struct JacobiOutput
 #endif
 
 /* -------------------- POINT PROTOTYPES -------------------- */
+/* Struct point is an interface of data stored as a list of doubles, like a mathematical vector */
+/* the Point gives a clean, easy to work with way of treating a matrix as rows and columns */
+/* using offset field you can create a point the represents a column of a matrix */
 
 /* Point API */
-Point *create_empty_point();
+Point *create_empty_point(); /* creates an empty point in the memory */
 Point *create_point(double *data, int dim, int offset);  /* creates a point from list */
 
 /* Getters */
 double point_get_entry(Point *point, int entry);  /* returns the value in index <index> of point */
-int point_get_dim(Point *point);  
-int point_get_offset(Point *point);  
-double *point_get_data(Point *point);  
+int point_get_dim(Point *point);  /* returns point's dim */
+int point_get_offset(Point *point);  /* returns point's offset */
+double *point_get_data(Point *point);  /* returns point's data */
+
+/* Setters */
+void point_set_values(Point *point, int dim, int offset, double *data);  /* sets point new values */
 
 /* Utils */
 double inner_product(Point *row_point, Point *column_point);  /* returns row X column scalar */
-double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
-double euclidean_norm(Point *p);
-void divide_point_by_value(Point *p, double value);
+double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points (vectors) */
+double euclidean_norm(Point *p);  /* returns the eucalidian norm of a point (vector) */
+void divide_point_by_value(Point *p, double value);  /* divides each point entry by a given value */
 
 /* Point inner functions */
-int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
+int _convert_point_index(Point *point, int index);  /* converts given index to the "real" index considering the offset */
 
 /* debugging functions */
 void print_point(Point *point);
 
 /* -------------------- MATRIX PROTOTYPES -------------------- */
+/* Struct matrix is an interface of a list of doubles representing a matrix */
+/* a matrix can be diagnal or not, consists rows and column dimensions, and data */
+/* upon the matrix interface there are many known matrix functionalities */
+
 
 /* Matrix API */
-Matrix *create_matrix(int rows, int cols);
-Matrix *create_identity_matrix(int n);
+Matrix *create_matrix(int rows, int cols);  /* creates a matrix in the memory containing 0 in all entries */
+Matrix *create_identity_matrix(int n);  /* crate the I matrix with 1-diagonal 0-non diagonal */
 
 /* Getters */
-int matrix_get_rows_num(Matrix *matrix);
-int matrix_get_cols_num(Matrix *matrix);
-double *matrix_get_data(Matrix *matrix);
-double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry */
-void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index); /* inserts a row into a given point */
-void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);  /* inserts a column into a given point */
-void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element);  /* returns the max element of the matrix */
+int matrix_get_rows_num(Matrix *matrix);  /* returns matrix's rows dim */
+int matrix_get_cols_num(Matrix *matrix);  /* returns matrix's columns dim */
+double *matrix_get_data(Matrix *matrix);  /* returns matrix's data */
+double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry value */
+void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index); /* inserts a row (represented as a point) into a given point */
+void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);  /* inserts a column (represented as a point) into a given point */
 
 /* Setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
 
 /* Utils */
+void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element);  /* returns the max element of the matrix that is not on the diagonal */
 double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
-void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* TODO: check if relevant */
+void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* adds a row to the matrix value by value */
 void reset_matrix_entries_to_zero(Matrix *matrix);  /* resets all metrix entries to zero */
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
 Matrix *sub_matrices(Matrix *A, Matrix *B); /* sub A - B */
 
 /* Cleanup */
-void free_matrix(Matrix *matrix); /* cleanup matrix object and sub-objects */
+void free_matrix(Matrix *matrix); /* free matrix object and data */
 
 /* Matrix inner functions */
 int _is_matrix_diag(Matrix *matrix);
