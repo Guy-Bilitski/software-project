@@ -145,22 +145,23 @@ Matrix *generate_symmetric_matrix(int n);
 void space();
 
 /* -------------------- EIGENVECTOR PROTOTYPES -------------------- */
+/* Eigenvector struct represents an eigen vector (point) that has an eigen value */
 
 /* EIGENVECTOR API */
-Eigenvector *create_empty_eigen_vector();
-Eigenvector *create_eigen_vector(Point *point, double eigen_value);
-Eigenvector *create_eigen_vectors_array(int eigenvectors_num);
+Eigenvector *create_empty_eigen_vector();  /* creates an empty eigenvector in the memory  */
+Eigenvector *create_eigen_vector(Point *point, double eigen_value);  /* creates an eigenvector in the memory with given values */
+Eigenvector *create_eigen_vectors_array(int eigenvectors_num);  /* creates an eigenvector_num size array of eigenvectors */
 
 /* Getters */
-Point *eigen_vector_get_point(Eigenvector *eigen_vector);
-double eigen_vector_get_eigen_value(Eigenvector *eigen_vector);
+Point *eigen_vector_get_point(Eigenvector *eigen_vector);  /* returns the vector (point) of the eigenvector */
+double eigen_vector_get_eigen_value(Eigenvector *eigen_vector);  /* returns the eigen value of the eigenvector */
 
 /* Utils */
-int compare_eigenvectors(const void *p1, const void *p2);
-void sort_eigenvectors_array(Eigenvector *array, size_t n);
+int compare_eigenvectors(const void *p1, const void *p2);  /* Eigenvectors comperator based on eigenvector's eigen values */
+void sort_eigenvectors_array(Eigenvector *array, size_t n);  /* sorts eigenvectors array based on compare_eigenvectors comperator */
 
 /* Cleanup */
-void free_eigen_vector(Eigenvector *eigen_vector);
+void free_eigen_vector(Eigenvector *eigen_vector);  /* frees Eigen vector struct and its point property */
 
 /* debugging functions */
 void print_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);

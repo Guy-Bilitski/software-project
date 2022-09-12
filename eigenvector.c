@@ -43,7 +43,7 @@ double eigen_vector_get_eigen_value(Eigenvector *eigen_vector) {
 /* Utils */
 int compare_eigenvectors(const void *p1, const void *p2) {
     const Eigenvector *v1 = p1, *v2 = p2;
-    double diff = (v1->eigen_value) - (v2->eigen_value); /* if diff > 0 then v1 should be first, return -1 */
+    double diff = (eigen_vector_get_eigen_value(v1)) - (eigen_vector_get_eigen_value(v2)); /* if diff > 0 then v1 should be first, return -1 */
     if (diff < 0) return 1;
     if (diff > 0) return -1;
     return 0;
