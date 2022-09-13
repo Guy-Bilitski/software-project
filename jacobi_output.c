@@ -1,5 +1,4 @@
 #include "spkmeans.h"
-#include <stdlib.h>
 #ifndef JACOBI_OUTPUT_IS_DEFINED
 #define JACOBI_OUTPUT_IS_DEFINED
 typedef struct JacobiOutput

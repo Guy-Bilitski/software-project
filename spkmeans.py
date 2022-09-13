@@ -38,7 +38,7 @@ def main():
         elif goal == 'lnorm':
             L = mykmeanssp.lnorm(data_points.tolist())
             print_matrix(L)
-        elif goal == 'jacobi': # Sage - I removed lnorm here as the ouput correct using the input withput performing lnorm
+        elif goal == 'jacobi':
             eigen_vectors, eigen_values = mykmeanssp.jacobi(data_points.tolist())
             print_jacobi_output(eigen_vectors, eigen_values)
         else:

@@ -1,5 +1,4 @@
 #include "spkmeans.h"
-#include <stdlib.h>
 
 #ifndef EIGENVECTOR_IS_DEFINED
 #define EIGENVECTOR_IS_DEFINED

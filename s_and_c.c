@@ -1,5 +1,4 @@
 #include "spkmeans.h"
-#include <stdlib.h>
 
 #ifndef S_AND_C_IS_DEFINED
 #define S_AND_C_IS_DEFINED

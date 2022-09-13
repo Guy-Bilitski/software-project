@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "spkmeans.h"
-#include <limits.h>
 
 
 /* MAX_ELEMENT API */
