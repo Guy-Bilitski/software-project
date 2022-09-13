@@ -13,6 +13,10 @@ typedef struct JacobiOutput
 /* Jacobi Output API */
 JacobiOutput *create_empty_jacobi_output() {
     JacobiOutput *jacobi_output = (JacobiOutput *)malloc(sizeof(JacobiOutput));
+    if (jacobi_output == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
     return jacobi_output;
 }
 

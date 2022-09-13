@@ -90,8 +90,6 @@ void divide_point_by_value(Point *p, double value);  /* divides each point entry
 /* Point inner functions */
 int _convert_point_index(Point *point, int index);  /* converts given index to the "real" index considering the offset */
 
-/* debugging functions */
-void print_point(Point *point);
 
 /* -------------------- MATRIX PROTOTYPES -------------------- */
 /* Struct matrix is an interface of a list of doubles representing a matrix */
@@ -132,16 +130,8 @@ Matrix *_multiply_matrices_diag_with_diag(Matrix *m1, Matrix *m2);
 Matrix *_multiply_matrices_diag_with_nondiag(Matrix *m1, Matrix *m2);
 Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2);
 
-/* debugging functions */
 void print_matrix(Matrix *matrix);
-void print_matrix2(Matrix *matrix);
 void print_matrix_diag(Matrix *matrix);
-void print_matrix_rows(Matrix *matrix);
-void print_matrix_cols(Matrix *matrix);
-double RandomReal(double low, double high);
-Matrix *generate_matrix(int rows, int cols, int is_diag);
-Matrix *generate_symmetric_matrix(int n);
-void space();
 
 /* -------------------- EIGENVECTOR PROTOTYPES -------------------- */
 /* Eigenvector struct represents an eigen vector (point) that has an eigen value */
@@ -176,9 +166,6 @@ double s_and_c_get_c(S_and_C *s_and_c);  /* returns s_and_c value of c */
 /* Setters */
 void S_and_C_set_values(S_and_C *s_and_c, double s, double c);  /* sets s,c values to s_and_c struct */
 
-/* debugging functions */
-void print_s_and_c(S_and_C *s_and_c);
-
 /* -------------------- MAX ELEMENT PROTOTYPES -------------------- */
 /* MaxElement struct represents a value with <i,j> coordinated (e.g of a matrix) */
 
@@ -197,8 +184,6 @@ void max_element_set_value(MaxElement *max_element, double value);  /* sets max_
 void max_element_set_index1(MaxElement *max_element, int i);  /* sets max_element first index */
 void max_element_set_index2(MaxElement *max_element, int j);  /* sets max_element second index */
 
-/* debugging */
-void print_max_element(MaxElement *max_element);
 
 /* -------------------- JACOBI OUTPUT PROTOTYPES -------------------- */
 /* JacobiOutput struct represents the output of jacobi process containing */

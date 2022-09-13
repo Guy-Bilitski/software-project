@@ -7,6 +7,11 @@
 /* MAX_ELEMENT API */
 MaxElement *create_empty_max_element() {
     MaxElement *max_element = (MaxElement *)malloc(sizeof(MaxElement));
+    if (max_element == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
+    
     return max_element;
 }
 
@@ -48,11 +53,3 @@ void max_element_set_index2(MaxElement *max_element, int j) {
     max_element->j = j;
 }
 
-/* debugging */
-void print_max_element(MaxElement *max_element) { 
-    space();
-    printf("max element value: %f ", max_element_get_value(max_element));
-    printf("max element i: %d ", max_element_get_index1(max_element));
-    printf("max element j: %d", max_element_get_index2(max_element));
-    space();
-}

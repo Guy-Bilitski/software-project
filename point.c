@@ -19,6 +19,10 @@ typedef struct Point {
 /* Point API */
 Point *create_empty_point() {
     Point *new_point = (Point *)malloc(sizeof(Point));
+    if (new_point == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
     return new_point;
 }
 
@@ -102,10 +106,3 @@ int _convert_point_index(Point *point, int index) {
     return point_offset*index;
 }
 
-/* debugging function */
-void print_point(Point *point) {
-    int i;
-    for (i=0; i<(point->dim); i++) {
-        printf("%f ", point_get_entry(point, i));
-    }
-}

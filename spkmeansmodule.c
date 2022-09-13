@@ -265,7 +265,7 @@ PyMODINIT_FUNC PyInit_mykmeanssp(void) {
     PyObject *m;
     m=PyModule_Create(&moduledef);
     if (!m) {
-        printf("An Error Has Occurred-module.c\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
     return m;

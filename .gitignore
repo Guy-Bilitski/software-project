@@ -27,3 +27,9 @@ data/input_2.txt
 data/input_3.txt
 data/T.txt
 data/Tpy.txt
+utils/memory_transcript_py.txt
+.gitignore
+.gitignore
+tmp/valgrind.txt
+tmp/output.txt
+tmp/output.txt

@@ -76,6 +76,10 @@ void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centr
     int k = matrix_get_rows_num(centroids);
     Point *current_vector = create_empty_point();
     int *num_of_points_in_cluster = (int *)calloc(k, sizeof(int));
+    if (num_of_points_in_cluster == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
 
     for (r=0; r<n; r++) {
         matrix_get_row_to_point(data_points, current_vector, r);

@@ -12,6 +12,10 @@ typedef struct Eigenvector {
 /* Eigenvector API */
 Eigenvector *create_empty_eigen_vector() {
     Eigenvector *eigen_vector = (Eigenvector *)malloc(sizeof(Eigenvector));
+    if (eigen_vector == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
     return eigen_vector;
 }
 
@@ -26,6 +30,11 @@ Eigenvector *create_eigen_vectors_array(int eigenvectors_num) {
     int i;
     Eigenvector *eigen_vectors_array;
     eigen_vectors_array = (Eigenvector *)malloc(sizeof(Eigenvector)*eigenvectors_num);
+    if (eigen_vectors_array == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
+    
     for (i=0; i<eigenvectors_num; i++) 
         eigen_vectors_array[i].point = create_empty_point();
     return eigen_vectors_array;

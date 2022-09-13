@@ -1,14 +1,12 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h> /* delete */
 #include "spkmeans.h"
 
 #define true 1
 #define false 0
 
 
-/* TODO: Check callocs/mallocs on failure */
 
 
 /* Matrix API */
@@ -18,10 +16,18 @@ Matrix *create_matrix(int rows, int cols) {
     size_of_data = rows*cols;
 
     matrix = (Matrix *)malloc(sizeof(Matrix));
+    if (matrix == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
     matrix->rows = rows;
     matrix->cols = cols;
     matrix->is_not_diag = 0;
     matrix->data = (double *)calloc(sizeof(double), size_of_data);
+    if (matrix->data == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
     for (i=0; i<size_of_data; i++)
         (matrix->data)[i] = 0.;
     return matrix;
@@ -223,6 +229,10 @@ Matrix *_multiply_matrices_nondiag_with_nondiag(Matrix *m1, Matrix *m2) {
     Matrix *new_matrix = create_matrix(rows_num, cols_num);
     Point *row_point = (Point *)malloc(sizeof(Point));
     Point *col_point = (Point *)malloc(sizeof(Point));
+    if (row_point == NULL || col_point == NULL){
+        printf("An Error Has Occurred\n");
+        exit(1);
+    }
     
     for (i=0; i<rows_num; i++) {
         matrix_get_row_to_point(m1, row_point, i);
@@ -257,24 +267,6 @@ void print_matrix(Matrix *matrix) {
     }
 }
 
-void print_matrix2(Matrix *matrix) {
-    int i, j;
-    double val;
-    printf("[");
-    for (i=0; i<matrix->rows; i++) {
-        printf("[");
-        for (j=0; j<matrix->cols; j++) {
-            val = matrix_get_entry(matrix, i, j);
-            printf("%.4f,", val);
-            if (j != matrix->cols - 1)
-                printf(", ");
-        }
-        if (i != matrix->rows - 1)
-            printf("],\n");
-        else printf("]]\n");
-    }
-    printf("\n");
-}
 
 void print_matrix_diag(Matrix *matrix) {
     int i;
@@ -290,69 +282,4 @@ void print_matrix_diag(Matrix *matrix) {
     printf("\n");
 }
 
-void print_matrix_rows(Matrix *matrix) {
-    int i;
-    Point *point = create_empty_point();
-    for (i=0; i<matrix_get_rows_num(matrix); i++) {
-        matrix_get_row_to_point(matrix, point, i);
-        print_point(point);
-        printf("\n");
-    }
-    free(point);
-}
 
-void print_matrix_cols(Matrix *matrix) {
-    int i;
-    Point *point = create_empty_point();
-    for (i=0; i<matrix_get_cols_num(matrix); i++) {
-        matrix_get_column_to_point(matrix, point, i);
-        print_point(point);
-        printf("\n");
-    }
-    free(point);
-}
-
-double RandomReal(double low, double high) /* TODO: delete */ {
-  double d;
-
-  d = (double) rand() / ((double) RAND_MAX + 1);
-  return (low + d * (high - low));
-}
-
-Matrix *generate_matrix(int rows, int cols, int is_diag) {
-    int i,j;
-    Matrix *m;
-
-    if (is_diag) {
-        m = create_matrix(rows, rows);
-        for (i=0; i<rows; i++) {
-            matrix_set_entry(m, i, i, RandomReal(0, 10));
-        }
-    }
-    else {
-        m = create_matrix(rows, cols);
-        for (i=0; i<rows; i++) {
-            for (j=0; j<cols; j++) {
-                matrix_set_entry(m, i, j, RandomReal(0, 10));
-            }
-        }
-    }
-
-    return m; 
-}
-
-Matrix *generate_symmetric_matrix(int n) {
-    Matrix *new_matrix = generate_matrix(n, n, false);
-    int i, j;
-    for (i=0; i<n; i++) {
-        for (j=i; j<n; j++) {
-            matrix_set_entry(new_matrix, j, i, matrix_get_entry(new_matrix, i, j));
-        }
-    }
-    return new_matrix;
-}
-
-void space() {
-    printf("\n");
-    printf("\n");
-}
