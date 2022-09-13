@@ -119,7 +119,7 @@ void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_
 double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
 void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* adds a row to the matrix value by value */
 void reset_matrix_entries_to_zero(Matrix *matrix);  /* resets all metrix entries to zero */
-Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
+Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and retumalrns the new matrix */
 Matrix *sub_matrices(Matrix *A, Matrix *B); /* sub A - B */
 
 /* Cleanup */
