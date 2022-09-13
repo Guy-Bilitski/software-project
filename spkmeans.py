@@ -20,6 +20,9 @@ def main():
         
         goal = args.get(Env.goal)
         if goal == 'spk':
+            if args[Env.k] > data_points.shape[0]:
+                print("Invalid input!")
+                exit(1)
             T_as_pylist = mykmeanssp.transform_data_points(data_points.tolist(), args.get(Env.k))
             T_as_np = np.array(T_as_pylist)
             k = T_as_np.shape[1]
@@ -39,7 +42,7 @@ def main():
             eigen_vectors, eigen_values = mykmeanssp.jacobi(data_points.tolist())
             print_jacobi_output(eigen_vectors, eigen_values)
         else:
-            print("Invalid input") #TODO: validate output
+            print("Invalid input!")
         
         #kmeans_pp(data_points, args.get(Env.k))
     except Exception as ex:
