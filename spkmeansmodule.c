@@ -2,8 +2,6 @@
 #include <Python.h>
 #include "spkmeans.c"
 
-
-//TODO: Check if prototypes declaration is needed
 PyObject *matrix_to_pylist(Matrix *matrix){
     int cols, rows;
     PyObject *py_matrix, *temp;
@@ -166,22 +164,27 @@ static PyObject* transform_data_points_capi(PyObject *self, PyObject *args) {
     JacobiOutput *Jout;
     PyObject *pylist_U;
     Matrix *data_points_matrix, *laplacian, *U;
+    
 
     if (!(PyArg_ParseTuple(args, "Oi", &data_points_as_pylist, &k))){
         printf("An Error Has Occurred\n");
         exit(1);
     }
+    
     data_points_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
+    
     laplacian = lnorm(data_points_matrix);
     Jout = create_empty_jacobi_output();
     jacobi(laplacian, Jout);
-    U = getU(Jout, k);
+
+    U = getU(Jout, k);  
     normalize_matrix_rows(U);
     pylist_U = matrix_to_pylist(U);
     
     free_jacobi_output(Jout);
     free_matrix(data_points_matrix);
     free_matrix(U);
+    
     
     return Py_BuildValue("O", pylist_U);
 }

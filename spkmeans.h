@@ -202,8 +202,8 @@ void set_jacobi_output_values(JacobiOutput *jacobi_output, Matrix *A, Matrix *V)
 /* Cleanup */
 void free_jacobi_output(JacobiOutput *jacobi_output);  /* free Jacobi Output struct and A, V matrices */
 
-/* debugging */
-void print_jacobi_output(JacobiOutput *J);
+/* Print */
+void print_jacobi_output(JacobiOutput *J); /* prints the eigenvectors and eigenvalues as required */
 
 /* -------------------- KMEANS-IO PROTOTYPES -------------------- */
 
@@ -228,21 +228,22 @@ double gaussian_RBF(Point *x1, Point *x2);  /*computes w_i in the weighted adjac
 Matrix *create_weighted_matrix(Matrix *X);  /* creates the weighted matrix */
 Matrix *create_diagonal_degree_matrix(Matrix *matrix); /* retruns the I matrix */
 void neg_root_to_diag_matrix(Matrix *matrix); /* performs pow of -0.5 for all the diagonal entries */
-Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W);
-void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c);
+Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W); /* Construct Lnorm, inner function */
+void get_s_and_c_for_rotation_matrix(Matrix* A, MaxElement *max_element, S_and_C *s_and_c); /* inner function, getting values for the rotation matrix construction */
 void build_rotation_matrix(S_and_C *s_and_c, MaxElement *max_element, Matrix *identity_matrix); /* inserts the rotation matrix to a given identity matrix */
-void normalize_matrix_rows(Matrix *matrix);
+void normalize_matrix_rows(Matrix *matrix); /* normalize matrix rows for them to be unit vectors. assumes each row != 0 */
 double matrix_off(Matrix *matrix); /* returns the value of "off" function on a given matrix */
 Matrix *transform_matrix(Matrix *matrix, S_and_C *s_and_c, MaxElement *max_element);  /* permorms matrix transformation */
-int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
-void get_eigen_vectors_from_jacobi_output(JacobiOutput *jacobi_output, Eigenvector *eigen_vectors_array);
-Matrix *getU(JacobiOutput *jacobi_output, int k);
+int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n); /* The Eigengap Heuristic */
+void get_eigen_vectors_from_jacobi_output(JacobiOutput *jacobi_output, Eigenvector *eigen_vectors_array); /* Turning the matrix into eigenvecotrs array, for sorting purposes */
+Matrix *getU(JacobiOutput *jacobi_output, int k); /* getting U as in the main algorithm */
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
-int matrix_converge(double A_off, Matrix *A);
-void retrieve_identity_from_rotation_matrix(MaxElement *max_element, Matrix *P);
-void update_eigenvectors_matrix_V(Matrix *V, Matrix *P, MaxElement *max_element);
+int matrix_converge(double A_off, Matrix *A); /* stop condition for jacobi */
+void retrieve_identity_from_rotation_matrix(MaxElement *max_element, Matrix *P); /* making the existed rotation matrix identity matrix again */
+void update_eigenvectors_matrix_V(Matrix *V, Matrix *P, MaxElement *max_element); /* efficient matrix multiplication for that specific use case (updating V <- VxP) */
 
 /* SPKMEANS API */
+/* API for the CPython wrapper. each function's wrapper calls a single function */
 Matrix *wam(Matrix* data_points);
 Matrix *ddg(Matrix* data_points);
 Matrix *lnorm(Matrix* data_points);

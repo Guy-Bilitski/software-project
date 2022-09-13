@@ -130,7 +130,7 @@ void neg_root_to_diag_matrix(Matrix *D) {
 
 Matrix *normalized_graph_laplacian(Matrix *D_minus_05, Matrix *W) {
     int n = matrix_get_rows_num(W);
-    Matrix *I = create_identity_matrix(n);
+    Matrix *I = create_identity_matrix(n);    
     Matrix *temp = multiply_matrices(D_minus_05, W);
     Matrix *X = multiply_matrices(temp, D_minus_05);
     Matrix *Lnorm = sub_matrices(I, X);
