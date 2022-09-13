@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <assert.h>
 
 /* ---------------- STRUCTS ---------------- */
 
@@ -152,8 +151,6 @@ void sort_eigenvectors_array(Eigenvector *array, size_t n);
 /* Cleanup */
 void free_eigen_vector(Eigenvector *eigen_vector);
 
-/* debugging functions */
-void print_eigen_vectors_array(Eigenvector *eigen_vectors_array, int n);
 
 /* -------------------- S AND C PROTOTYPES -------------------- */
 
@@ -242,6 +239,8 @@ void get_eigen_vectors_from_jacobi_output(JacobiOutput *jacobi_output, Eigenvect
 Matrix *getU(JacobiOutput *jacobi_output, int k);
 double get_value_for_transformed_matrix(Matrix *old_matrix, double s, double c, int i, int j, int row_index, int col_index); /* returns the expected value of the transformed matrix at (row_index, col_index) based on the rules described at 6. Relations betweeb A and A'*/
 int matrix_converge(double A_off, Matrix *A);
+void retrieve_identity_from_rotation_matrix(MaxElement *max_element, Matrix *P);
+void update_eigenvectors_matrix_V(Matrix *V, Matrix *P, MaxElement *max_element);
 
 /* SPKMEANS API */
 Matrix *wam(Matrix* data_points);

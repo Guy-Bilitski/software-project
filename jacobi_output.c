@@ -38,7 +38,6 @@ void free_jacobi_output(JacobiOutput *jacobi_output) {
     free(jacobi_output);
 }
 
-/* debugging */
 void print_jacobi_output(JacobiOutput *J) {
     print_matrix_diag(J->A);
     print_matrix(J->V);

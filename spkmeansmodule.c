@@ -15,7 +15,7 @@ PyObject *matrix_to_pylist(Matrix *matrix){
     py_matrix = PyList_New(rows);
 
     if (py_matrix == NULL){
-        printf("An Error Has Occurred-module.c-18\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
 
@@ -23,7 +23,7 @@ PyObject *matrix_to_pylist(Matrix *matrix){
 
         temp = PyList_New(cols);
         if (temp == NULL){
-            printf("An Error Has Occurred-module.c-26\n");
+            printf("An Error Has Occurred\n");
             exit(1);
         }
 
@@ -37,7 +37,6 @@ PyObject *matrix_to_pylist(Matrix *matrix){
 }
 
 PyObject *diagonal_matrix_to_pylist(Matrix *matrix){
-    assert(matrix->cols == matrix->rows);
     int n;
     PyObject *py_matrix;
     int i;
@@ -47,7 +46,7 @@ PyObject *diagonal_matrix_to_pylist(Matrix *matrix){
     py_matrix = PyList_New(n);
 
     if (py_matrix == NULL){
-        printf("An Error Has Occurred-module.c-50\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
 
@@ -67,7 +66,7 @@ Matrix *pylist_to_matrix(PyObject *pymatrix) {
     PyObject *current_row;
 
     if (!PyList_Check(pymatrix) || !PyList_Check(PyList_GetItem(pymatrix, 0))){
-        printf("An Error Has Occurred-module.c-70\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
 
@@ -93,12 +92,13 @@ static PyObject* wam_capi(PyObject *self, PyObject *args){
     PyObject *output;
 
     if (!(PyArg_ParseTuple(args, "O", &data_points_as_pylist))){
-        printf("An Error Has Occurred-module.c-96\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
     data_points = pylist_to_matrix(data_points_as_pylist);
     W = wam(data_points);
     output = matrix_to_pylist(W);
+    
     free_matrix(W);
     free_matrix(data_points);
     return Py_BuildValue("O", output);
@@ -111,7 +111,7 @@ static PyObject* ddg_capi(PyObject *self, PyObject *args){
     PyObject *output;
 
     if (!(PyArg_ParseTuple(args, "O", &data_points_as_pylist))){
-        printf("An Error Has Occurred-module.c-114\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
     data_points = pylist_to_matrix(data_points_as_pylist);
@@ -128,7 +128,7 @@ static PyObject* lnorm_capi(PyObject *self, PyObject *args){
     PyObject *output;
 
     if (!(PyArg_ParseTuple(args, "O", &data_points_as_pylist))){
-        printf("An Error Has Occurred-module.c-131\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
     data_points = pylist_to_matrix(data_points_as_pylist);
@@ -147,7 +147,7 @@ static PyObject* jacobi_capi(PyObject *self, PyObject *args) {
     Matrix *sym_matrix;
 
     if (!(PyArg_ParseTuple(args, "O", &data_points_as_pylist))){
-        printf("An Error Has Occurred-module.c-151\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
     sym_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
@@ -168,7 +168,7 @@ static PyObject* transform_data_points_capi(PyObject *self, PyObject *args) {
     Matrix *data_points_matrix, *laplacian, *U;
 
     if (!(PyArg_ParseTuple(args, "Oi", &data_points_as_pylist, &k))){
-        printf("An Error Has Occurred-module.c-152\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
     data_points_matrix = pylist_to_matrix(data_points_as_pylist); /*TODO: assure sym matrix */
@@ -178,9 +178,11 @@ static PyObject* transform_data_points_capi(PyObject *self, PyObject *args) {
     U = getU(Jout, k);
     normalize_matrix_rows(U);
     pylist_U = matrix_to_pylist(U);
+    
     free_jacobi_output(Jout);
     free_matrix(data_points_matrix);
     free_matrix(U);
+    
     return Py_BuildValue("O", pylist_U);
 }
 
@@ -189,16 +191,20 @@ static PyObject* kmeans_capi(PyObject *self, PyObject *args){
     Matrix *init_centroids, *data_points, *final_centroids;
 
     if (!(PyArg_ParseTuple(args, "OO", &py_data_points, &py_init_centroids))){
-        printf("An Error Has Occurred-module.c-171\n");
+        printf("An Error Has Occurred\n");
         exit(1);
     }
 
     data_points = pylist_to_matrix(py_data_points);
     init_centroids = pylist_to_matrix(py_init_centroids);
+
     final_centroids = kmeans(data_points, init_centroids);
+
     output = matrix_to_pylist(final_centroids);
+    
     free_matrix(data_points);
     free_matrix(final_centroids);
+    
     return Py_BuildValue("O", output);
 }
 
@@ -259,7 +265,7 @@ PyMODINIT_FUNC PyInit_mykmeanssp(void) {
     PyObject *m;
     m=PyModule_Create(&moduledef);
     if (!m) {
-        printf("An Error Has Occurred-module.c-236\n");
+        printf("An Error Has Occurred-module.c\n");
         exit(1);
     }
     return m;

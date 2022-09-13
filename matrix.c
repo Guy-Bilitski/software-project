@@ -17,7 +17,6 @@ Matrix *create_matrix(int rows, int cols) {
     Matrix *matrix;
 
     size_of_data = rows*cols;
-    assert(rows>0 && cols>0);
 
     matrix = (Matrix *)malloc(sizeof(Matrix));
     matrix->rows = rows;
@@ -33,7 +32,6 @@ Matrix *create_identity_matrix(int n) {
     int i;
     Matrix *I;
 
-    assert(n>0);
     I = create_matrix(n,n);
     for (i=0; i<n; i++)
         matrix_set_entry(I, i, i, 1.);
@@ -55,7 +53,6 @@ double *matrix_get_data(Matrix *matrix) {
 
 double matrix_get_entry(Matrix *matrix, int row, int col){
     double *matrix_data;
-    assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
     
     matrix_data = matrix_get_data(matrix);
     return matrix_data[_get_matrix_index(matrix, row, col)];
@@ -63,7 +60,6 @@ double matrix_get_entry(Matrix *matrix, int row, int col){
 
 void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index) {
     int cols_num;
-    assert(matrix_get_rows_num(matrix) > row_index);
     
     cols_num = matrix_get_cols_num(matrix);
     point->dim = cols_num;
@@ -73,7 +69,6 @@ void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index) {
 
 void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index) {
     int cols_num = matrix_get_cols_num(matrix);
-    assert(cols_num > column_index);
     point->dim = matrix_get_rows_num(matrix);
     point->data = matrix_get_data(matrix) + column_index;
     point->offset = cols_num;
@@ -100,7 +95,6 @@ void matrix_set_entry(Matrix *matrix, int row, int col, double value) {
     int matrix_index;
     double *matrix_data;
     double old_value;
-    assert(!(matrix->rows <= row || matrix->cols <= col || row < 0 || col < 0));
 
     matrix_data = matrix_get_data(matrix);
     matrix_index = _get_matrix_index(matrix, row, col);
@@ -130,7 +124,6 @@ void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point){
     int j;
     double entry;
     int dim = point_get_dim(point);
-    assert(dim == matrix_get_cols_num(matrix));
 
     for (j=0; j<dim; j++){
         entry = matrix_get_entry(matrix, row_index, j) + point_get_entry(point, j);
@@ -148,7 +141,6 @@ void reset_matrix_entries_to_zero(Matrix *matrix){
 }
 
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2) {
-    assert(matrix_get_cols_num(m1) == matrix_get_rows_num(m2));
 
     if (_is_matrix_diag(m1) && _is_matrix_diag(m2))
         return _multiply_matrices_diag_with_diag(m1, m2);
@@ -166,8 +158,6 @@ Matrix *sub_matrices(Matrix *A, Matrix *B) {
     int rows = matrix_get_rows_num(A);
     double value;
     Matrix *result;
-    assert(matrix_get_cols_num(A) == matrix_get_cols_num(B));
-    assert(matrix_get_rows_num(A) == matrix_get_rows_num(B));
     result = create_matrix(rows, cols);
 
     
@@ -292,7 +282,6 @@ void print_matrix_diag(Matrix *matrix) {
     int i;
     double val;
     int n;
-    assert(matrix_get_cols_num(matrix) == matrix_get_cols_num(matrix));
     n = matrix->cols;
 
     for (i=0; i<n; i++) {

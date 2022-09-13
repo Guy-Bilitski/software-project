@@ -4,7 +4,6 @@ import numpy as np
 import sys
 import time
 import mykmeanssp
-#sys.settrace(mykmeanssp.transform_data_points)
 
 class Env:
     """ Class for global variables used in the system """
@@ -27,7 +26,7 @@ def main():
             T_as_np = np.array(T_as_pylist)
             k = T_as_np.shape[1]
             indices, initial_centroids = kmeans_pp(T_as_np, k)
-            final_centroids = mykmeanssp.kmeans(T_as_pylist, initial_centroids) # segmentation fault is here
+            final_centroids = mykmeanssp.kmeans(T_as_pylist, initial_centroids)
             print_centroids(indices, final_centroids)
         elif goal == 'wam':
             W = mykmeanssp.wam(data_points.tolist())

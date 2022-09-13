@@ -1,7 +1,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include "spkmeans.h"
 
 #define true 1
@@ -35,7 +34,6 @@ Point *create_point(double *data, int dim, int offset) {
 double point_get_entry(Point *point, int index) {
     double *data;
     int real_index;
-    assert(index >= 0 && index < point->dim);
     real_index = _convert_point_index(point, index);
     data = point_get_data(point);
     return data[real_index];

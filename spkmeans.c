@@ -11,6 +11,7 @@
 #include "kmeans.c"
 #include "jacobi_output.c"
 
+
 #define EPSILON 0.00001
 #define MAX_NUMBER_OF_ROTATIONS 100
 
@@ -86,7 +87,7 @@ Matrix *create_weighted_matrix(Matrix *X) {
     matrix = create_matrix(rows_num, rows_num);
     p1 = create_empty_point(); p2 = create_empty_point();
     for (i=0; i<rows_num; i++) {
-        for (j=0; j<rows_num; j++) {
+        for (j=i; j<rows_num; j++) {
             if (i == j) {
                 matrix_set_entry(matrix, i, j, 0);
             }
@@ -95,6 +96,7 @@ Matrix *create_weighted_matrix(Matrix *X) {
                 matrix_get_row_to_point(X, p2, j);
                 value = gaussian_RBF(p1, p2);
                 matrix_set_entry(matrix, i, j, value);
+                matrix_set_entry(matrix, j, i, value);
             }
         }
     }
@@ -117,12 +119,10 @@ Matrix *create_diagonal_degree_matrix(Matrix *matrix) {
 void neg_root_to_diag_matrix(Matrix *D) {
     int i, rows_num;
     double value;
-    assert(_is_matrix_diag(D));
     rows_num = matrix_get_rows_num(D);
 
     for (i=0; i<rows_num; i++) {
         value = matrix_get_entry(D, i, i);
-        assert(value != 0);
         value = 1 / sqrt(value);
         matrix_set_entry(D, i, i, value);
     }
@@ -213,7 +213,6 @@ int get_k_from_sorted_eigen_vectors_array(Eigenvector *eigen_vectors_array, int 
     maxgap = -1.;
     for (i=0; i<n/2; i++){
         currentgap = eigen_vectors_array[i].eigen_value - eigen_vectors_array[i+1].eigen_value;
-        assert(currentgap >= 0);
         if (currentgap > maxgap){
             maxgap = currentgap;
             k = i+1;
@@ -318,11 +317,37 @@ Matrix *lnorm(Matrix* data_points) {
     return Lnorm;
 }
 
+void retrieve_identity_from_rotation_matrix(MaxElement *max_element, Matrix *P){
+    int i,j;
+    i = max_element_get_index1(max_element);
+    j = max_element_get_index2(max_element);
+    matrix_set_entry(P, i, i, 1);
+    matrix_set_entry(P, j, j, 1);
+    matrix_set_entry(P, i, j, 0);
+    matrix_set_entry(P, j, i, 0);
+}
+
+void update_eigenvectors_matrix_V(Matrix *V, Matrix *P, MaxElement *max_element){
+    int i,j, idx, n;
+    double value1, value2;
+    
+    n = matrix_get_cols_num(V);
+    i = max_element_get_index1(max_element);
+    j = max_element_get_index2(max_element);
+    
+    for (idx=0; idx<n; idx++){
+        value1 = ( matrix_get_entry(V, idx, i) * matrix_get_entry(P, i, i) ) + ( matrix_get_entry(V, idx, j) * matrix_get_entry(P, j, i) );
+        value2 = ( matrix_get_entry(V, idx, i) * matrix_get_entry(P, i, j) ) + ( matrix_get_entry(V, idx, j) * matrix_get_entry(P, j, j) );
+        matrix_set_entry(V, idx, i, value1);
+        matrix_set_entry(V, idx, j, value2);
+    }
+}
+
 JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /* note that jacobi function frees Matrix A! */
     int dim;
     int rotation_num;
     double recent_off;
-    Matrix *A_tmp, *V_tmp, *V;
+    Matrix *A_tmp, *V;
     S_and_C *s_and_c;
     MaxElement *max_element;
     Matrix *P;
@@ -337,19 +362,21 @@ JacobiOutput *jacobi(Matrix *A, JacobiOutput *jacobi_output) { /* note that jaco
     rotation_num = 0;
     s_and_c = create_empty_S_and_C();
     max_element = create_empty_max_element();
-    
+    P = create_identity_matrix(dim);
+
     while (rotation_num < MAX_NUMBER_OF_ROTATIONS) {
         recent_off = matrix_off(A);
         matrix_get_non_diagonal_max_absolute_value(A, max_element);
         get_s_and_c_for_rotation_matrix(A, max_element, s_and_c);
-        P = create_identity_matrix(dim);
         build_rotation_matrix(s_and_c, max_element, P); rotation_num ++;
         A_tmp = transform_matrix(A, s_and_c, max_element); free_matrix(A); A=A_tmp;
-        V_tmp = multiply_matrices(V, P); free_matrix(V); V = V_tmp; free_matrix(P);
+        update_eigenvectors_matrix_V(V,P,max_element);
+        retrieve_identity_from_rotation_matrix(max_element, P);
         if (matrix_converge(recent_off, A)) {
             break;
         }
     }
+    free_matrix(P);
     set_jacobi_output_values(jacobi_output, A, V);
     free(max_element);
     free(s_and_c);

@@ -5,11 +5,12 @@
 
 
 Matrix *kmeans(Matrix *data_points, Matrix *centroids) {
+    
+    
     Matrix *new_centroids, *temp;
     int dim, k;
     int maxiter, iter;
     double max_distance, epsilon;
-
     /*Setting variables*/
     dim = matrix_get_cols_num(centroids);
     k = matrix_get_rows_num(centroids);
@@ -84,7 +85,6 @@ void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centr
     }
 
     for (r=0; r<k; r++){
-        assert(num_of_points_in_cluster[r] > 0);
         for (c=0; c<dim; c++) {
             entry_value = matrix_get_entry(new_centroids, r, c) / num_of_points_in_cluster[r];
             matrix_set_entry(new_centroids, r, c, entry_value);
