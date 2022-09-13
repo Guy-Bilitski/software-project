@@ -51,6 +51,13 @@ double *point_get_data(Point *point) {
     return point->data;
 }
 
+/* Setters */
+void point_set_values(Point *point, int dim, int offset, double *data) {
+    point->dim = dim;
+    point->offset = offset;
+    point->data = data;
+}
+
 /* Utils */
 double inner_product(Point *row_point, Point *column_point) {
     int i, points_dim = point_get_dim(row_point);
@@ -61,20 +68,20 @@ double inner_product(Point *row_point, Point *column_point) {
     return sum;
 }
 
-double euclidean_norm(Point *p) {
-    double sum = 0.;
-    int i, dim = point_get_dim(p);
-    for (i=0; i<dim; i++) {
-        sum += pow(point_get_entry(p, i), 2);
-    }
-    return sqrt(sum);
-}
-
 double euclidean_distance(Point *p1, Point *p2) {
     double sum = 0.;
     int i, dim = point_get_dim(p1);
     for (i=0; i<dim; i++) {
         sum += pow(point_get_entry(p1, i) - point_get_entry(p2, i), 2);
+    }
+    return sqrt(sum);
+}
+
+double euclidean_norm(Point *p) {
+    double sum = 0.;
+    int i, dim = point_get_dim(p);
+    for (i=0; i<dim; i++) {
+        sum += pow(point_get_entry(p, i), 2);
     }
     return sqrt(sum);
 }

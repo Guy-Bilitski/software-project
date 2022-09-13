@@ -64,56 +64,66 @@ typedef struct JacobiOutput
 #endif
 
 /* -------------------- POINT PROTOTYPES -------------------- */
+/* Struct point is an interface of data stored as a list of doubles, like a mathematical vector */
+/* the Point gives a clean, easy to work with way of treating a matrix as rows and columns */
+/* using offset field you can create a point the represents a column of a matrix */
 
 /* Point API */
-Point *create_empty_point();
+Point *create_empty_point(); /* creates an empty point in the memory */
 Point *create_point(double *data, int dim, int offset);  /* creates a point from list */
 
 /* Getters */
 double point_get_entry(Point *point, int entry);  /* returns the value in index <index> of point */
-int point_get_dim(Point *point);  
-int point_get_offset(Point *point);  
-double *point_get_data(Point *point);  
+int point_get_dim(Point *point);  /* returns point's dim */
+int point_get_offset(Point *point);  /* returns point's offset */
+double *point_get_data(Point *point);  /* returns point's data */
+
+/* Setters */
+void point_set_values(Point *point, int dim, int offset, double *data);  /* sets point new values */
 
 /* Utils */
 double inner_product(Point *row_point, Point *column_point);  /* returns row X column scalar */
-double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points */
-double euclidean_norm(Point *p);
-void divide_point_by_value(Point *p, double value);
+double euclidean_distance(Point *p1, Point *p2);  /* returns the euclidian distance between two points (vectors) */
+double euclidean_norm(Point *p);  /* returns the eucalidian norm of a point (vector) */
+void divide_point_by_value(Point *p, double value);  /* divides each point entry by a given value */
 
 /* Point inner functions */
-int _convert_point_index(Point *point, int index);  /* converts given index to the real one considering the offset */
+int _convert_point_index(Point *point, int index);  /* converts given index to the "real" index considering the offset */
 
 /* debugging functions */
 void print_point(Point *point);
 
 /* -------------------- MATRIX PROTOTYPES -------------------- */
+/* Struct matrix is an interface of a list of doubles representing a matrix */
+/* a matrix can be diagnal or not, consists rows and column dimensions, and data */
+/* upon the matrix interface there are many known matrix functionalities */
+
 
 /* Matrix API */
-Matrix *create_matrix(int rows, int cols);
-Matrix *create_identity_matrix(int n);
+Matrix *create_matrix(int rows, int cols);  /* creates a matrix in the memory containing 0 in all entries */
+Matrix *create_identity_matrix(int n);  /* crate the I matrix with 1-diagonal 0-non diagonal */
 
 /* Getters */
-int matrix_get_rows_num(Matrix *matrix);
-int matrix_get_cols_num(Matrix *matrix);
-double *matrix_get_data(Matrix *matrix);
-double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry */
-void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index); /* inserts a row into a given point */
-void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);  /* inserts a column into a given point */
-void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element);  /* returns the max element of the matrix */
+int matrix_get_rows_num(Matrix *matrix);  /* returns matrix's rows dim */
+int matrix_get_cols_num(Matrix *matrix);  /* returns matrix's columns dim */
+double *matrix_get_data(Matrix *matrix);  /* returns matrix's data */
+double matrix_get_entry(Matrix *matrix, int row, int col);  /* returns the (row, col) entry value */
+void matrix_get_row_to_point(Matrix *matrix, Point *point, int row_index); /* inserts a row (represented as a point) into a given point */
+void matrix_get_column_to_point(Matrix *matrix, Point *point, int column_index);  /* inserts a column (represented as a point) into a given point */
 
 /* Setters */
 void matrix_set_entry(Matrix *matrix, int row, int col, double value);  /* sets <value> in (row, col) entry */
 
 /* Utils */
+void matrix_get_non_diagonal_max_absolute_value(Matrix *matrix, MaxElement *max_element);  /* returns the max element of the matrix that is not on the diagonal */
 double matrix_get_row_sum(Matrix *matrix, int row_index);  /* returns <row_index> row sum of values */
-void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* TODO: check if relevant */
+void matrix_add_point_to_row(Matrix *matrix, int row_index, Point *point); /* adds a row to the matrix value by value */
 void reset_matrix_entries_to_zero(Matrix *matrix);  /* resets all metrix entries to zero */
 Matrix *multiply_matrices(Matrix *m1, Matrix *m2);  /* multiply m1 X m2 and returns the new matrix */
 Matrix *sub_matrices(Matrix *A, Matrix *B); /* sub A - B */
 
 /* Cleanup */
-void free_matrix(Matrix *matrix); /* cleanup matrix object and sub-objects */
+void free_matrix(Matrix *matrix); /* free matrix object and data */
 
 /* Matrix inner functions */
 int _is_matrix_diag(Matrix *matrix);
@@ -134,73 +144,78 @@ Matrix *generate_symmetric_matrix(int n);
 void space();
 
 /* -------------------- EIGENVECTOR PROTOTYPES -------------------- */
+/* Eigenvector struct represents an eigen vector (point) that has an eigen value */
 
 /* EIGENVECTOR API */
-Eigenvector *create_empty_eigen_vector();
-Eigenvector *create_eigen_vector(Point *point, double eigen_value);
-Eigenvector *create_eigen_vectors_array(int eigenvectors_num);
+Eigenvector *create_empty_eigen_vector();  /* creates an empty eigenvector in the memory  */
+Eigenvector *create_eigen_vector(Point *point, double eigen_value);  /* creates an eigenvector in the memory with given values */
+Eigenvector *create_eigen_vectors_array(int eigenvectors_num);  /* creates an eigenvector_num size array of eigenvectors */
 
 /* Getters */
-Point *eigen_vector_get_point(Eigenvector *eigen_vector);
-double eigen_vector_get_eigen_value(Eigenvector *eigen_vector);
+Point *eigen_vector_get_point(Eigenvector *eigen_vector);  /* returns the vector (point) of the eigenvector */
+double eigen_vector_get_eigen_value(Eigenvector *eigen_vector);  /* returns the eigen value of the eigenvector */
 
 /* Utils */
-int compare_eigenvectors(const void *p1, const void *p2);
-void sort_eigenvectors_array(Eigenvector *array, size_t n);
+int compare_eigenvectors(const void *p1, const void *p2);  /* Eigenvectors comperator based on eigenvector's eigen values */
+void sort_eigenvectors_array(Eigenvector *array, size_t n);  /* sorts eigenvectors array based on compare_eigenvectors comperator */
 
 /* Cleanup */
-void free_eigen_vector(Eigenvector *eigen_vector);
+void free_eigen_vector(Eigenvector *eigen_vector);  /* frees Eigen vector struct and its point property */
 
 
 /* -------------------- S AND C PROTOTYPES -------------------- */
+/* S_AND_C struct represents the values of s and c when building a rotation matrix */
 
 /* S AND C API */
-S_and_C *create_empty_S_and_C();
+S_and_C *create_empty_S_and_C();  /* creates an empty s_and_c in the memory  */
 
 /* Getters */
-double s_and_c_get_s(S_and_C *s_and_c);
-double s_and_c_get_c(S_and_C *s_and_c);
+double s_and_c_get_s(S_and_C *s_and_c);  /* returns s_and_c value of s */
+double s_and_c_get_c(S_and_C *s_and_c);  /* returns s_and_c value of c */
 
 /* Setters */
-void S_and_C_set_values(S_and_C *s_and_c, double s, double c);
+void S_and_C_set_values(S_and_C *s_and_c, double s, double c);  /* sets s,c values to s_and_c struct */
 
 /* debugging functions */
 void print_s_and_c(S_and_C *s_and_c);
 
 /* -------------------- MAX ELEMENT PROTOTYPES -------------------- */
+/* MaxElement struct represents a value with <i,j> coordinated (e.g of a matrix) */
 
 /* MaxElemnt API */
-MaxElement *create_empty_max_element();
-MaxElement *create_max_element(double value, int i, int j);
+MaxElement *create_empty_max_element();  /* creates an empty max_element in the memory  */
+MaxElement *create_max_element(double value, int i, int j);  /* creates max element with given values */
 
 /* Getters */
-double max_element_get_value(MaxElement *max_element);
-int max_element_get_index1(MaxElement *max_element);
-int max_element_get_index2(MaxElement *max_element);
+double max_element_get_value(MaxElement *max_element);  /* returns max_element value */
+int max_element_get_index1(MaxElement *max_element);  /* returns max_element first index */
+int max_element_get_index2(MaxElement *max_element);  /* returns max_element second index */
 
 /* Setters */
-void max_element_set_new_values(MaxElement *max_element, double value, int i, int j);
-void max_element_set_value(MaxElement *max_element, double value);
-void max_element_set_index1(MaxElement *max_element, int i);
-void max_element_set_index2(MaxElement *max_element, int j);
+void max_element_set_new_values(MaxElement *max_element, double value, int i, int j);  /* sets max_element values */
+void max_element_set_value(MaxElement *max_element, double value);  /* sets max_element value */
+void max_element_set_index1(MaxElement *max_element, int i);  /* sets max_element first index */
+void max_element_set_index2(MaxElement *max_element, int j);  /* sets max_element second index */
 
 /* debugging */
 void print_max_element(MaxElement *max_element);
 
 /* -------------------- JACOBI OUTPUT PROTOTYPES -------------------- */
+/* JacobiOutput struct represents the output of jacobi process containing */
+/* eigen vectors matrix V and diagonal eigen values matrix A */
 
 /* Jacobi Output API */
-JacobiOutput *create_empty_jacobi_output();
+JacobiOutput *create_empty_jacobi_output();  /* creates an empty jacobi_output in the memory  */
 
 /* Getters */
-Matrix *jacobi_output_get_A(JacobiOutput *jacobi_output);
-Matrix *jacobi_output_get_V(JacobiOutput *jacobi_output);
+Matrix *jacobi_output_get_A(JacobiOutput *jacobi_output);  /* returns matrix A of Jacobi Output */
+Matrix *jacobi_output_get_V(JacobiOutput *jacobi_output);  /* returns matrix V of Jacobi Output */
 
 /* Setters */
-void set_jacobi_output_values(JacobiOutput *jacobi_output, Matrix *A, Matrix *V);
+void set_jacobi_output_values(JacobiOutput *jacobi_output, Matrix *A, Matrix *V);  /* sets A,V matrices to Jacoib Output */
 
 /* Cleanup */
-void free_jacobi_output(JacobiOutput *jacobi_output);
+void free_jacobi_output(JacobiOutput *jacobi_output);  /* free Jacobi Output struct and A, V matrices */
 
 /* debugging */
 void print_jacobi_output(JacobiOutput *J);
@@ -208,17 +223,17 @@ void print_jacobi_output(JacobiOutput *J);
 /* -------------------- KMEANS-IO PROTOTYPES -------------------- */
 
 /* Kmeans_io API */
-int get_dimension(const char *input_file);
-int get_n(const char *input_file);
-Matrix *input_file_to_matrix(const char *input_file);
+int get_dimension(const char *input_file);  /* returns the dimension of points given in input_file */
+int get_n(const char *input_file);  /* returns the number of data points given in input_file */
+Matrix *input_file_to_matrix(const char *input_file);  /* returns data points from input_file as a matrix */
 
 /* -------------------- KMEANS PROTOTYPES -------------------- */
 
 /* Kmeans API */
-Matrix * kmeans(Matrix *data_points, Matrix *centroids);
-double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids);
-void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids);
-int find_closest_centroid(Point *vector, Matrix *centroids);
+Matrix * kmeans(Matrix *data_points, Matrix *centroids);  /* performs kmeans algorithm on data_points matrix using the given centroids */
+double max_distance_between_centroids(Matrix *old_centroids, Matrix *new_centroids);  /* returns the maximum distance between given centroids calculated one by one */
+void kmeans_iteration(Matrix *data_points , Matrix *centroids, Matrix *new_centroids);  /* performs kmeans algorithm single iteration (centroids improvement) */
+int find_closest_centroid(Point *vector, Matrix *centroids);  /* returns the index of the closet centroid to a given vector */
 
 /* -------------------- SPKMEANS PROTOTYPES -------------------- */
 
