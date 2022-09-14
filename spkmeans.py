@@ -11,6 +11,7 @@ class Env:
 
 def main():
     try:
+        np.random.seed(0)
         args = load_args()
     except Exception as ex:
         print(ex)
@@ -102,7 +103,6 @@ def print_jacobi_output(matrix, eigenvalues):
             print("".join(line))
 
 def get_centriods(np_array, k):
-    np.random.seed(0)
     n = np_array.shape[0]
     indices = [np.random.choice(n)]
     centroids = [np_array[indices[0], :]] # initializing the first centroid
